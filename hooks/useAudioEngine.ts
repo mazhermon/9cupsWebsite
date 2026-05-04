@@ -118,7 +118,9 @@ export function useAudioEngine(trackUrls: string[]): AudioEngineReturn {
 
       const analyser = ctx.createAnalyser()
       analyser.fftSize = BUFFER_SIZE
-      analyser.smoothingTimeConstant = 0.85
+      // Light smoothing so transients reach the visualisers without lag.
+      // Per-visualiser JS lerps still control how fast each shape responds.
+      analyser.smoothingTimeConstant = 0.4
 
       source.connect(gain)
       gain.connect(analyser)

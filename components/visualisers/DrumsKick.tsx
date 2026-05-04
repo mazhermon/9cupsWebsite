@@ -246,9 +246,9 @@ function DrumsKickScene({ analyser, muted, color, playing }: DrumsKickProps) {
     /* eslint-disable react-hooks/immutability -- THREE uniform mutation. */
     const um = meshMaterial.uniforms
     um.uTime.value = timeRef.current
-    um.uKick.value = lerpToward(um.uKick.value, kick * (kicked ? 1.6 : 1.0), kicked ? 0.85 : 0.18)
-    um.uMid.value = lerpToward(um.uMid.value, mid, 0.22)
-    um.uHigh.value = lerpToward(um.uHigh.value, high, 0.28)
+    um.uKick.value = lerpToward(um.uKick.value, kick * (kicked ? 1.6 : 1.0), kicked ? 0.9 : 0.40)
+    um.uMid.value = lerpToward(um.uMid.value, mid, 0.45)
+    um.uHigh.value = lerpToward(um.uHigh.value, high, 0.50)
 
     const uc = coreMaterial.uniforms
     uc.uKick.value = um.uKick.value

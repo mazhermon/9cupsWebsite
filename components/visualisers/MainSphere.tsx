@@ -158,9 +158,9 @@ function MainSphereScene({ analyser, muted, color, playing }: MainSphereProps) {
 
     /* eslint-disable react-hooks/immutability -- THREE uniforms are intentionally mutated each frame; this is the documented R3F pattern. */
     material.uniforms.uTime.value += delta * (0.55 + mid * 1.5)
-    material.uniforms.uLow.value = lerpToward(material.uniforms.uLow.value, low, 0.22)
-    material.uniforms.uMid.value = lerpToward(material.uniforms.uMid.value, mid, 0.30)
-    material.uniforms.uHigh.value = lerpToward(material.uniforms.uHigh.value, high, 0.36)
+    material.uniforms.uLow.value = lerpToward(material.uniforms.uLow.value, low, 0.45)
+    material.uniforms.uMid.value = lerpToward(material.uniforms.uMid.value, mid, 0.50)
+    material.uniforms.uHigh.value = lerpToward(material.uniforms.uHigh.value, high, 0.55)
     /* eslint-enable react-hooks/immutability */
 
     if (meshRef.current) {
@@ -172,7 +172,7 @@ function MainSphereScene({ analyser, muted, color, playing }: MainSphereProps) {
 
   return (
     <mesh ref={meshRef} material={material}>
-      <icosahedronGeometry args={[1, 16]} />
+      <icosahedronGeometry args={[1, 12]} />
     </mesh>
   )
 }

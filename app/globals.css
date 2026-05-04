@@ -22,9 +22,12 @@
   --color-text-faint:     rgb(240 235 224 / 0.30);
   --color-line:           rgb(212 170 238 / 0.10);
 
-  /* Typography — brand-committed pairing */
-  --font-display: var(--font-display), 'IM Fell English', Georgia, serif;
-  --font-body:    var(--font-body),    'DM Sans', system-ui, sans-serif;
+  /* Typography — brand-committed pairing.
+     next/font owns `--font-display` and `--font-body` (set on <html> via className).
+     We expose explicit fallback stacks under different names so we don't shadow
+     them with self-referential values (which silently invalidate the variable). */
+  --font-display-stack: var(--font-display), 'IM Fell English', Georgia, serif;
+  --font-body-stack:    var(--font-body),    'DM Sans', system-ui, sans-serif;
 
   --text-xs:    0.75rem;
   --text-sm:    0.875rem;
@@ -81,7 +84,7 @@ body {
   min-height: 100%;
   background: var(--color-surface);
   color: var(--color-text);
-  font-family: var(--font-body);
+  font-family: var(--font-body-stack);
   font-weight: 400;
   font-feature-settings: 'kern' 1, 'liga' 1;
   -webkit-font-smoothing: antialiased;
@@ -118,7 +121,7 @@ a {
   background: var(--color-primary-dark);
   color: var(--color-ground-light);
   border-radius: var(--radius-full);
-  font-family: var(--font-body);
+  font-family: var(--font-body-stack);
   font-size: 0.8125rem;
   font-weight: 500;
   letter-spacing: 0.04em;
@@ -167,7 +170,7 @@ a {
 
 /* ─── Wordmark ──────────────────────────────────────────────────────────────── */
 .wordmark {
-  font-family: var(--font-display);
+  font-family: var(--font-display-stack);
   font-size: clamp(2.5rem, 6.5vw, 4.5rem);
   font-weight: 400;
   letter-spacing: -0.01em;
@@ -180,7 +183,7 @@ a {
 
 .wordmark-eyebrow {
   display: block;
-  font-family: var(--font-body);
+  font-family: var(--font-body-stack);
   font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.24em;
@@ -281,7 +284,7 @@ a {
   color: var(--color-surface-deeper);
   border: 0;
   border-radius: 0;
-  font-family: var(--font-body);
+  font-family: var(--font-body-stack);
   font-weight: 700;
   font-size: 0.78rem;
   letter-spacing: 0.16em;
@@ -332,12 +335,15 @@ a {
 .stage {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 2fr;
-  grid-template-rows: 2.4fr 0.55fr 1fr;
+  /* Side gutters keep drums + main hugging the middle; the centre two columns
+     hold them at equal width so they sit as a balanced pair. */
+  grid-template-columns: 0.4fr 1.1fr 1.1fr 0.4fr;
+  /* Bass takes more vertical room — it's the ground, the rest sits on it. */
+  grid-template-rows: 1.4fr 0.45fr 1.6fr;
   grid-template-areas:
-    "drums main"
-    "vox   vox"
-    "bass  bass";
+    ".    drums main .   "
+    "vox  vox   vox  vox "
+    "bass bass  bass bass";
   gap: 0;
   width: 100%;
   height: 100%;
@@ -386,7 +392,7 @@ a {
   position: absolute;
   left: var(--space-3);
   bottom: var(--space-3);
-  font-family: var(--font-body);
+  font-family: var(--font-body-stack);
   font-size: 0.625rem;
   font-weight: 500;
   letter-spacing: 0.24em;
@@ -458,7 +464,7 @@ a {
 }
 
 .track-title {
-  font-family: var(--font-display);
+  font-family: var(--font-display-stack);
   font-size: clamp(1.25rem, 3.2vw, 2rem);
   font-weight: 400;
   font-style: italic;
@@ -468,7 +474,7 @@ a {
 }
 
 .track-meta {
-  font-family: var(--font-body);
+  font-family: var(--font-body-stack);
   font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.24em;
@@ -486,7 +492,7 @@ a {
 }
 
 .listen-eyebrow {
-  font-family: var(--font-body);
+  font-family: var(--font-body-stack);
   font-size: 0.625rem;
   font-weight: 500;
   letter-spacing: 0.32em;
@@ -511,7 +517,7 @@ a {
   background: rgb(139 58 196 / 0.10);
   border: 1px solid rgb(196 126 232 / 0.25);
   color: var(--color-ground-light);
-  font-family: var(--font-display);
+  font-family: var(--font-display-stack);
   font-size: 0.9375rem;
   letter-spacing: 0.01em;
   min-height: var(--touch-target-min);
@@ -583,7 +589,7 @@ a {
 }
 
 .play-hint {
-  font-family: var(--font-body);
+  font-family: var(--font-body-stack);
   font-size: 0.6rem;
   font-weight: 500;
   letter-spacing: 0.24em;
@@ -602,7 +608,7 @@ a {
   background: var(--color-primary-mid);
   color: var(--color-ground-light);
   border-radius: var(--radius-full);
-  font-family: var(--font-body);
+  font-family: var(--font-body-stack);
   font-size: 0.8125rem;
   font-weight: 500;
   letter-spacing: 0.18em;

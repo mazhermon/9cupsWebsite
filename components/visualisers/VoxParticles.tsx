@@ -13,7 +13,7 @@ interface VoxParticlesProps {
   playing: boolean
 }
 
-const PARTICLE_COUNT = 420
+const PARTICLE_COUNT = 240
 // VOX is now a horizontal river of particles drifting left → right.
 // The orthographic camera maps -1..1 to the (very wide, short) view rect,
 // so particles span the full width along X and a thin band along Y.

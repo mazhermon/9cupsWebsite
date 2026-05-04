@@ -55,8 +55,11 @@ export default function StageR3F({ stems, trackStates, analysers, onToggle, play
 
       <div className="shared-canvas" style={{ pointerEvents: 'none' }} aria-hidden="true">
         <Canvas
-          dpr={[1, 1.5]}
-          gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+          // dpr=1 halves the shaded pixel count on retina; antialias off saves
+          // the multisample resolve per View. For a wireframe + particle scene
+          // the visual hit is small but the GPU saving is large.
+          dpr={1}
+          gl={{ antialias: false, alpha: true, powerPreference: 'high-performance' }}
           frameloop="always"
           style={{ width: '100%', height: '100%', pointerEvents: 'none' }}
           eventSource={typeof document !== 'undefined' ? (document.body as HTMLElement) : undefined}

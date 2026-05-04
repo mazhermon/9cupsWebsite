@@ -14,11 +14,11 @@ interface BassTerrainProps {
   playing: boolean
 }
 
-const SPARK_COUNT = 240
+const SPARK_COUNT = 140
 const PLANE_WIDTH = 9
 const PLANE_DEPTH = 5
-const PLANE_SEG_W = 80
-const PLANE_SEG_D = 44
+const PLANE_SEG_W = 60
+const PLANE_SEG_D = 32
 const GROUND_Y = -0.55
 
 export default function BassTerrain(props: BassTerrainProps) {
@@ -271,8 +271,8 @@ function BassTerrainScene({ analyser, muted, color, playing }: BassTerrainProps)
     /* eslint-disable react-hooks/immutability -- THREE uniform mutation. */
     const u = terrainMaterial.uniforms
     u.uTime.value = timeRef.current
-    u.uLow.value = lerpToward(u.uLow.value, low, 0.30)
-    u.uHigh.value = lerpToward(u.uHigh.value, high, 0.34)
+    u.uLow.value = lerpToward(u.uLow.value, low, 0.50)
+    u.uHigh.value = lerpToward(u.uHigh.value, high, 0.50)
 
     if (kicked) {
       shockZRef.current = -PLANE_DEPTH * 0.5
