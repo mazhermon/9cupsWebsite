@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>9CUPS — Brand Identity A</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --black:#0a0a0f;
+    --white:#f0ebe0;
+    --purple:#8B3AC4;
+    --deep-violet:#3B1A6E;
+    --lavender:#C47EE8;
+    --lilac:#D4AAEE;
+    --magenta:#CC2E90;
+    --crimson:#B03060;
+    --cyan:#00D4FF;
+    --lime:#C8FF00;
+    --pink:#FF2D78;
+    --vox-purple:#9B4DFF;
+    --forest:#1A2A1E;
+    --asphalt:#3A3530;
+    --bone:#F0EBE0;
+    --moss:#7A8A1A;
+  }
+  html{font-size:16px;scroll-behavior:smooth}
+  body{
+    background:var(--black);
+    color:var(--white);
+    font-family:'Space Grotesk',sans-serif;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .svg-filters{position:absolute;width:0;height:0;overflow:hidden}
+
+  /* ===== HEADER ===== */
+  .brand-header{
+    padding:3rem 4vw;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid rgba(139,58,196,0.12);
+  }
+  .brand-header__title{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:1.2rem;
+    letter-spacing:0.15em;
+  }
+  .brand-header__label{
+    font-size:0.6rem;
+    letter-spacing:0.5em;
+    text-transform:uppercase;
+    color:var(--lavender);
+    opacity:0.6;
+  }
+
+  /* ===== HERO STATEMENT ===== */
+  .brand-hero{
+    padding:8rem 4vw 6rem;
+    position:relative;
+    overflow:hidden;
+  }
+  .brand-hero__bg{
+    position:absolute;
+    top:-10%;right:-20%;
+    width:60%;height:120%;
+    object-fit:cover;
+    filter:url(#brand-purple) brightness(0.3) contrast(1.3);
+    opacity:0.4;
+    mask-image:linear-gradient(90deg, transparent 0%, black 30%, black 70%, transparent 100%);
+    -webkit-mask-image:linear-gradient(90deg, transparent 0%, black 30%, black 70%, transparent 100%);
+  }
+  .brand-hero__content{
+    position:relative;
+    z-index:2;
+    max-width:800px;
+  }
+  .brand-hero__eyebrow{
+    font-size:0.6rem;
+    letter-spacing:0.6em;
+    text-transform:uppercase;
+    color:var(--lavender);
+    margin-bottom:2rem;
+    opacity:0.7;
+  }
+  .brand-hero__title{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(4rem, 10vw, 10rem);
+    line-height:0.85;
+    letter-spacing:-0.02em;
+  }
+  .brand-hero__title em{
+    font-style:normal;
+    color:var(--lavender);
+  }
+  .brand-hero__sub{
+    margin-top:2rem;
+    font-weight:300;
+    font-size:1rem;
+    line-height:1.7;
+    color:rgba(240,235,224,0.6);
+    max-width:500px;
+  }
+  .brand-hero__tagline{
+    margin-top:1.5rem;
+    font-family:'IM Fell English',serif;
+    font-style:italic;
+    font-size:1.2rem;
+    color:var(--lilac);
+    opacity:0.8;
+  }
+
+  /* ===== SECTION UTILITY ===== */
+  .section{
+    padding:5rem 4vw;
+    border-top:1px solid rgba(139,58,196,0.08);
+  }
+  .section__label{
+    font-size:0.6rem;
+    letter-spacing:0.6em;
+    text-transform:uppercase;
+    color:var(--lavender);
+    margin-bottom:2rem;
+    opacity:0.6;
+  }
+  .section__title{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(2rem, 4vw, 3.5rem);
+    margin-bottom:2rem;
+    line-height:0.95;
+  }
+
+  /* ===== COLOUR SYSTEM ===== */
+  .colours__grid{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:1rem;
+  }
+  .colour-swatch{
+    aspect-ratio:1;
+    position:relative;
+    overflow:hidden;
+  }
+  .colour-swatch__fill{
+    width:100%;height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    padding:0.75rem;
+  }
+  .colour-swatch__name{
+    font-size:0.6rem;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    font-weight:500;
+  }
+  .colour-swatch__hex{
+    font-size:0.55rem;
+    opacity:0.7;
+    letter-spacing:0.1em;
+    margin-top:0.15rem;
+  }
+  .colour-swatch__token{
+    font-size:0.5rem;
+    opacity:0.5;
+    font-family:monospace;
+    margin-top:0.15rem;
+  }
+  .colour-swatch--light .colour-swatch__name,
+  .colour-swatch--light .colour-swatch__hex,
+  .colour-swatch--light .colour-swatch__token{color:var(--black)}
+  /* Proportion bar */
+  .colour-proportions{
+    margin-top:2rem;
+    display:flex;
+    height:8px;
+    overflow:hidden;
+  }
+  .colour-proportions span{display:block;height:100%}
+
+  /* ===== TYPOGRAPHY ===== */
+  .type-specimen{
+    margin-bottom:3rem;
+  }
+  .type-specimen__label{
+    font-size:0.55rem;
+    letter-spacing:0.5em;
+    text-transform:uppercase;
+    color:var(--cyan);
+    margin-bottom:1rem;
+    opacity:0.6;
+  }
+  .type-specimen--fell h3{
+    font-family:'IM Fell English',serif;
+    font-size:clamp(3rem, 6vw, 5rem);
+    line-height:1;
+    color:var(--white);
+  }
+  .type-specimen--fell p{
+    font-family:'IM Fell English',serif;
+    font-style:italic;
+    font-size:1.1rem;
+    color:rgba(240,235,224,0.6);
+    margin-top:0.5rem;
+  }
+  .type-specimen--display h3{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(3rem, 8vw, 7rem);
+    line-height:0.85;
+    letter-spacing:-0.01em;
+  }
+  .type-specimen--body{
+    max-width:600px;
+  }
+  .type-specimen--body h3{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:1.2rem;
+    margin-bottom:0.75rem;
+  }
+  .type-specimen--body p{
+    font-weight:300;
+    font-size:0.95rem;
+    line-height:1.75;
+    color:rgba(240,235,224,0.6);
+  }
+  .type-note{
+    font-size:0.7rem;
+    color:rgba(240,235,224,0.4);
+    margin-top:0.5rem;
+    letter-spacing:0.05em;
+  }
+
+  /* ===== VISUAL TREATMENTS ===== */
+  .treatments__grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:2rem;
+  }
+  .treatment{
+    position:relative;
+    overflow:hidden;
+  }
+  .treatment__image{
+    width:100%;
+    aspect-ratio:4/3;
+    object-fit:cover;
+    display:block;
+  }
+  .treatment__image--purple{
+    filter:url(#brand-purple) brightness(0.5) contrast(1.3);
+  }
+  .treatment__image--magenta{
+    filter:url(#brand-magenta) brightness(0.5) contrast(1.3);
+  }
+  .treatment__contour{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:1;
+  }
+  .treatment__grain{
+    position:absolute;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
+    background-size:180px;
+    mix-blend-mode:overlay;
+    pointer-events:none;
+    z-index:2;
+  }
+  .treatment__label{
+    position:absolute;
+    bottom:1rem;left:1rem;
+    z-index:3;
+    font-size:0.6rem;
+    letter-spacing:0.4em;
+    text-transform:uppercase;
+    color:var(--white);
+    background:rgba(10,10,15,0.6);
+    padding:0.3rem 0.6rem;
+  }
+
+  /* ===== MOOD WORDS ===== */
+  .mood-grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:0.75rem;
+  }
+  .mood-word{
+    font-family:'IM Fell English',serif;
+    font-size:1rem;
+    padding:0.5rem 1rem;
+    border:1px solid rgba(139,58,196,0.2);
+    color:rgba(240,235,224,0.6);
+    transition:border-color 0.3s, color 0.3s;
+  }
+  .mood-word:hover{
+    border-color:var(--purple);
+    color:var(--white);
+  }
+  .not-brand{
+    display:flex;
+    flex-wrap:wrap;
+    gap:0.75rem;
+    margin-top:2rem;
+  }
+  .not-brand__item{
+    font-size:0.75rem;
+    padding:0.4rem 0.8rem;
+    border:1px solid rgba(255,45,120,0.15);
+    color:rgba(255,45,120,0.5);
+    text-decoration:line-through;
+  }
+
+  /* ===== SYMBOLS ===== */
+  .symbols__grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:2rem;
+  }
+  .symbol{
+    text-align:center;
+  }
+  .symbol__image{
+    width:100%;
+    aspect-ratio:1;
+    object-fit:cover;
+    display:block;
+    margin-bottom:1rem;
+  }
+  .symbol__image--tinted{
+    filter:url(#brand-purple) brightness(0.55) contrast(1.2);
+  }
+  .symbol__name{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:1.1rem;
+    letter-spacing:0.08em;
+  }
+  .symbol__desc{
+    font-size:0.7rem;
+    color:rgba(240,235,224,0.45);
+    margin-top:0.25rem;
+    line-height:1.5;
+  }
+
+  /* ===== FOOTER ===== */
+  .brand-footer{
+    padding:3rem 4vw;
+    border-top:1px solid rgba(139,58,196,0.08);
+    text-align:center;
+    font-size:0.6rem;
+    letter-spacing:0.3em;
+    text-transform:uppercase;
+    color:rgba(240,235,224,0.25);
+  }
+
+  @media(max-width:768px){
+    .colours__grid{grid-template-columns:repeat(3, 1fr)}
+    .treatments__grid{grid-template-columns:1fr}
+    .symbols__grid{grid-template-columns:1fr 1fr}
+  }
+  @media(max-width:480px){
+    .colours__grid{grid-template-columns:repeat(2, 1fr)}
+    .symbols__grid{grid-template-columns:1fr}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important}
+  }
+</style>
+</head>
+<body>
+
+<!-- SVG Filters -->
+<svg class="svg-filters" aria-hidden="true">
+  <defs>
+    <filter id="brand-purple" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="
+        0.35 0.18 0.1  0  0.1
+        0.08 0.08 0.08 0  0.04
+        0.28 0.18 0.5  0  0.2
+        0    0    0    1  0"/>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="1.0"/>
+        <feFuncG type="linear" slope="0.8"/>
+        <feFuncB type="linear" slope="1.35"/>
+      </feComponentTransfer>
+    </filter>
+    <filter id="brand-magenta" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="
+        0.48 0.2  0.1  0  0.2
+        0.08 0.1  0.06 0  0.02
+        0.22 0.1  0.35 0  0.12
+        0    0    0    1  0"/>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="1.3"/>
+        <feFuncG type="linear" slope="0.55"/>
+        <feFuncB type="linear" slope="1.1"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+</svg>
+
+<!-- ===== HEADER ===== -->
+<header class="brand-header">
+  <div class="brand-header__title">9CUPS</div>
+  <div class="brand-header__label">Brand Identity &middot; Reference Document</div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="brand-hero">
+  <img class="brand-hero__bg"
+       src="../.claude/skills/design-inspiration/references/project-specific/Work9cups_SetYouFree_Cover.jpg"
+       alt="" loading="eager" aria-hidden="true">
+  <div class="brand-hero__content">
+    <p class="brand-hero__eyebrow">Brand Identity System</p>
+    <h1 class="brand-hero__title">The Wise<br><em>Enjoyer</em></h1>
+    <p class="brand-hero__sub">Not seeking, not striving, already here, already satisfied, sharing generously. Named after the Nine of Cups tarot card — emotional fulfilment, quiet abundance, presence.</p>
+    <p class="brand-hero__tagline">"Wellington-rooted, globally influenced"</p>
+  </div>
+</section>
+
+<!-- ===== COLOUR SYSTEM ===== -->
+<section class="section" id="colour">
+  <p class="section__label">01 &mdash; Colour System</p>
+  <h2 class="section__title">Palette</h2>
+  <div class="colours__grid">
+    <div class="colour-swatch">
+      <div class="colour-swatch__fill" style="background:#3B1A6E">
+        <span class="colour-swatch__name">Deep Violet</span>
+        <span class="colour-swatch__hex">#3B1A6E</span>
+        <span class="colour-swatch__token">--color-primary-dark</span>
+      </div>
+    </div>
+    <div class="colour-swatch">
+      <div class="colour-swatch__fill" style="background:#8B3AC4">
+        <span class="colour-swatch__name">Electric Amethyst</span>
+        <span class="colour-swatch__hex">#8B3AC4</span>
+        <span class="colour-swatch__token">--color-primary-mid</span>
+      </div>
+    </div>
+    <div class="colour-swatch">
+      <div class="colour-swatch__fill" style="background:#C47EE8">
+        <span class="colour-swatch__name">Bright Lavender</span>
+        <span class="colour-swatch__hex">#C47EE8</span>
+        <span class="colour-swatch__token">--color-primary-light</span>
+      </div>
+    </div>
+    <div class="colour-swatch">
+      <div class="colour-swatch__fill colour-swatch--light" style="background:#D4AAEE">
+        <span class="colour-swatch__name">Lilac Mist</span>
+        <span class="colour-swatch__hex">#D4AAEE</span>
+        <span class="colour-swatch__token">--color-primary-pale</span>
+      </div>
+    </div>
+    <div class="colour-swatch">
+      <div class="colour-swatch__fill" style="background:#B03060">
+        <span class="colour-swatch__name">Crimson Rose</span>
+        <span class="colour-swatch__hex">#B03060</span>
+        <span class="colour-swatch__token">--color-accent-warm</span>
+      </div>
+    </div>
+    <div class="colour-swatch">
+      <div class="colour-swatch__fill" style="background:#CC2E90">
+        <span class="colour-swatch__name">Hot Magenta</span>
+        <span class="colour-swatch__hex">#CC2E90</span>
+        <span class="colour-swatch__token">--color-accent-vivid</span>
+      </div>
+    </div>
+    <div class="colour-swatch">
+      <div class="colour-swatch__fill" style="background:#1A2A1E">
+        <span class="colour-swatch__name">Dark Forest</span>
+        <span class="colour-swatch__hex">#1A2A1E</span>
+        <span class="colour-swatch__token">--color-ground-dark</span>
+      </div>
+    </div>
+    <div class="colour-swatch">
+      <div class="colour-swatch__fill" style="background:#3A3530">
+        <span class="colour-swatch__name">Warm Asphalt</span>
+        <span class="colour-swatch__hex">#3A3530</span>
+        <span class="colour-swatch__token">--color-ground-mid</span>
+      </div>
+    </div>
+    <div class="colour-swatch">
+      <div class="colour-swatch__fill colour-swatch--light" style="background:#F0EBE0">
+        <span class="colour-swatch__name">Bone White</span>
+        <span class="colour-swatch__hex">#F0EBE0</span>
+        <span class="colour-swatch__token">--color-ground-light</span>
+      </div>
+    </div>
+    <div class="colour-swatch">
+      <div class="colour-swatch__fill" style="background:#7A8A1A">
+        <span class="colour-swatch__name">Acid Moss</span>
+        <span class="colour-swatch__hex">#7A8A1A</span>
+        <span class="colour-swatch__token">--color-accent-organic</span>
+      </div>
+    </div>
+  </div>
+  <div class="colour-proportions">
+    <span style="width:60%;background:linear-gradient(90deg, #3B1A6E, #8B3AC4, #C47EE8, #D4AAEE)"></span>
+    <span style="width:20%;background:linear-gradient(90deg, #B03060, #CC2E90)"></span>
+    <span style="width:15%;background:linear-gradient(90deg, #1A2A1E, #3A3530, #F0EBE0)"></span>
+    <span style="width:5%;background:#7A8A1A"></span>
+  </div>
+  <p class="type-note" style="margin-top:0.75rem">60% Purple &middot; 20% Warm Accent &middot; 15% Neutral Ground &middot; 5% Acid Moss</p>
+</section>
+
+<!-- ===== TYPOGRAPHY ===== -->
+<section class="section" id="type">
+  <p class="section__label">02 &mdash; Typography</p>
+  <h2 class="section__title">Type System</h2>
+  <div class="type-specimen type-specimen--fell">
+    <p class="type-specimen__label">Primary &mdash; IM Fell English (Wordmark / Headings)</p>
+    <h3>Nine of Cups</h3>
+    <p>"Round, unhurried, slightly archaic. Literary, not corporate."</p>
+    <p class="type-note">Old-style serif. Used for the brand wordmark, release names, and display headings.</p>
+  </div>
+  <div class="type-specimen type-specimen--display">
+    <p class="type-specimen__label">Display &mdash; Bebas Neue (Web / Large Scale)</p>
+    <h3>9CUPS</h3>
+    <p class="type-note">Condensed sans-serif for web display and promotional material. Swiss-inspired, strong edges. Complements IM Fell English without competing.</p>
+  </div>
+  <div class="type-specimen type-specimen--body">
+    <p class="type-specimen__label">Body &mdash; Space Grotesk (Secondary / UI)</p>
+    <h3>Clean, geometric, modern</h3>
+    <p>Used only where legibility demands it. Secondary text should feel like a caption, not a label. Light weight preferred. Never cold, never techy.</p>
+    <p class="type-note">Also applies: extreme tracking on secondary lines (event details, dates, platforms).</p>
+  </div>
+</section>
+
+<!-- ===== VISUAL TREATMENTS ===== -->
+<section class="section" id="treatments">
+  <p class="section__label">03 &mdash; Visual Treatments</p>
+  <h2 class="section__title">Photo + SVG Overlay</h2>
+  <div class="treatments__grid">
+    <div class="treatment">
+      <img class="treatment__image treatment__image--purple"
+           src="../.claude/skills/design-inspiration/references/project-specific/Work9cups_SetYouFree_Cover.jpg"
+           alt="Purple tint treatment" loading="lazy">
+      <svg class="treatment__contour" viewBox="0 0 600 450" fill="none" aria-hidden="true">
+        <path d="M310,100 C280,80 245,78 220,95 C198,112 190,140 195,170 C200,200 225,225 255,232 C280,236 308,230 328,215 C350,198 358,170 352,145 C348,125 335,108 318,100Z"
+              stroke="#C8FF00" stroke-width="2.5" opacity="0.6" stroke-dasharray="6,4">
+          <animate attributeName="stroke-dashoffset" from="0" to="40" dur="4s" repeatCount="indefinite"/>
+        </path>
+        <path d="M180,240 C160,270 145,310 140,350 C138,370 142,395 155,410"
+              stroke="#FF2D78" stroke-width="2" opacity="0.5"/>
+        <path d="M340,240 C365,270 385,315 395,360 C400,385 398,405 388,420"
+              stroke="#00D4FF" stroke-width="2" opacity="0.5"/>
+      </svg>
+      <div class="treatment__grain" aria-hidden="true"></div>
+      <span class="treatment__label">Style 1 &mdash; Double Exposure</span>
+    </div>
+    <div class="treatment">
+      <img class="treatment__image treatment__image--magenta"
+           src="../.claude/skills/design-inspiration/references/project-specific/IMG_2538.png"
+           alt="Magenta tint treatment" loading="lazy">
+      <svg class="treatment__contour" viewBox="0 0 600 450" fill="none" aria-hidden="true">
+        <path d="M280,60 C250,70 230,95 225,125 C220,160 228,195 248,220 C268,240 298,252 325,248 C352,242 375,225 385,200 C395,172 390,140 375,115 C358,90 330,70 300,62 C290,58 284,58 280,60Z"
+              stroke="#9B4DFF" stroke-width="2.5" opacity="0.5" stroke-dasharray="7,4">
+          <animate attributeName="stroke-dashoffset" from="0" to="44" dur="5s" repeatCount="indefinite"/>
+        </path>
+        <path d="M200,260 C230,275 270,285 310,282 C345,278 375,268 400,252"
+              stroke="#C8FF00" stroke-width="2" opacity="0.4"/>
+      </svg>
+      <div class="treatment__grain" aria-hidden="true"></div>
+      <span class="treatment__label">Style 2 &mdash; Contour Overlay</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SYMBOLS ===== -->
+<section class="section" id="symbols">
+  <p class="section__label">04 &mdash; Key Symbols</p>
+  <h2 class="section__title">Brand Marks</h2>
+  <div class="symbols__grid">
+    <div class="symbol">
+      <img class="symbol__image symbol__image--tinted"
+           src="../.claude/skills/design-inspiration/references/project-specific/Cups09.jpg"
+           alt="Nine of Cups tarot card" loading="lazy">
+      <div class="symbol__name">Nine of Cups</div>
+      <div class="symbol__desc">Primary avatar/logo. The smiling figure, arms crossed, nine chalices in an arc above.</div>
+    </div>
+    <div class="symbol">
+      <img class="symbol__image symbol__image--tinted"
+           src="../.claude/skills/design-inspiration/references/project-specific/9cups_YourLove_single_Cover2000_85qual.jpg"
+           alt="Two cups on woven mat" loading="lazy">
+      <div class="symbol__name">Two Tin Cups</div>
+      <div class="symbol__desc">Communion, sharing, campfire still life. Recurring sub-motif for release art and social.</div>
+    </div>
+    <div class="symbol">
+      <img class="symbol__image symbol__image--tinted"
+           src="../.claude/skills/design-inspiration/references/project-specific/NewtownFestCollectionImage.jpg"
+           alt="Mandala tapestry at festival" loading="lazy">
+      <div class="symbol__name">Mandala Tapestry</div>
+      <div class="symbol__desc">Intricate, global, celebratory. Background and texture source. Strong in festival and community contexts.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MOOD WORDS ===== -->
+<section class="section" id="mood">
+  <p class="section__label">05 &mdash; Brand Character</p>
+  <h2 class="section__title">Mood</h2>
+  <div class="mood-grid">
+    <span class="mood-word">Contemplative</span>
+    <span class="mood-word">Communal</span>
+    <span class="mood-word">Psychedelic without ego</span>
+    <span class="mood-word">Warm</span>
+    <span class="mood-word">Textured</span>
+    <span class="mood-word">Knowing</span>
+    <span class="mood-word">Unhurried</span>
+    <span class="mood-word">Layered</span>
+    <span class="mood-word">Spiritual without dogma</span>
+    <span class="mood-word">Present</span>
+    <span class="mood-word">Wellington-rooted</span>
+    <span class="mood-word">Global in influence</span>
+  </div>
+  <div class="not-brand">
+    <span class="not-brand__item">Aggressive</span>
+    <span class="not-brand__item">Minimalist</span>
+    <span class="not-brand__item">Corporate</span>
+    <span class="not-brand__item">Cold</span>
+    <span class="not-brand__item">Ironic without feeling</span>
+    <span class="not-brand__item">Loudly digital</span>
+    <span class="not-brand__item">Flat colour</span>
+    <span class="not-brand__item">Pixel-perfect without grain</span>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="brand-footer">
+  9CUPS &middot; Brand Identity Reference &middot; Not for public distribution
+</footer>
+
+</body>
+</html>

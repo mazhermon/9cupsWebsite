@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DJ 9Cups — Visual Research & Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --deep-violet: #3B1A6E;
+    --amethyst: #8B3AC4;
+    --lavender: #C47EE8;
+    --mist: #D4AAEE;
+    --crimson: #B03060;
+    --magenta: #CC2E90;
+    --forest: #1A2A1E;
+    --asphalt: #3A3530;
+    --bone: #F0EBE0;
+    --moss: #7A8A1A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0E0A1A;
+    color: var(--bone);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* Header */
+  .site-header {
+    padding: 3rem 2rem 2rem;
+    border-bottom: 1px solid rgba(196,126,232,0.12);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .site-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--amethyst), transparent);
+    opacity: 0.4;
+  }
+
+  .header-eyebrow {
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--amethyst);
+    margin-bottom: 0.75rem;
+  }
+
+  .header-title {
+    font-family: 'IM Fell English', serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    color: var(--mist);
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+
+  .header-title em {
+    color: var(--lavender);
+    font-style: italic;
+  }
+
+  .header-sub {
+    font-size: 0.85rem;
+    color: rgba(212,170,238,0.6);
+    max-width: 560px;
+    line-height: 1.6;
+    margin-top: 0.75rem;
+  }
+
+  .header-note {
+    margin-top: 1.25rem;
+    display: inline-block;
+    padding: 6px 14px;
+    border: 1px solid rgba(139,58,196,0.3);
+    border-radius: 4px;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--lavender);
+    opacity: 0.8;
+  }
+
+  /* Main layout */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* Section headings */
+  .section {
+    padding: 3rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .section-number {
+    font-family: 'IM Fell English', serif;
+    font-size: 3rem;
+    color: rgba(139,58,196,0.2);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.5rem;
+    color: var(--mist);
+  }
+
+  .section-intro {
+    font-size: 0.82rem;
+    color: rgba(212,170,238,0.55);
+    max-width: 680px;
+    margin-bottom: 2rem;
+    margin-left: 3.8rem;
+    line-height: 1.65;
+  }
+
+  /* Artist cards */
+  .artist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5px;
+    margin-left: 3.8rem;
+  }
+
+  .artist-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(196,126,232,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .artist-card:hover {
+    border-color: rgba(196,126,232,0.25);
+  }
+
+  .artist-card-header {
+    padding: 1.25rem 1.25rem 0.75rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .artist-name {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.05rem;
+    color: var(--lavender);
+    line-height: 1.2;
+  }
+
+  .artist-tag {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .tag-high { background: rgba(139,58,196,0.2); color: var(--lavender); }
+  .tag-med  { background: rgba(176,48,96,0.2); color: #E08098; }
+  .tag-ref  { background: rgba(122,138,26,0.2); color: #B5C445; }
+
+  .artist-card-body {
+    padding: 0 1.25rem 1.25rem;
+  }
+
+  .artist-desc {
+    font-size: 0.8rem;
+    color: rgba(240,235,224,0.55);
+    line-height: 1.65;
+    margin-bottom: 0.9rem;
+  }
+
+  .lessons-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amethyst);
+    margin-bottom: 0.4rem;
+    opacity: 0.8;
+  }
+
+  .lesson-list {
+    list-style: none;
+  }
+
+  .lesson-list li {
+    font-size: 0.76rem;
+    color: rgba(212,170,238,0.7);
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    padding-left: 12px;
+    position: relative;
+    line-height: 1.4;
+  }
+
+  .lesson-list li:last-child { border-bottom: none; }
+
+  .lesson-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--amethyst);
+    opacity: 0.5;
+    font-size: 0.65rem;
+  }
+
+  /* Designer section — wider cards */
+  .designer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5px;
+    margin-left: 3.8rem;
+  }
+
+  .designer-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(196,126,232,0.06);
+    border-radius: 2px;
+    padding: 1.25rem;
+    transition: border-color 0.3s;
+  }
+
+  .designer-card:hover { border-color: rgba(196,126,232,0.2); }
+
+  .designer-name {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.1rem;
+    color: var(--mist);
+    margin-bottom: 0.15rem;
+  }
+
+  .designer-url {
+    font-size: 0.65rem;
+    color: var(--amethyst);
+    opacity: 0.7;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .designer-desc {
+    font-size: 0.78rem;
+    color: rgba(240,235,224,0.5);
+    line-height: 1.65;
+    margin-bottom: 0.9rem;
+  }
+
+  .relevance-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0.75rem;
+  }
+
+  .relevance-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(196,126,232,0.5);
+    flex-shrink: 0;
+  }
+
+  .relevance-track {
+    flex: 1;
+    height: 2px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .relevance-fill {
+    height: 100%;
+    border-radius: 1px;
+    background: linear-gradient(90deg, var(--amethyst), var(--lavender));
+  }
+
+  /* Principles section */
+  .principles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1px;
+    margin-left: 3.8rem;
+  }
+
+  .principle-card {
+    padding: 1.25rem;
+    border: 1px solid rgba(196,126,232,0.07);
+    background: rgba(255,255,255,0.015);
+    transition: background 0.3s;
+  }
+
+  .principle-card:hover {
+    background: rgba(139,58,196,0.06);
+  }
+
+  .principle-icon {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.8rem;
+    color: rgba(139,58,196,0.4);
+    margin-bottom: 0.5rem;
+    line-height: 1;
+  }
+
+  .principle-title {
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: var(--lavender);
+    letter-spacing: 0.04em;
+    margin-bottom: 0.4rem;
+  }
+
+  .principle-desc {
+    font-size: 0.73rem;
+    color: rgba(240,235,224,0.45);
+    line-height: 1.6;
+  }
+
+  /* Contrast section */
+  .contrast-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5px;
+    margin-left: 3.8rem;
+  }
+
+  @media (max-width: 600px) {
+    .contrast-grid { grid-template-columns: 1fr; }
+    .artist-grid, .designer-grid, .principles-grid { margin-left: 0; }
+    .section-intro { margin-left: 0; }
+  }
+
+  .contrast-col {
+    padding: 1.5rem;
+    border: 1px solid rgba(196,126,232,0.07);
+  }
+
+  .contrast-col.avoid { border-color: rgba(176,48,96,0.12); }
+
+  .contrast-heading {
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .contrast-heading.learn { color: var(--lavender); }
+  .contrast-heading.avoid { color: var(--crimson); opacity: 0.7; }
+
+  .contrast-item {
+    font-size: 0.78rem;
+    color: rgba(240,235,224,0.5);
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    padding-left: 14px;
+    position: relative;
+    line-height: 1.4;
+  }
+
+  .contrast-item:last-child { border-bottom: none; }
+
+  .contrast-item::before {
+    content: '+';
+    position: absolute;
+    left: 0;
+    font-size: 0.7rem;
+  }
+
+  .contrast-col.learn .contrast-item::before { color: var(--amethyst); }
+  .contrast-col.avoid .contrast-item { color: rgba(240,235,224,0.35); text-decoration: line-through; }
+  .contrast-col.avoid .contrast-item::before { content: '×'; color: var(--crimson); opacity: 0.5; }
+
+  /* Footer */
+  .site-footer {
+    padding: 2.5rem 2rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    text-align: center;
+  }
+
+  .footer-note {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: rgba(212,170,238,0.35);
+  }
+
+  /* Highlight quotes */
+  .pull-quote {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--lavender);
+    opacity: 0.65;
+    padding: 1rem 1.5rem;
+    border-left: 2px solid rgba(139,58,196,0.3);
+    margin: 1.5rem 0 1.5rem 3.8rem;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 600px) {
+    .pull-quote { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <div class="header-eyebrow">DJ 9Cups · Brand Research · Phase 3 Preparation</div>
+    <h1 class="header-title">Visual <em>Lineage</em> & Reference</h1>
+    <p class="header-sub">A curated research document mapping the visual territory adjacent to the 9Cups brand — artists, designers, and design principles to learn from and be in conversation with. Not to copy, but to understand the neighbourhood.</p>
+    <span class="header-note">For reference and learning only · All named works belong to their respective creators</span>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- SECTION 1: Adjacent artists -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">01</span>
+      <h2 class="section-title">Adjacent Artists — Visual DNA</h2>
+    </div>
+    <p class="section-intro">Electronic artists whose visual identity shares territory with 9Cups — warmth, layering, spiritual depth, the personal over the spectacular. Study what they're doing, then ask how 9Cups does it differently.</p>
+
+    <div class="artist-grid">
+
+      <div class="artist-card">
+        <div class="artist-card-header">
+          <div class="artist-name">Bonobo</div>
+          <span class="artist-tag tag-high">Highest relevance</span>
+        </div>
+        <div class="artist-card-body">
+          <p class="artist-desc">Simon Green's visual world — shot primarily by Neil Krug and designed by Leif Podhajsky — shares the most DNA with 9Cups. Photographic, textured, atmospheric. Landscapes become dreamscapes. Motion and transience as recurring themes. The music and the image feel like the same thing.</p>
+          <div class="lessons-label">What to learn</div>
+          <ul class="lesson-list">
+            <li>Photography as the raw material, not illustration</li>
+            <li>Colour temperature signals the emotional register of each release</li>
+            <li>The same visual language can be cool/introspective OR warm/celebratory</li>
+            <li>Nature imagery layered with colour wash — organic + psychedelic</li>
+            <li>Bonobo's "Fragments" concept: motion, transience, tides — cycles as theme</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="artist-card">
+        <div class="artist-card-header">
+          <div class="artist-name">Maya Jane Coles</div>
+          <span class="artist-tag tag-high">High relevance</span>
+        </div>
+        <div class="artist-card-body">
+          <p class="artist-desc">Self-made visual identity — she draws, paints, and makes her own tour visuals from sketchbooks kept on the road. The intimacy and personal quality of doing it yourself runs through everything. Her Night Creature era: poster-board aesthetic, techno precision with warmth underneath.</p>
+          <div class="lessons-label">What to learn</div>
+          <ul class="lesson-list">
+            <li>The power of a personally-made visual vs outsourced design</li>
+            <li>Sketchbook quality — rough, gestural, not over-finished</li>
+            <li>Poster-within-poster layout: frame-within-frame thinking</li>
+            <li>Dark foundation with warm human elements breaking through</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="artist-card">
+        <div class="artist-card-header">
+          <div class="artist-name">Flying Lotus</div>
+          <span class="artist-tag tag-med">Medium relevance</span>
+        </div>
+        <div class="artist-card-body">
+          <p class="artist-desc">Psychedelia and spirituality as a consistent throughline — deeply influenced by Alice Coltrane and cosmic jazz. His visuals merge fluid organic shapes with angular machine-like structures. Surreal and disorienting. The visual world is eclectic but always unmistakably his.</p>
+          <div class="lessons-label">What to learn</div>
+          <ul class="lesson-list">
+            <li>Spirituality as a visual language, not just a mood</li>
+            <li>Genre-hopping can coexist with a consistent visual identity</li>
+            <li>Organic and mechanical layered together — not either/or</li>
+            <li>3D and flat combined: depth without realism</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="artist-card">
+        <div class="artist-card-header">
+          <div class="artist-name">Floating Points</div>
+          <span class="artist-tag tag-med">Medium relevance</span>
+        </div>
+        <div class="artist-card-body">
+          <p class="artist-desc">Sam Shepherd's visual world pulls from jazz spirituality (Alice Coltrane, Sun Ra) and translates it into abstract projections and live visual collaborations. His Cascade tour used real-time abstract projections by Hamill Industries — visuals that feel improvised, alive, present.</p>
+          <div class="lessons-label">What to learn</div>
+          <ul class="lesson-list">
+            <li>Live energy captured in still form — presence over polish</li>
+            <li>Abstract projection as extension of the music's feeling</li>
+            <li>Jazz influence as visual cue: warmth, flow, unpredictability</li>
+            <li>Collaboration with visual artists as part of the brand identity</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="artist-card">
+        <div class="artist-card-header">
+          <div class="artist-name">Tipper</div>
+          <span class="artist-tag tag-ref">Reference only</span>
+        </div>
+        <div class="artist-card-body">
+          <p class="artist-desc">Ambient organic sounds with psychedelic creature visuals by Android Jones. A study in how an abstract electronic artist builds a visual world around creatures, swirling patterns, and neon colour. More intense and alien than 9Cups — but the commitment to a total visual experience is instructive.</p>
+          <div class="lessons-label">What to learn</div>
+          <ul class="lesson-list">
+            <li>Visual collaborators as co-authors of brand identity</li>
+            <li>The psychedelic visual field: swirling, layered, dense</li>
+            <li>Warm vs cool temperature used to signal set mood</li>
+            <li>What NOT to do: 9Cups is warm and grounded, Tipper is alien and intense</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 2: Key designers -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">02</span>
+      <h2 class="section-title">The Designers — Craft References</h2>
+    </div>
+    <p class="section-intro">The photographers and visual artists who have built the vocabulary we're working adjacent to. Study their techniques, not their outputs.</p>
+
+    <div class="pull-quote">"I try and work with artists whose music I would want to listen to. Ideally I like to spend a lot of time with the music working out a story and concept which I can capture the whole album's feel and flow." — Leif Podhajsky</div>
+
+    <div class="designer-grid">
+
+      <div class="designer-card">
+        <div class="designer-name">Neil Krug</div>
+        <a class="designer-url" href="https://www.neilkrug.com" target="_blank">neilkrug.com</a>
+        <p class="designer-desc">The photographer behind Bonobo's Migration and Fragments, Tame Impala's The Slow Rush, Lana Del Rey's Ultraviolence. His technique: psychedelic analogue photography, warm high-key colour, desert landscapes, the feeling of a world "disorientingly dislocated from time." He describes his subjects as being in "memory fragments of places I used to explore."</p>
+        <div class="relevance-bar">
+          <span class="relevance-label">Relevance to 9Cups</span>
+          <div class="relevance-track"><div class="relevance-fill" style="width:90%"></div></div>
+        </div>
+        <ul class="lesson-list">
+          <li>Photographic layering with strong colour cast as the primary technique</li>
+          <li>Real locations transformed by light and colour treatment — not composite CGI</li>
+          <li>Analogue grain and imperfection as quality, not flaw</li>
+          <li>Two words guide a shoot: find the emotional brief ("beautifully sinister" for Bonobo)</li>
+          <li>The subject doesn't need to be identifiable — mood matters more than clarity</li>
+        </ul>
+      </div>
+
+      <div class="designer-card">
+        <div class="designer-name">Leif Podhajsky</div>
+        <a class="designer-url" href="https://leifpodhajsky.com" target="_blank">leifpodhajsky.com</a>
+        <p class="designer-desc">Australian-born designer behind Tame Impala's Innerspeaker and Lonerism, multiple Bonobo releases. Mixed-media: digital images layered with painted textures and drawings. "Striking abstractions of nature — mirrored vistas, engulfing waves, rippling, melting cosmic landscapes." Has synesthesia — literally sees colour in sound.</p>
+        <div class="relevance-bar">
+          <span class="relevance-label">Relevance to 9Cups</span>
+          <div class="relevance-track"><div class="relevance-fill" style="width:85%"></div></div>
+        </div>
+        <ul class="lesson-list">
+          <li>Nature photography as raw material for abstraction — not illustration</li>
+          <li>Recursion and reflection: the Droste effect (image within image) as a technique</li>
+          <li>Colour as emotion: synesthetic approach — what colour does this music feel like?</li>
+          <li>Psychedelic but grounded — surreal but universal, not alien</li>
+          <li>The themes: connectedness, love, nature, altered experience</li>
+        </ul>
+      </div>
+
+      <div class="designer-card">
+        <div class="designer-name">The Fashtons (Ben Ashton & Fiona Garden)</div>
+        <span class="designer-url">Visual collaborators for Maya Jane Coles</span>
+        <p class="designer-desc">The creative duo behind Maya Jane Coles' visual identity. They work in intimate settings, often shooting in darkness, using alternative light sources, distortion, and water reflection. "We've bounced her reflection off of water, we've distorted her and fed it back into the image." The intimacy allows the creativity to flow.</p>
+        <div class="relevance-bar">
+          <span class="relevance-label">Relevance to 9Cups</span>
+          <div class="relevance-track"><div class="relevance-fill" style="width:65%"></div></div>
+        </div>
+        <ul class="lesson-list">
+          <li>Intimate scale: minimal setups, everything made from scratch</li>
+          <li>Alternative light sources as a compositional tool</li>
+          <li>Portraiture as abstraction — the subject becomes a visual element</li>
+          <li>Long-term collaboration creates a visual shorthand over time</li>
+        </ul>
+      </div>
+
+      <div class="designer-card">
+        <div class="designer-name">Android Jones</div>
+        <span class="designer-url">Tipper's visual collaborator / festival VJ</span>
+        <p class="designer-desc">VJ and digital artist working with Tipper, Bassnectar, Grateful Dead. "I was just trying to give a visual form to the languages that he was communicating." His approach: be of service to the music. The visuals are a 4th-dimensional sound hologram translated to 2D. Improvised, responsive, present.</p>
+        <div class="relevance-bar">
+          <span class="relevance-label">Relevance to 9Cups</span>
+          <div class="relevance-track"><div class="relevance-fill" style="width:40%"></div></div>
+        </div>
+        <ul class="lesson-list">
+          <li>Visuals as translation of music, not decoration of it</li>
+          <li>Improvisation and presence over pre-planned execution</li>
+          <li>The visual artist in service to the music — ego-free approach</li>
+          <li>Festival scale: tapestries, mandala patterns, large-format immersive art</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 3: Design principles extracted -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">03</span>
+      <h2 class="section-title">Extracted Principles</h2>
+    </div>
+    <p class="section-intro">What these artists and designers have in common — and what 9Cups can crystallise into its own brand rules.</p>
+
+    <div class="principles-grid">
+
+      <div class="principle-card">
+        <div class="principle-icon">I</div>
+        <div class="principle-title">The emotional brief comes first</div>
+        <p class="principle-desc">Krug's "beautifully sinister" for Bonobo. Podhajsky spending time with the music before making a mark. The visual direction starts with two or three words, not a spec. For 9Cups: <em>present, warm, layered</em>.</p>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-icon">II</div>
+        <div class="principle-title">Real world, transformed</div>
+        <p class="principle-desc">Every artist here uses real photography — real places, real objects, real light — as the starting material. The transformation is the art: colour wash, layering, recursion. Not illustration, not CGI. The ground is always real.</p>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-icon">III</div>
+        <div class="principle-title">Colour temperature = emotional register</div>
+        <p class="principle-desc">Bonobo's warm Mojave sunset vs cool underwater Fragments. Flying Lotus's cosmic blue-blacks vs earthy warm tones. The same artist, different releases, radically different colour temperature. Each one signals the mood before a note is heard.</p>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-icon">IV</div>
+        <div class="principle-title">Grain and imperfection as authenticity</div>
+        <p class="principle-desc">Krug's analogue feel, Podhajsky's painted textures bled into digital images, Maya Jane Coles' sketchbook scans. The roughness communicates humanity. Over-polish reads as corporate. The seam, the grain, the scratch — these are features.</p>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-icon">V</div>
+        <div class="principle-title">One recurring symbol anchors everything</div>
+        <p class="principle-desc">Deadmau5's head. Marshmello's helmet. The Nine of Cups figure for 9Cups. A single unmistakable mark that appears across all contexts and acts as a visual shorthand for the whole world. Everything else can change — the logo mark holds.</p>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-icon">VI</div>
+        <div class="principle-title">The intimate perspective</div>
+        <p class="principle-desc">Maya Jane Coles shot from within the crowd. Krug shooting before dawn with only his crew present. Podhajsky in a converted stable in Shoreditch making things. The best music visual art feels like it came from someone's private world — not a studio brief.</p>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-icon">VII</div>
+        <div class="principle-title">Nature as psychedelic raw material</div>
+        <p class="principle-desc">Leaves, water, sand, rock — natural forms treated with colour and light become otherworldly without becoming artificial. The 9Cups leaf canopy. Krug's desert at dawn. Podhajsky's mirrored mountain vistas. Nature is always the starting point.</p>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-icon">VIII</div>
+        <div class="principle-title">Personal philosophy expressed visually</div>
+        <p class="principle-desc">Podhajsky on connectedness and losing touch with nature. Krug on bygone California as "a place in our minds." 9Cups on the Wish Card — quiet abundance, the moment you're already in. The visual work is a philosophy made visible, not just decoration.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 4: Learn vs avoid -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">04</span>
+      <h2 class="section-title">Learn From vs Avoid</h2>
+    </div>
+    <p class="section-intro">Mapping the territory clearly — what's adjacent enough to learn from, and what's in the wrong neighbourhood entirely.</p>
+
+    <div class="contrast-grid">
+      <div class="contrast-col learn">
+        <div class="contrast-heading learn">Draw from these traditions</div>
+        <div class="contrast-item">Analogue-feeling photography with colour treatment</div>
+        <div class="contrast-item">Double exposure and layer transparency as metaphor</div>
+        <div class="contrast-item">Natural textures: sand, leaf, fabric, concrete</div>
+        <div class="contrast-item">Warm, high-key colour without being saccharine</div>
+        <div class="contrast-item">Frame-within-frame compositional thinking</div>
+        <div class="contrast-item">A single recurring symbol as brand anchor</div>
+        <div class="contrast-item">Grain and imperfection communicating authenticity</div>
+        <div class="contrast-item">Spiritual iconography used with cultural respect</div>
+        <div class="contrast-item">The intimate perspective — among, not above</div>
+        <div class="contrast-item">Colour temperature shifts to signal release mood</div>
+        <div class="contrast-item">Typography that feels unhurried and archaic</div>
+      </div>
+      <div class="contrast-col avoid">
+        <div class="contrast-heading avoid">Wrong neighbourhood</div>
+        <div class="contrast-item">EDM spectacle aesthetics — laser shows, LED helmets</div>
+        <div class="contrast-item">Cold, high-contrast black/white with neon accents</div>
+        <div class="contrast-item">Corporate DJ website templates</div>
+        <div class="contrast-item">Alien/creature visuals (Tipper territory)</div>
+        <div class="contrast-item">Futuristic tech aesthetics — glitch, cyberpunk, circuit boards</div>
+        <div class="contrast-item">Hero shots from above the crowd</div>
+        <div class="contrast-item">Flat illustration / vector art style</div>
+        <div class="contrast-item">Sans-serif everywhere, no typographic warmth</div>
+        <div class="contrast-item">Aggressive drop-shadow and bevel treatment</div>
+        <div class="contrast-item">Stock photography — unnamed places, generic people</div>
+        <div class="contrast-item">Purple gradient on white (generic AI aesthetic)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: Sources to explore -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">05</span>
+      <h2 class="section-title">Go Look at These</h2>
+    </div>
+    <p class="section-intro">Direct links to portfolios, articles, and visual archives worth spending time in.</p>
+
+    <div class="designer-grid">
+
+      <div class="designer-card">
+        <div class="designer-name">Neil Krug — Portfolio</div>
+        <a class="designer-url" href="https://www.neilkrug.com" target="_blank">neilkrug.com</a>
+        <p class="designer-desc">Browse the full portfolio — especially the Bonobo section and the Phantom series. Note the colour temperature in each project, how he uses haze and dust, and the way subjects exist in environments rather than being placed against backdrops.</p>
+      </div>
+
+      <div class="designer-card">
+        <div class="designer-name">Leif Podhajsky — Studio</div>
+        <a class="designer-url" href="https://leifpodhajsky.com" target="_blank">leifpodhajsky.com</a>
+        <p class="designer-desc">Look at the Bonobo work (North Borders, Cirrus) and the Tame Impala Innerspeaker series. Notice the recursion and mirroring techniques, how natural landscapes become abstract fields, and how the colour palette serves as the emotional carrier.</p>
+      </div>
+
+      <div class="designer-card">
+        <div class="designer-name">Creative Review — Bonobo Fragments</div>
+        <a class="designer-url" href="https://www.creativereview.co.uk/bonobo-artwork-fragments-neil-krug/" target="_blank">creativereview.co.uk</a>
+        <p class="designer-desc">A deep dive into how Neil Krug and Bonobo briefed and made the Fragments campaign. Particularly useful: the concept of "transience, motion, tides and cycles" as a visual brief, and how lenticular printing was used to make images lap against each other like waves.</p>
+      </div>
+
+      <div class="designer-card">
+        <div class="designer-name">Leif Podhajsky — WePresent Interview</div>
+        <a class="designer-url" href="https://wepresent.wetransfer.com/stories/leif-podhajsky-on-designing-album-covers" target="_blank">wepresent.wetransfer.com</a>
+        <p class="designer-desc">The best interview about his process. Key quote: "A little bit surreal, but universal." How he uses confusion as a gateway into engagement. How he spends time with the music before touching a tool. His concept of album art as a "story which encompasses an entire album's feel and flow."</p>
+      </div>
+
+      <div class="designer-card">
+        <div class="designer-name">Neil Krug — WePresent</div>
+        <a class="designer-url" href="https://wepresent.wetransfer.com/stories/neil-krug-reflection" target="_blank">wepresent.wetransfer.com</a>
+        <p class="designer-desc">On memory fragments, landscape, and abstraction. "It's either the inexplicable, or the complete direct, or the complete abstract." How his mind hops between a landscape, a portrait, and pure colour — and how those three registers work together as a series.</p>
+      </div>
+
+      <div class="designer-card">
+        <div class="designer-name">Fabric London — Maya Jane Coles & The Fashtons</div>
+        <a class="designer-url" href="https://fabriclondon.com/blog/view/in-conversation-maya-jane-coles-introduces-her-visual-creative-partners-fashtons" target="_blank">fabriclondon.com</a>
+        <p class="designer-desc">On the intimacy of small-scale shoots and what it enables creatively. "We've done so many experiments with alternative light sources that it's become a running joke that we always seem to be shooting in the dark." The value of a long-term visual collaborator.</p>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p class="footer-note">For the benefit of DJ 9Cups' brand development · All referenced works remain the intellectual property of their respective creators · This document is for private research and reference only</p>
+  </div>
+</footer>
+
+</body>
+</html>

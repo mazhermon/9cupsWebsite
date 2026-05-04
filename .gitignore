@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# debug screenshots & playwright cache (keep out of repo, they're scratch)
+/*.png
+.playwright-mcp/
+skills-lock.json

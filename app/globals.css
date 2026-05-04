@@ -145,10 +145,11 @@ a {
   width: 100vw;
   height: 100dvh;
   display: grid;
-  grid-template-rows: auto 1fr auto auto;
+  /* Wordmark · stem toggles · stage · live region · listen-on */
+  grid-template-rows: auto auto 1fr auto auto;
   align-items: stretch;
   justify-items: stretch;
-  gap: var(--space-4);
+  gap: var(--space-3);
   padding: clamp(var(--space-4), 3vw, var(--space-8)) clamp(var(--space-4), 4vw, var(--space-12));
   isolation: isolate;
 }
@@ -167,13 +168,14 @@ a {
 /* ─── Wordmark ──────────────────────────────────────────────────────────────── */
 .wordmark {
   font-family: var(--font-display);
-  font-size: clamp(2.25rem, 6vw, 4rem);
+  font-size: clamp(2.5rem, 6.5vw, 4.5rem);
   font-weight: 400;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   line-height: 1;
   color: var(--color-ground-light);
   text-align: center;
   user-select: none;
+  margin: 0;
 }
 
 .wordmark-eyebrow {
@@ -187,47 +189,192 @@ a {
   margin-bottom: var(--space-3);
 }
 
-/* ─── Triptych stage ───────────────────────────────────────────────────────── */
+/* `wordmark-frame` is the inline-block stack that holds the visible 9cups + the
+   animated ghost copies behind it. The frame's width comes from the main word
+   so ghosts position relative to it. */
+.wordmark-frame {
+  position: relative;
+  display: inline-block;
+  isolation: isolate;
+}
+
+.wordmark-main {
+  position: relative;
+  z-index: 2;
+  color: var(--color-ground-light);
+}
+
+.wordmark-ghost {
+  position: absolute;
+  inset: 0;
+  display: block;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1;
+  /* Each ghost is slightly larger than the main word so it peeks out
+     around the edges. Transformed via individual keyframe sets below. */
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+.wordmark-ghost-1 {
+  color: var(--color-accent-vivid);
+  opacity: 0.18;
+  animation: wordmark-ghost-1 9s ease-in-out infinite alternate;
+}
+.wordmark-ghost-2 {
+  color: var(--color-primary-mid);
+  opacity: 0.12;
+  animation: wordmark-ghost-2 11s ease-in-out infinite alternate;
+}
+.wordmark-ghost-3 {
+  color: var(--color-accent-warm);
+  opacity: 0.08;
+  animation: wordmark-ghost-3 7s ease-in-out infinite alternate;
+}
+
+@keyframes wordmark-ghost-1 {
+  0%   { transform: translate(-12px, -2px) scale(1.08) skewX(-2deg); }
+  50%  { transform: translate(8px,  4px) scale(1.10) skewX(0deg);   }
+  100% { transform: translate(14px, -3px) scale(1.07) skewX(2deg);  }
+}
+@keyframes wordmark-ghost-2 {
+  0%   { transform: translate(6px,  -6px) scale(1.16) rotate(-1.5deg); }
+  50%  { transform: translate(-4px, 8px)  scale(1.13) rotate(0deg);    }
+  100% { transform: translate(-10px,-4px) scale(1.18) rotate(1.5deg);  }
+}
+@keyframes wordmark-ghost-3 {
+  0%   { transform: translate(0, 4px)  scale(1.24) rotate(0.8deg);  }
+  50%  { transform: translate(2px, -2px) scale(1.27) rotate(-1deg); }
+  100% { transform: translate(-2px, 6px) scale(1.22) rotate(0.4deg);}
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wordmark-ghost-1,
+  .wordmark-ghost-2,
+  .wordmark-ghost-3 { animation: none; }
+}
+
+/* ─── Stem toggle stamps (Brutalist Stamp · D from playground) ─────────────── */
+.stem-toggles {
+  display: flex;
+  justify-content: center;
+}
+
+.stem-toggles ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+}
+
+.stem-stamp {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  padding: 0.55rem 1.05rem 0.55rem 0.95rem;
+  /* The corner cut on the right edge gives this its ticker-tape silhouette. */
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
+  background: var(--stem-color);
+  color: var(--color-surface-deeper);
+  border: 0;
+  border-radius: 0;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  /* Filter-based outline so we can keep the clip-path; box-shadow alone gets clipped. */
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--stem-color) 35%, transparent));
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    filter var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+.stem-stamp:hover {
+  filter: drop-shadow(0 0 20px color-mix(in srgb, var(--stem-color) 55%, transparent));
+}
+
+.stem-stamp:focus-visible {
+  outline: 2px solid var(--color-ground-light);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.stem-stamp:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+  filter: none;
+}
+
+/* Muted: the stamp fades and desaturates — clip-path makes outline tricks unreliable
+   on the diagonal cut, so opacity + saturate is the cleaner read. */
+.stem-stamp[data-muted="true"] {
+  opacity: 0.34;
+  filter: saturate(0.5);
+}
+
+.stem-stamp-state {
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  opacity: 0.85;
+  /* Small shift so ON/OFF doesn't crowd the corner cut. */
+  margin-right: 0.2rem;
+}
+
+/* ─── Stage: drums + main upper · vox horizontal · bass ground ─────────────── */
 .stage {
   position: relative;
   display: grid;
-  grid-template-columns: 13fr 44fr 13fr;
-  grid-template-rows: 55fr 45fr;
+  grid-template-columns: 1fr 2fr;
+  grid-template-rows: 2.4fr 0.55fr 1fr;
   grid-template-areas:
-    "bass main vox"
-    "bass drums vox";
-  gap: var(--space-2);
+    "drums main"
+    "vox   vox"
+    "bass  bass";
+  gap: 0;
   width: 100%;
   height: 100%;
   min-height: 0;
+  overflow: visible;
 }
 
 .cell {
   position: relative;
   display: block;
   padding: 0;
-  border: 1px solid var(--color-line);
+  border: 0;
   border-radius: 0;
   background: transparent;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  overflow: hidden;
-  transition:
-    border-color var(--dur-fast) var(--ease-out),
-    opacity var(--dur-base) var(--ease-out);
+  /* overflow: visible so each cell-view can extend past its cell into the stage. */
+  overflow: visible;
+  transition: opacity var(--dur-base) var(--ease-out);
 }
 
-.cell:hover {
-  border-color: var(--shape-color, var(--color-primary-light));
+.cell:hover .cell-label {
+  color: var(--shape-color, var(--color-primary-light));
 }
 
 .cell:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 3px var(--shape-color, var(--color-primary-light));
+}
+
+.cell:focus-visible .cell-label {
+  color: var(--shape-color, var(--color-primary-light));
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .cell[data-muted="true"] {
-  opacity: 0.28;
+  opacity: 0.32;
 }
 
 .cell--bass  { grid-area: bass; }
@@ -257,10 +404,35 @@ a {
   letter-spacing: 0.05em;
 }
 
+/* Each cell-view is the WebGL track rect.
+   We let it extend beyond the cell so the visualiser has more space than
+   the click-target button — main especially must overflow its cell so its
+   peaks are not cropped. */
 .cell-view {
   position: absolute;
-  inset: 0;
+  inset: -8%;
   pointer-events: none;
+}
+
+.cell--main .cell-view {
+  /* MAIN gets very generous overflow so peaks never hit a hard edge. */
+  inset: -25% -8%;
+}
+
+.cell--drums .cell-view {
+  /* DRUMS shares the upper row with MAIN — generous all round so the full sphere is visible. */
+  inset: -16% -8%;
+}
+
+.cell--vox .cell-view {
+  /* VOX is a horizontal strip — small vertical overflow to bleed into the rows above and below. */
+  inset: -25% -2%;
+}
+
+.cell--bass .cell-view {
+  /* Bass is the ground — extends upward into main row, full width. */
+  inset: -35% -2% -2% -2%;
+  z-index: 0;
 }
 
 .shared-canvas {
@@ -268,6 +440,12 @@ a {
   inset: 0;
   pointer-events: none;
   z-index: 1;
+}
+
+/* R3F's inner wrapper sets pointer-events: auto inline — override it so cell buttons remain clickable. */
+.shared-canvas > div,
+.shared-canvas canvas {
+  pointer-events: none !important;
 }
 
 /* ─── Track title block ─────────────────────────────────────────────────────── */
@@ -506,3 +684,4 @@ a {
     font-size: 0.8125rem;
   }
 }
+

@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>9CUPS — Homepage Option A</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --black:#0a0a0f;
+    --white:#f0ebe0;
+    --purple:#8B3AC4;
+    --deep-violet:#3B1A6E;
+    --magenta:#CC2E90;
+    --crimson:#B03060;
+    --lavender:#C47EE8;
+    --cyan:#00D4FF;
+    --lime:#C8FF00;
+    --pink:#FF2D78;
+    --vox-purple:#9B4DFF;
+  }
+  html{font-size:16px;scroll-behavior:smooth}
+  body{
+    background:var(--black);
+    color:var(--white);
+    font-family:'Space Grotesk',sans-serif;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .svg-filters{position:absolute;width:0;height:0;overflow:hidden}
+
+  /* ===== HERO ===== */
+  .hero{
+    position:relative;
+    width:100%;
+    height:100vh;
+    min-height:700px;
+    overflow:hidden;
+  }
+  .hero__image{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    filter:url(#purple-tint) brightness(0.5) contrast(1.3);
+    transform:scale(1.05);
+  }
+  .hero__grain{
+    position:absolute;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.12'/%3E%3C/svg%3E");
+    background-size:200px 200px;
+    mix-blend-mode:overlay;
+    pointer-events:none;
+    z-index:2;
+  }
+  .hero__contour{
+    position:absolute;
+    inset:0;
+    z-index:3;
+    pointer-events:none;
+  }
+  .hero__contour svg{width:100%;height:100%}
+  .hero__grid{
+    position:absolute;
+    inset:0;
+    z-index:2;
+    pointer-events:none;
+    background:
+      repeating-linear-gradient(90deg, transparent, transparent calc(25% - 1px), rgba(139,58,196,0.07) calc(25% - 1px), rgba(139,58,196,0.07) 25%),
+      repeating-linear-gradient(0deg, transparent, transparent calc(25% - 1px), rgba(139,58,196,0.07) calc(25% - 1px), rgba(139,58,196,0.07) 25%);
+  }
+  .hero__content{
+    position:relative;
+    z-index:5;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    padding:3rem 4vw 4rem;
+  }
+  .hero__title{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(8rem, 22vw, 28rem);
+    line-height:0.82;
+    letter-spacing:-0.02em;
+    color:var(--white);
+    mix-blend-mode:difference;
+  }
+  .hero__subtitle{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:300;
+    font-size:clamp(0.75rem, 1.2vw, 1rem);
+    letter-spacing:0.35em;
+    text-transform:uppercase;
+    color:var(--lavender);
+    margin-top:1.5rem;
+    opacity:0.9;
+  }
+  .hero__nav{
+    position:absolute;
+    top:2rem;
+    left:4vw;
+    right:4vw;
+    z-index:10;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .hero__logo{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:1.2rem;
+    letter-spacing:0.15em;
+    color:var(--white);
+  }
+  .hero__menu{
+    display:flex;
+    gap:2.5rem;
+    list-style:none;
+  }
+  .hero__menu a{
+    color:var(--white);
+    text-decoration:none;
+    font-size:0.8rem;
+    font-weight:400;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    opacity:0.7;
+    transition:opacity 0.3s;
+  }
+  .hero__menu a:hover{opacity:1}
+  .hero__accent-line{
+    position:absolute;
+    bottom:0;right:0;
+    width:45%;height:60%;
+    z-index:4;
+    pointer-events:none;
+  }
+
+  /* ===== ABOUT ===== */
+  .about{
+    position:relative;
+    padding:8rem 4vw;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:4rem;
+    align-items:center;
+  }
+  .about__image-wrap{
+    position:relative;
+    aspect-ratio:4/5;
+    overflow:hidden;
+  }
+  .about__image{
+    width:100%;height:100%;
+    object-fit:cover;
+    filter:url(#warm-tint) brightness(0.65) contrast(1.2);
+  }
+  .about__contour-overlay{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+  }
+  .about__image-border{
+    position:absolute;
+    inset:-2px;
+    border:1px solid var(--purple);
+    pointer-events:none;
+    opacity:0.4;
+  }
+  .about__text h2{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(3rem, 6vw, 5rem);
+    line-height:0.95;
+    margin-bottom:2rem;
+  }
+  .about__text p{
+    font-weight:300;
+    font-size:1rem;
+    line-height:1.75;
+    color:rgba(240,235,224,0.7);
+    max-width:480px;
+  }
+  .about__label{
+    font-size:0.7rem;
+    letter-spacing:0.4em;
+    text-transform:uppercase;
+    color:var(--lavender);
+    margin-bottom:1rem;
+    display:block;
+  }
+
+  /* ===== STEMS PLAYER ===== */
+  .stems{
+    position:relative;
+    padding:6rem 4vw 8rem;
+    background:linear-gradient(180deg, var(--black) 0%, rgba(59,26,110,0.12) 50%, var(--black) 100%);
+  }
+  .stems__label{
+    font-size:0.7rem;
+    letter-spacing:0.4em;
+    text-transform:uppercase;
+    color:var(--lavender);
+    margin-bottom:0.75rem;
+    text-align:center;
+  }
+  .stems__title{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(2rem, 4vw, 3.5rem);
+    text-align:center;
+    margin-bottom:3rem;
+    letter-spacing:0.02em;
+  }
+  .stems__row{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:clamp(1.5rem, 4vw, 4rem);
+    flex-wrap:wrap;
+  }
+  .stem{
+    position:relative;
+    cursor:pointer;
+    background:none;
+    border:none;
+    color:inherit;
+    transition:transform 0.3s ease;
+  }
+  .stem:hover{transform:scale(1.08)}
+  .stem:focus-visible{
+    outline:3px solid var(--lavender);
+    outline-offset:8px;
+    border-radius:50%;
+  }
+  .stem svg{
+    width:clamp(80px, 14vw, 180px);
+    height:clamp(80px, 14vw, 180px);
+    filter:drop-shadow(0 0 30px var(--stem-color));
+  }
+  .stem__label{
+    display:block;
+    text-align:center;
+    margin-top:0.75rem;
+    font-size:0.65rem;
+    letter-spacing:0.35em;
+    text-transform:uppercase;
+    color:rgba(240,235,224,0.5);
+    font-family:'Space Grotesk',sans-serif;
+  }
+
+  /* ===== RELEASES ===== */
+  .releases{
+    padding:6rem 4vw;
+  }
+  .releases__header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-bottom:3rem;
+  }
+  .releases__header h2{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(3rem, 6vw, 5rem);
+    line-height:0.95;
+  }
+  .releases__header a{
+    font-size:0.75rem;
+    letter-spacing:0.3em;
+    text-transform:uppercase;
+    color:var(--lavender);
+    text-decoration:none;
+    border-bottom:1px solid var(--lavender);
+    padding-bottom:2px;
+  }
+  .releases__grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:2rem;
+  }
+  .release-card{
+    position:relative;
+    aspect-ratio:1;
+    overflow:hidden;
+    cursor:pointer;
+  }
+  .release-card img{
+    width:100%;height:100%;
+    object-fit:cover;
+    transition:transform 0.5s ease, filter 0.5s ease;
+    filter:url(#purple-tint) brightness(0.55) contrast(1.1);
+  }
+  .release-card:hover img{
+    transform:scale(1.06);
+    filter:url(#purple-tint) brightness(0.7) contrast(1.2);
+  }
+  .release-card__info{
+    position:absolute;
+    bottom:0;left:0;right:0;
+    padding:1.5rem;
+    background:linear-gradient(transparent, rgba(10,10,15,0.9));
+    z-index:2;
+  }
+  .release-card__title{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:1.5rem;
+    letter-spacing:0.05em;
+  }
+  .release-card__meta{
+    font-size:0.65rem;
+    letter-spacing:0.3em;
+    text-transform:uppercase;
+    color:rgba(240,235,224,0.5);
+    margin-top:0.25rem;
+  }
+  .release-card__contour{
+    position:absolute;
+    inset:0;z-index:1;
+    pointer-events:none;
+  }
+
+  /* ===== FOOTER ===== */
+  .footer{
+    padding:4rem 4vw 2rem;
+    border-top:1px solid rgba(139,58,196,0.15);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:1rem;
+  }
+  .footer__brand{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:1.5rem;
+    letter-spacing:0.1em;
+  }
+  .footer__links{
+    display:flex;gap:2rem;list-style:none;
+  }
+  .footer__links a{
+    color:rgba(240,235,224,0.5);
+    text-decoration:none;
+    font-size:0.75rem;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    transition:color 0.3s;
+  }
+  .footer__links a:hover{color:var(--lavender)}
+  .footer__copy{
+    width:100%;
+    text-align:center;
+    font-size:0.65rem;
+    color:rgba(240,235,224,0.3);
+    margin-top:2rem;
+    letter-spacing:0.15em;
+  }
+
+  @media(max-width:768px){
+    .about{grid-template-columns:1fr;gap:3rem}
+    .releases__grid{grid-template-columns:1fr 1fr}
+    .hero__menu{display:none}
+    .hero__content{padding:2rem 5vw 3rem}
+  }
+  @media(max-width:480px){
+    .releases__grid{grid-template-columns:1fr}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important}
+  }
+</style>
+</head>
+<body>
+
+<!-- Hidden SVG Filters -->
+<svg class="svg-filters" aria-hidden="true">
+  <defs>
+    <filter id="purple-tint" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="
+        0.4  0.2  0.1  0  0.12
+        0.1  0.1  0.1  0  0.05
+        0.3  0.2  0.5  0  0.18
+        0    0    0    1  0"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" result="grain" seed="2"/>
+      <feBlend in="SourceGraphic" in2="grain" mode="overlay"/>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="1.1"/>
+        <feFuncG type="linear" slope="0.85"/>
+        <feFuncB type="linear" slope="1.3"/>
+      </feComponentTransfer>
+    </filter>
+    <filter id="warm-tint" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="
+        0.5  0.15 0.1  0  0.15
+        0.1  0.12 0.08 0  0.02
+        0.2  0.1  0.4  0  0.15
+        0    0    0    1  0"/>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="1.2"/>
+        <feFuncG type="linear" slope="0.7"/>
+        <feFuncB type="linear" slope="1.1"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+</svg>
+
+<!-- ===== HERO ===== -->
+<section class="hero" role="banner">
+  <img class="hero__image"
+       src="../.claude/skills/design-inspiration/references/project-specific/Work9cups_SetYouFree_Cover.jpg"
+       alt="DJ 9Cups on the beach with purple overlay" loading="eager">
+  <div class="hero__grain" aria-hidden="true"></div>
+  <div class="hero__grid" aria-hidden="true"></div>
+
+  <!-- SVG contour lines tracing the subject -->
+  <div class="hero__contour" aria-hidden="true">
+    <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" fill="none">
+      <!-- Head/cap contour -->
+      <path d="M620,180 C580,150 540,145 510,160 C485,175 475,200 480,230 C485,260 510,285 545,290 C565,292 590,288 610,275 C635,258 645,230 640,205 C638,192 630,185 620,180Z"
+            stroke="#C8FF00" stroke-width="2" stroke-dasharray="6,4" opacity="0.8">
+        <animate attributeName="stroke-dashoffset" from="0" to="40" dur="4s" repeatCount="indefinite"/>
+      </path>
+      <!-- Shoulder left -->
+      <path d="M460,300 C430,320 390,360 370,410 C355,445 350,485 360,520"
+            stroke="#FF2D78" stroke-width="2.5" opacity="0.7">
+        <animate attributeName="stroke-dashoffset" from="0" to="30" dur="3s" repeatCount="indefinite"/>
+      </path>
+      <!-- Shoulder right -->
+      <path d="M600,290 C640,310 680,350 710,400 C730,435 740,475 735,520"
+            stroke="#00D4FF" stroke-width="2" opacity="0.7"/>
+      <!-- Torso -->
+      <path d="M380,420 C400,480 430,540 470,580 C510,610 560,620 610,600 C650,585 690,550 710,500"
+            stroke="#9B4DFF" stroke-width="1.5" stroke-dasharray="8,6" opacity="0.5">
+        <animate attributeName="stroke-dashoffset" from="0" to="56" dur="5s" repeatCount="indefinite"/>
+      </path>
+      <!-- Arm contour -->
+      <path d="M430,380 C420,420 415,460 425,500 C430,520 445,540 465,550"
+            stroke="#C8FF00" stroke-width="1.5" opacity="0.4"/>
+      <!-- Energy lines -->
+      <line x1="550" y1="200" x2="350" y2="80" stroke="#FF2D78" stroke-width="1" opacity="0.2"/>
+      <line x1="560" y1="210" x2="800" y2="60" stroke="#00D4FF" stroke-width="1" opacity="0.15"/>
+      <!-- Circle accent -->
+      <circle cx="555" cy="220" r="65" stroke="#9B4DFF" stroke-width="1" fill="none" opacity="0.25" stroke-dasharray="4,8">
+        <animate attributeName="r" values="62;68;62" dur="4s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+  </div>
+
+  <svg class="hero__accent-line" viewBox="0 0 600 500" fill="none" aria-hidden="true">
+    <line x1="0" y1="500" x2="600" y2="100" stroke="#C8FF00" stroke-width="1.5" opacity="0.12"/>
+    <line x1="0" y1="500" x2="550" y2="0" stroke="#FF2D78" stroke-width="1" opacity="0.08"/>
+  </svg>
+
+  <nav class="hero__nav" aria-label="Main navigation">
+    <div class="hero__logo">9CUPS</div>
+    <ul class="hero__menu">
+      <li><a href="#about">About</a></li>
+      <li><a href="#player">Player</a></li>
+      <li><a href="#releases">Releases</a></li>
+    </ul>
+  </nav>
+
+  <div class="hero__content">
+    <h1 class="hero__title">9CUPS</h1>
+    <p class="hero__subtitle">Wellington &middot; DJ &middot; Producer &middot; The Wise Enjoyer</p>
+  </div>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section class="about" id="about">
+  <div class="about__image-wrap">
+    <img class="about__image"
+         src="../.claude/skills/design-inspiration/references/project-specific/IMG_2538.png"
+         alt="DJ 9Cups portrait" loading="lazy">
+    <div class="about__image-border" aria-hidden="true"></div>
+    <svg class="about__contour-overlay" viewBox="0 0 400 500" fill="none" aria-hidden="true">
+      <path d="M180,120 C160,130 145,155 140,180 C135,210 140,240 155,265 C170,285 195,300 220,305 C245,305 265,290 275,270 C290,240 290,205 280,175 C270,150 250,130 225,120 C205,115 190,115 180,120Z"
+            stroke="#FF2D78" stroke-width="2" opacity="0.5" stroke-dasharray="5,5">
+        <animate attributeName="stroke-dashoffset" from="0" to="40" dur="5s" repeatCount="indefinite"/>
+      </path>
+      <path d="M120,310 C140,320 160,330 200,340 C250,340 290,330 320,310"
+            stroke="#00D4FF" stroke-width="2.5" opacity="0.4"/>
+      <path d="M150,140 C170,125 200,118 240,120 C260,122 275,130 280,140"
+            stroke="#C8FF00" stroke-width="2" opacity="0.6"/>
+    </svg>
+  </div>
+  <div class="about__text">
+    <span class="about__label">The Nine of Cups</span>
+    <h2>Already Here,<br>Already Satisfied</h2>
+    <p>Named after the Nine of Cups tarot card — The Wish Card — 9Cups is emotional fulfilment made audible. Wellington-rooted, globally influenced. Not seeking, not striving. Present.</p>
+    <p style="margin-top:1rem;color:rgba(240,235,224,0.5)">Contemplative. Communal. Psychedelic without ego. Warm. Textured. Knowing. Unhurried.</p>
+  </div>
+</section>
+
+<!-- ===== STEMS PLAYER ===== -->
+<section class="stems" id="player">
+  <p class="stems__label">Interactive</p>
+  <h2 class="stems__title">Catching a Feeling Stems Player</h2>
+  <div class="stems__row" role="group" aria-label="Stem tracks — click shapes to mute or unmute">
+    <button class="stem" style="--stem-color:#FF2D78" aria-label="Bass track" aria-pressed="false">
+      <svg viewBox="0 0 200 200" fill="none">
+        <defs><filter id="glow-pink"><feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <circle cx="100" cy="100" r="70" stroke="#FF2D78" stroke-width="2" fill="rgba(255,45,120,0.08)" filter="url(#glow-pink)">
+          <animate attributeName="r" values="68;73;68" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="100" cy="100" r="50" stroke="#FF2D78" stroke-width="0.5" fill="none" opacity="0.3"/>
+      </svg>
+      <span class="stem__label">Bass</span>
+    </button>
+    <button class="stem" style="--stem-color:#00D4FF" aria-label="Drums track" aria-pressed="false">
+      <svg viewBox="0 0 200 200" fill="none">
+        <defs><filter id="glow-cyan"><feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <polygon points="100,25 175,62.5 175,137.5 100,175 25,137.5 25,62.5" stroke="#00D4FF" stroke-width="2" fill="rgba(0,212,255,0.06)" filter="url(#glow-cyan)">
+          <animate attributeName="points" values="100,25 175,62.5 175,137.5 100,175 25,137.5 25,62.5;100,28 172,65 172,135 100,172 28,135 28,65;100,25 175,62.5 175,137.5 100,175 25,137.5 25,62.5" dur="4s" repeatCount="indefinite"/>
+        </polygon>
+        <polygon points="100,50 150,75 150,125 100,150 50,125 50,75" stroke="#00D4FF" stroke-width="0.5" fill="none" opacity="0.3"/>
+      </svg>
+      <span class="stem__label">Drums</span>
+    </button>
+    <button class="stem" style="--stem-color:#C8FF00" aria-label="Main track" aria-pressed="false">
+      <svg viewBox="0 0 200 200" fill="none">
+        <defs><filter id="glow-lime"><feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <rect x="60" y="60" width="80" height="80" transform="rotate(45 100 100)" stroke="#C8FF00" stroke-width="2" fill="rgba(200,255,0,0.06)" filter="url(#glow-lime)">
+          <animate attributeName="width" values="78;84;78" dur="3.5s" repeatCount="indefinite"/>
+          <animate attributeName="height" values="78;84;78" dur="3.5s" repeatCount="indefinite"/>
+          <animate attributeName="x" values="61;58;61" dur="3.5s" repeatCount="indefinite"/>
+          <animate attributeName="y" values="61;58;61" dur="3.5s" repeatCount="indefinite"/>
+        </rect>
+        <rect x="72" y="72" width="56" height="56" transform="rotate(45 100 100)" stroke="#C8FF00" stroke-width="0.5" fill="none" opacity="0.3"/>
+      </svg>
+      <span class="stem__label">Main</span>
+    </button>
+    <button class="stem" style="--stem-color:#9B4DFF" aria-label="Vox track" aria-pressed="false">
+      <svg viewBox="0 0 200 200" fill="none">
+        <defs><filter id="glow-purple"><feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <path d="M100,30 C140,30 170,55 175,90 C180,125 160,155 135,170 C110,185 75,180 55,160 C35,140 25,110 35,80 C45,50 70,30 100,30Z"
+              stroke="#9B4DFF" stroke-width="2" fill="rgba(155,77,255,0.06)" filter="url(#glow-purple)">
+          <animate attributeName="d"
+                   values="M100,30 C140,30 170,55 175,90 C180,125 160,155 135,170 C110,185 75,180 55,160 C35,140 25,110 35,80 C45,50 70,30 100,30Z;M100,28 C145,32 168,60 172,92 C176,128 158,158 132,172 C108,182 72,178 52,158 C32,138 28,108 38,78 C48,48 68,28 100,28Z;M100,30 C140,30 170,55 175,90 C180,125 160,155 135,170 C110,185 75,180 55,160 C35,140 25,110 35,80 C45,50 70,30 100,30Z"
+                   dur="4.5s" repeatCount="indefinite"/>
+        </path>
+        <path d="M100,50 C130,50 150,70 152,95 C155,120 140,140 120,150 C100,158 78,155 65,140 C52,125 48,105 55,85 C62,65 80,50 100,50Z"
+              stroke="#9B4DFF" stroke-width="0.5" fill="none" opacity="0.3"/>
+      </svg>
+      <span class="stem__label">Vox</span>
+    </button>
+  </div>
+</section>
+
+<!-- ===== RELEASES ===== -->
+<section class="releases" id="releases">
+  <div class="releases__header">
+    <h2>Releases</h2>
+    <a href="#">View All</a>
+  </div>
+  <div class="releases__grid">
+    <div class="release-card">
+      <img src="../.claude/skills/design-inspiration/references/project-specific/9cups_YourLove_single_Cover2000_85qual.jpg"
+           alt="Your Love — single cover" loading="lazy">
+      <svg class="release-card__contour" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+        <ellipse cx="180" cy="240" rx="35" ry="50" stroke="#C8FF00" stroke-width="1.5" opacity="0.4" stroke-dasharray="4,4"/>
+        <ellipse cx="250" cy="220" rx="30" ry="45" stroke="#FF2D78" stroke-width="1.5" opacity="0.4" stroke-dasharray="4,4"/>
+      </svg>
+      <div class="release-card__info">
+        <div class="release-card__title">Your Love</div>
+        <div class="release-card__meta">Single &middot; 2024</div>
+      </div>
+    </div>
+    <div class="release-card">
+      <img src="../.claude/skills/design-inspiration/references/project-specific/Work9cups_SetYouFree_Cover.jpg"
+           alt="Set You Free — single cover" loading="lazy">
+      <svg class="release-card__contour" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+        <path d="M160,150 C180,120 220,110 250,130 C270,145 275,175 260,200 C245,220 215,230 190,220"
+              stroke="#00D4FF" stroke-width="1.5" opacity="0.4" stroke-dasharray="5,4"/>
+      </svg>
+      <div class="release-card__info">
+        <div class="release-card__title">Set You Free</div>
+        <div class="release-card__meta">Single &middot; 2024</div>
+      </div>
+    </div>
+    <div class="release-card">
+      <img src="../.claude/skills/design-inspiration/references/project-specific/NewtownFestCollectionImage.jpg"
+           alt="Newtown Festival — live performance" loading="lazy">
+      <svg class="release-card__contour" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+        <rect x="100" y="120" width="200" height="160" rx="4" stroke="#9B4DFF" stroke-width="1.5" opacity="0.3" stroke-dasharray="6,4"/>
+        <line x1="100" y1="200" x2="300" y2="200" stroke="#C8FF00" stroke-width="0.8" opacity="0.2"/>
+      </svg>
+      <div class="release-card__info">
+        <div class="release-card__title">Newtown Festival</div>
+        <div class="release-card__meta">Live &middot; 2024</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="footer__brand">9CUPS</div>
+  <ul class="footer__links">
+    <li><a href="#">Spotify</a></li>
+    <li><a href="#">SoundCloud</a></li>
+    <li><a href="#">Instagram</a></li>
+  </ul>
+  <p class="footer__copy">The Wise Enjoyer &middot; Wellington, NZ</p>
+</footer>
+
+</body>
+</html>

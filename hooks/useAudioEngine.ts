@@ -100,7 +100,8 @@ export function useAudioEngine(trackUrls: string[]): AudioEngineReturn {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Wire up audio graph for all loaded buffers
+  // Wire up audio graph for all loaded buffers.
+  // toggleMute is a no-op before the graph exists, so all gains start at 1.
   const buildGraph = useCallback(() => {
     const ctx = audioCtxRef.current
     if (!ctx) return
@@ -113,7 +114,7 @@ export function useAudioEngine(trackUrls: string[]): AudioEngineReturn {
       source.loop = true
 
       const gain = ctx.createGain()
-      gain.gain.value = tracks[i].muted ? 0 : 1
+      gain.gain.value = 1
 
       const analyser = ctx.createAnalyser()
       analyser.fftSize = BUFFER_SIZE
@@ -127,8 +128,7 @@ export function useAudioEngine(trackUrls: string[]): AudioEngineReturn {
       gainsRef.current[i] = gain
       analysersRef.current[i] = analyser
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allLoaded])
+  }, [])
 
   const startPlayback = useCallback(() => {
     const ctx = audioCtxRef.current

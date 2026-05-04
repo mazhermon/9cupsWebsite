@@ -1,0 +1,872 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400&display=swap');
+
+  :root {
+    --9c-deep-violet: #3B1A6E;
+    --9c-amethyst: #8B3AC4;
+    --9c-lavender: #C47EE8;
+    --9c-mist: #D4AAEE;
+    --9c-crimson: #B03060;
+    --9c-magenta: #CC2E90;
+    --9c-forest: #1A2A1E;
+    --9c-asphalt: #3A3530;
+    --9c-bone: #F0EBE0;
+    --9c-moss: #7A8A1A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .brand-shell {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    color: var(--color-text-primary);
+    padding: 0 0 2rem;
+  }
+
+  .brand-header {
+    background: var(--9c-deep-violet);
+    padding: 2rem 1.5rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .brand-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(196,126,232,0.06) 40px,
+      rgba(196,126,232,0.06) 41px
+    );
+  }
+
+  .brand-header-inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .wordmark {
+    font-family: 'IM Fell English', serif;
+    font-size: 2.2rem;
+    color: var(--9c-mist);
+    letter-spacing: -0.01em;
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+
+  .wordmark span {
+    color: var(--9c-lavender);
+  }
+
+  .tagline {
+    font-size: 0.75rem;
+    color: var(--9c-lavender);
+    opacity: 0.7;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    padding: 0 1.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .nav-tabs::-webkit-scrollbar { display: none; }
+
+  .nav-tab {
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--color-text-secondary);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -0.5px;
+    white-space: nowrap;
+    transition: color 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+  }
+
+  .nav-tab.active {
+    color: var(--9c-amethyst);
+    border-bottom-color: var(--9c-amethyst);
+  }
+
+  .panel { display: none; padding: 1.5rem; }
+  .panel.active { display: block; }
+
+  .section-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    margin-bottom: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .section-label:first-child { margin-top: 0; }
+
+  /* Colour panel */
+  .swatch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+  }
+
+  .swatch {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 0.5px solid rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  .swatch:hover { transform: scale(1.02); }
+
+  .swatch-colour {
+    height: 52px;
+  }
+
+  .swatch-info {
+    padding: 6px 8px;
+    background: var(--color-background-secondary);
+  }
+
+  .swatch-name {
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: var(--color-text-primary);
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .swatch-hex {
+    font-size: 0.65rem;
+    font-family: monospace;
+    color: var(--color-text-tertiary);
+  }
+
+  .swatch-role {
+    font-size: 0.6rem;
+    color: var(--color-text-tertiary);
+    margin-top: 2px;
+    display: block;
+  }
+
+  .proportion-bar {
+    display: flex;
+    height: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+  }
+
+  /* Typography panel */
+  .type-specimen {
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+
+  .type-label {
+    padding: 8px 14px;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    background: var(--color-background-secondary);
+  }
+
+  .type-body {
+    padding: 1.25rem 1.25rem;
+  }
+
+  .type-wordmark {
+    font-family: 'IM Fell English', serif;
+    font-size: 2.5rem;
+    color: var(--9c-deep-violet);
+    line-height: 1.1;
+  }
+
+  .type-heading {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.4rem;
+    color: var(--color-text-primary);
+    line-height: 1.3;
+  }
+
+  .type-italic {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+  }
+
+  .type-body-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+  }
+
+  .type-meta {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+  }
+
+  /* Texture panel */
+  .texture-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .texture-card {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 0.5px solid var(--color-border-tertiary);
+  }
+
+  .texture-swatch {
+    height: 80px;
+    position: relative;
+  }
+
+  .texture-asphalt {
+    background-color: var(--9c-asphalt);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  }
+
+  .texture-deep {
+    background: linear-gradient(135deg, var(--9c-deep-violet) 0%, var(--9c-forest) 100%);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.25'/%3E%3C/svg%3E");
+  }
+
+  .texture-wash {
+    background: var(--9c-amethyst);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.35' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeBlend in='SourceGraphic' mode='multiply'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.3'/%3E%3C/svg%3E");
+    opacity: 0.85;
+  }
+
+  .texture-warm {
+    background: linear-gradient(135deg, var(--9c-crimson) 0%, var(--9c-magenta) 100%);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+  }
+
+  .texture-info {
+    padding: 8px 10px;
+    background: var(--color-background-secondary);
+  }
+
+  .texture-name {
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--color-text-primary);
+    display: block;
+  }
+
+  .texture-desc {
+    font-size: 0.65rem;
+    color: var(--color-text-tertiary);
+    margin-top: 2px;
+  }
+
+  /* Mood panel */
+  .mood-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .mood-pill {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 300;
+    border: 0.5px solid;
+  }
+
+  .mood-pill.positive {
+    background: rgba(139,58,196,0.08);
+    border-color: rgba(139,58,196,0.25);
+    color: var(--9c-amethyst);
+  }
+
+  .mood-pill.negative {
+    background: rgba(58,53,48,0.06);
+    border-color: rgba(58,53,48,0.2);
+    color: var(--color-text-secondary);
+    text-decoration: line-through;
+  }
+
+  .archetype-card {
+    background: var(--9c-deep-violet);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .archetype-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 30px,
+      rgba(196,126,232,0.05) 30px,
+      rgba(196,126,232,0.05) 31px
+    );
+  }
+
+  .archetype-title {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.1rem;
+    color: var(--9c-mist);
+    position: relative;
+    z-index: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .archetype-desc {
+    font-size: 0.8rem;
+    color: var(--9c-lavender);
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+    font-weight: 300;
+  }
+
+  .spatial-rule {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+
+  .spatial-rule:last-child { border-bottom: none; }
+
+  .spatial-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--9c-amethyst);
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+
+  .spatial-text {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+  }
+
+  /* Token panel */
+  .token-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+  }
+
+  .token-table th {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    font-weight: 400;
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+
+  .token-table td {
+    padding: 7px 8px;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    color: var(--color-text-secondary);
+    vertical-align: middle;
+  }
+
+  .token-table tr:last-child td { border-bottom: none; }
+
+  .token-chip {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-right: 6px;
+    border: 0.5px solid rgba(0,0,0,0.1);
+  }
+
+  .token-name {
+    font-family: monospace;
+    font-size: 0.7rem;
+    color: var(--9c-amethyst);
+  }
+
+  .copied-toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--9c-deep-violet);
+    color: var(--9c-mist);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .copied-toast.show { opacity: 1; }
+</style>
+
+<div class="brand-shell">
+  <div class="brand-header">
+    <div class="brand-header-inner">
+      <div class="wordmark">DJ <span>9Cups</span></div>
+      <div class="tagline">Brand System · Phase 2</div>
+    </div>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPanel('colour')">Colour</button>
+    <button class="nav-tab" onclick="showPanel('type')">Typography</button>
+    <button class="nav-tab" onclick="showPanel('texture')">Texture</button>
+    <button class="nav-tab" onclick="showPanel('mood')">Mood & Voice</button>
+    <button class="nav-tab" onclick="showPanel('tokens')">Tokens</button>
+  </div>
+
+  <!-- COLOUR PANEL -->
+  <div class="panel active" id="panel-colour">
+    <div class="section-label">Purple family · 60%</div>
+    <div class="swatch-grid">
+      <div class="swatch" onclick="copyHex('#3B1A6E','Deep Violet')">
+        <div class="swatch-colour" style="background:#3B1A6E"></div>
+        <div class="swatch-info">
+          <span class="swatch-name">Deep Violet</span>
+          <span class="swatch-hex">#3B1A6E</span>
+          <span class="swatch-role">Depth · mystery</span>
+        </div>
+      </div>
+      <div class="swatch" onclick="copyHex('#8B3AC4','Electric Amethyst')">
+        <div class="swatch-colour" style="background:#8B3AC4"></div>
+        <div class="swatch-info">
+          <span class="swatch-name">Electric Amethyst</span>
+          <span class="swatch-hex">#8B3AC4</span>
+          <span class="swatch-role">Identity · energy</span>
+        </div>
+      </div>
+      <div class="swatch" onclick="copyHex('#C47EE8','Bright Lavender')">
+        <div class="swatch-colour" style="background:#C47EE8"></div>
+        <div class="swatch-info">
+          <span class="swatch-name">Bright Lavender</span>
+          <span class="swatch-hex">#C47EE8</span>
+          <span class="swatch-role">Air · celebration</span>
+        </div>
+      </div>
+      <div class="swatch" onclick="copyHex('#D4AAEE','Lilac Mist')">
+        <div class="swatch-colour" style="background:#D4AAEE"></div>
+        <div class="swatch-info">
+          <span class="swatch-name">Lilac Mist</span>
+          <span class="swatch-hex">#D4AAEE</span>
+          <span class="swatch-role">Softness · pale</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Warm accent family · 20%</div>
+    <div class="swatch-grid">
+      <div class="swatch" onclick="copyHex('#B03060','Crimson Rose')">
+        <div class="swatch-colour" style="background:#B03060"></div>
+        <div class="swatch-info">
+          <span class="swatch-name">Crimson Rose</span>
+          <span class="swatch-hex">#B03060</span>
+          <span class="swatch-role">Passion · depth</span>
+        </div>
+      </div>
+      <div class="swatch" onclick="copyHex('#CC2E90','Hot Magenta')">
+        <div class="swatch-colour" style="background:#CC2E90"></div>
+        <div class="swatch-info">
+          <span class="swatch-name">Hot Magenta</span>
+          <span class="swatch-hex">#CC2E90</span>
+          <span class="swatch-role">Heat · urgency</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Neutral grounds · 15%</div>
+    <div class="swatch-grid">
+      <div class="swatch" onclick="copyHex('#1A2A1E','Dark Forest')">
+        <div class="swatch-colour" style="background:#1A2A1E"></div>
+        <div class="swatch-info">
+          <span class="swatch-name">Dark Forest</span>
+          <span class="swatch-hex">#1A2A1E</span>
+          <span class="swatch-role">Anchor · ground</span>
+        </div>
+      </div>
+      <div class="swatch" onclick="copyHex('#3A3530','Warm Asphalt')">
+        <div class="swatch-colour" style="background:#3A3530"></div>
+        <div class="swatch-info">
+          <span class="swatch-name">Warm Asphalt</span>
+          <span class="swatch-hex">#3A3530</span>
+          <span class="swatch-role">Neutral · urban</span>
+        </div>
+      </div>
+      <div class="swatch" onclick="copyHex('#F0EBE0','Bone White')">
+        <div class="swatch-colour" style="background:#F0EBE0; border: 0.5px solid #ddd;"></div>
+        <div class="swatch-info">
+          <span class="swatch-name">Bone White</span>
+          <span class="swatch-hex">#F0EBE0</span>
+          <span class="swatch-role">Space · sketch lines</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Organic accent · 5%</div>
+    <div class="swatch-grid">
+      <div class="swatch" onclick="copyHex('#7A8A1A','Acid Moss')">
+        <div class="swatch-colour" style="background:#7A8A1A"></div>
+        <div class="swatch-info">
+          <span class="swatch-name">Acid Moss</span>
+          <span class="swatch-hex">#7A8A1A</span>
+          <span class="swatch-role">Sparingly · grounding</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Proportional use</div>
+    <div class="proportion-bar">
+      <div style="width:60%;background:#8B3AC4;opacity:0.9" title="Purple family 60%"></div>
+      <div style="width:20%;background:#CC2E90;opacity:0.9" title="Warm accent 20%"></div>
+      <div style="width:15%;background:#3A3530;opacity:0.9" title="Neutral grounds 15%"></div>
+      <div style="width:5%;background:#7A8A1A;opacity:0.9" title="Acid Moss 5%"></div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:6px;flex-wrap:wrap;">
+      <span style="font-size:0.65rem;color:var(--color-text-tertiary)"><span style="display:inline-block;width:8px;height:8px;background:#8B3AC4;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Purple 60%</span>
+      <span style="font-size:0.65rem;color:var(--color-text-tertiary)"><span style="display:inline-block;width:8px;height:8px;background:#CC2E90;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Warm accent 20%</span>
+      <span style="font-size:0.65rem;color:var(--color-text-tertiary)"><span style="display:inline-block;width:8px;height:8px;background:#3A3530;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Grounds 15%</span>
+      <span style="font-size:0.65rem;color:var(--color-text-tertiary)"><span style="display:inline-block;width:8px;height:8px;background:#7A8A1A;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Moss 5%</span>
+    </div>
+
+    <div class="section-label" style="margin-top:1.5rem">Purple temperature guide</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+      <div style="background:linear-gradient(135deg,#3B1A6E,#2A1250);border-radius:8px;padding:10px 10px;">
+        <div style="font-size:0.65rem;color:#D4AAEE;opacity:0.8;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">Cool violet</div>
+        <div style="font-size:0.7rem;color:#C47EE8">Introspection · depth</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#8B3AC4,#6B2A9E);border-radius:8px;padding:10px 10px;">
+        <div style="font-size:0.65rem;color:#D4AAEE;opacity:0.8;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">Electric</div>
+        <div style="font-size:0.7rem;color:#D4AAEE">Celebration · live</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#B03060,#8B3AC4);border-radius:8px;padding:10px 10px;">
+        <div style="font-size:0.65rem;color:#D4AAEE;opacity:0.8;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">Warm magenta</div>
+        <div style="font-size:0.7rem;color:#F0C0D0">Love · connection</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TYPOGRAPHY PANEL -->
+  <div class="panel" id="panel-type">
+    <div class="type-specimen">
+      <div class="type-label">Wordmark / Primary heading — IM Fell English</div>
+      <div class="type-body">
+        <div class="type-wordmark">DJ 9Cups</div>
+      </div>
+    </div>
+
+    <div class="type-specimen">
+      <div class="type-label">Section heading — IM Fell English regular</div>
+      <div class="type-body">
+        <div class="type-heading">The Wish Card</div>
+      </div>
+    </div>
+
+    <div class="type-specimen">
+      <div class="type-label">Italic / mood text — IM Fell English italic</div>
+      <div class="type-body">
+        <div class="type-italic">Presence, pleasure, and the beauty of the moment you're already in.</div>
+      </div>
+    </div>
+
+    <div class="type-specimen">
+      <div class="type-label">Body text — DM Sans light 300</div>
+      <div class="type-body">
+        <div class="type-body-text">The layering technique used across every image communicates that reality is richer than it appears on the surface. The work asks you to look again.</div>
+      </div>
+    </div>
+
+    <div class="type-specimen">
+      <div class="type-label">Meta / label — DM Sans light, spaced caps</div>
+      <div class="type-body">
+        <div class="type-meta">Wellington · New Zealand · Est. 2024</div>
+      </div>
+    </div>
+
+    <div class="section-label">Typography rules</div>
+    <div class="spatial-rule">
+      <div class="spatial-dot"></div>
+      <div class="spatial-text">Wordmark and release titles always in IM Fell English. Feels slightly archaic, literary — never corporate.</div>
+    </div>
+    <div class="spatial-rule">
+      <div class="spatial-dot"></div>
+      <div class="spatial-text">Body text in DM Sans light (300) — complements the serif without competing. Never bold body text.</div>
+    </div>
+    <div class="spatial-rule">
+      <div class="spatial-dot"></div>
+      <div class="spatial-text">Italic for mood lines, quotes, tag phrases. The italic version of IM Fell English has real character — use it.</div>
+    </div>
+    <div class="spatial-rule">
+      <div class="spatial-dot"></div>
+      <div class="spatial-text">All caps used sparingly, widely spaced, small size only — meta information like dates and locations.</div>
+    </div>
+  </div>
+
+  <!-- TEXTURE PANEL -->
+  <div class="panel" id="panel-texture">
+    <div class="section-label">Core textures</div>
+    <div class="texture-grid">
+      <div class="texture-card">
+        <div class="texture-swatch texture-asphalt"></div>
+        <div class="texture-info">
+          <span class="texture-name">Gritty asphalt</span>
+          <span class="texture-desc">Urban · tactile · street-level</span>
+        </div>
+      </div>
+      <div class="texture-card">
+        <div class="texture-swatch texture-deep"></div>
+        <div class="texture-info">
+          <span class="texture-name">Deep violet grain</span>
+          <span class="texture-desc">Spiritual · mysterious · anchor</span>
+        </div>
+      </div>
+      <div class="texture-card">
+        <div class="texture-swatch texture-wash"></div>
+        <div class="texture-info">
+          <span class="texture-name">Purple colour wash</span>
+          <span class="texture-desc">Double exposure · psychedelic</span>
+        </div>
+      </div>
+      <div class="texture-card">
+        <div class="texture-swatch texture-warm"></div>
+        <div class="texture-info">
+          <span class="texture-name">Warm magenta wash</span>
+          <span class="texture-desc">Love · connection · heat</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Texture rules</div>
+    <div class="spatial-rule">
+      <div class="spatial-dot"></div>
+      <div class="spatial-text">Never use flat colour fills without at least one texture layer bleeding through. The grain is part of the voice.</div>
+    </div>
+    <div class="spatial-rule">
+      <div class="spatial-dot"></div>
+      <div class="spatial-text">The double-exposure technique is the core brand signature — real photography overlaid with colour washes. The seams are visible intentionally.</div>
+    </div>
+    <div class="spatial-rule">
+      <div class="spatial-dot"></div>
+      <div class="spatial-text">Tapestry/mandala patterns (as seen at Newtown Fest) — intricate, global, celebratory. Available as a background source.</div>
+    </div>
+    <div class="spatial-rule">
+      <div class="spatial-dot"></div>
+      <div class="spatial-text">Paper/screen grain on the tarot cards — sketch-like, archaic, literary. Use when referencing the Nine of Cups figure.</div>
+    </div>
+
+    <div class="section-label">Key symbols</div>
+    <div class="spatial-rule">
+      <div class="spatial-dot" style="background:var(--9c-crimson)"></div>
+      <div class="spatial-text"><strong style="font-weight:400;color:var(--color-text-primary)">The Nine of Cups figure</strong> — primary logo mark. The smiling, seated figure with nine chalices in an arc. Always used for profile/avatar contexts. Never replaced with a photograph.</div>
+    </div>
+    <div class="spatial-rule">
+      <div class="spatial-dot" style="background:var(--9c-crimson)"></div>
+      <div class="spatial-text"><strong style="font-weight:400;color:var(--color-text-primary)">Two tin cups on a woven mat</strong> — communion, sharing, campfire. The brand sub-motif for release art and social.</div>
+    </div>
+    <div class="spatial-rule">
+      <div class="spatial-dot" style="background:var(--9c-crimson)"></div>
+      <div class="spatial-text"><strong style="font-weight:400;color:var(--color-text-primary)">The mandala tapestry</strong> — intricate, global, celebratory. Background and texture source for live/festival contexts.</div>
+    </div>
+  </div>
+
+  <!-- MOOD & VOICE PANEL -->
+  <div class="panel" id="panel-mood">
+    <div class="archetype-card">
+      <div class="archetype-title">The Wise Enjoyer</div>
+      <div class="archetype-desc">Not the seeker (still searching). Not the hero (striving). The figure in the Nine of Cups — someone who has found something real, knows it, and wants to share it generously. Satisfaction without smugness. Abundance without showing off.</div>
+    </div>
+
+    <div class="section-label">The brand is this</div>
+    <div class="mood-grid">
+      <span class="mood-pill positive">Contemplative</span>
+      <span class="mood-pill positive">Communal</span>
+      <span class="mood-pill positive">Psychedelic without ego</span>
+      <span class="mood-pill positive">Warm</span>
+      <span class="mood-pill positive">Textured</span>
+      <span class="mood-pill positive">Knowing</span>
+      <span class="mood-pill positive">Unhurried</span>
+      <span class="mood-pill positive">Layered</span>
+      <span class="mood-pill positive">Spiritual without dogma</span>
+      <span class="mood-pill positive">Present</span>
+      <span class="mood-pill positive">Wellington-rooted</span>
+      <span class="mood-pill positive">Global in influence</span>
+    </div>
+
+    <div class="section-label" style="margin-top:1.25rem">Not this brand</div>
+    <div class="mood-grid">
+      <span class="mood-pill negative">Aggressive</span>
+      <span class="mood-pill negative">Minimalist</span>
+      <span class="mood-pill negative">Corporate</span>
+      <span class="mood-pill negative">Cold</span>
+      <span class="mood-pill negative">Ironic without feeling</span>
+      <span class="mood-pill negative">Loudly digital</span>
+    </div>
+
+    <div class="section-label" style="margin-top:1.25rem">Spatial language</div>
+    <div class="spatial-rule">
+      <div class="spatial-dot"></div>
+      <div class="spatial-text">Intimate, not spectacular. Even festival photography is shot from within the crowd — never above it.</div>
+    </div>
+    <div class="spatial-rule">
+      <div class="spatial-dot"></div>
+      <div class="spatial-text">Perspective is always among, never above.</div>
+    </div>
+    <div class="spatial-rule">
+      <div class="spatial-dot"></div>
+      <div class="spatial-text">Compositions breathe. Objects placed with care — two cups on a mat is a still life.</div>
+    </div>
+    <div class="spatial-rule">
+      <div class="spatial-dot"></div>
+      <div class="spatial-text">Frame-within-frame / rectangle-within-square gives a printmaking quality. This brand thinks about the frame.</div>
+    </div>
+  </div>
+
+  <!-- TOKENS PANEL -->
+  <div class="panel" id="panel-tokens">
+    <div class="section-label">CSS custom properties</div>
+    <table class="token-table">
+      <thead>
+        <tr>
+          <th>Token</th>
+          <th>Hex</th>
+          <th>Use</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr onclick="copyHex('#3B1A6E','--color-primary-dark')" style="cursor:pointer">
+          <td class="token-name">--color-primary-dark</td>
+          <td><span class="token-chip" style="background:#3B1A6E"></span>#3B1A6E</td>
+          <td>Deep Violet</td>
+        </tr>
+        <tr onclick="copyHex('#8B3AC4','--color-primary-mid')" style="cursor:pointer">
+          <td class="token-name">--color-primary-mid</td>
+          <td><span class="token-chip" style="background:#8B3AC4"></span>#8B3AC4</td>
+          <td>Electric Amethyst</td>
+        </tr>
+        <tr onclick="copyHex('#C47EE8','--color-primary-light')" style="cursor:pointer">
+          <td class="token-name">--color-primary-light</td>
+          <td><span class="token-chip" style="background:#C47EE8"></span>#C47EE8</td>
+          <td>Bright Lavender</td>
+        </tr>
+        <tr onclick="copyHex('#D4AAEE','--color-primary-pale')" style="cursor:pointer">
+          <td class="token-name">--color-primary-pale</td>
+          <td><span class="token-chip" style="background:#D4AAEE"></span>#D4AAEE</td>
+          <td>Lilac Mist</td>
+        </tr>
+        <tr onclick="copyHex('#B03060','--color-accent-warm')" style="cursor:pointer">
+          <td class="token-name">--color-accent-warm</td>
+          <td><span class="token-chip" style="background:#B03060"></span>#B03060</td>
+          <td>Crimson Rose</td>
+        </tr>
+        <tr onclick="copyHex('#CC2E90','--color-accent-vivid')" style="cursor:pointer">
+          <td class="token-name">--color-accent-vivid</td>
+          <td><span class="token-chip" style="background:#CC2E90"></span>#CC2E90</td>
+          <td>Hot Magenta</td>
+        </tr>
+        <tr onclick="copyHex('#1A2A1E','--color-ground-dark')" style="cursor:pointer">
+          <td class="token-name">--color-ground-dark</td>
+          <td><span class="token-chip" style="background:#1A2A1E"></span>#1A2A1E</td>
+          <td>Dark Forest</td>
+        </tr>
+        <tr onclick="copyHex('#3A3530','--color-ground-mid')" style="cursor:pointer">
+          <td class="token-name">--color-ground-mid</td>
+          <td><span class="token-chip" style="background:#3A3530"></span>#3A3530</td>
+          <td>Warm Asphalt</td>
+        </tr>
+        <tr onclick="copyHex('#F0EBE0','--color-ground-light')" style="cursor:pointer">
+          <td class="token-name">--color-ground-light</td>
+          <td><span class="token-chip" style="background:#F0EBE0;border:0.5px solid #ccc"></span>#F0EBE0</td>
+          <td>Bone White</td>
+        </tr>
+        <tr onclick="copyHex('#7A8A1A','--color-accent-organic')" style="cursor:pointer">
+          <td class="token-name">--color-accent-organic</td>
+          <td><span class="token-chip" style="background:#7A8A1A"></span>#7A8A1A</td>
+          <td>Acid Moss</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="font-size:0.65rem;color:var(--color-text-tertiary);margin-top:8px">Tap any row to copy the hex value</div>
+
+    <div class="section-label" style="margin-top:1.5rem">Typography tokens</div>
+    <table class="token-table">
+      <thead>
+        <tr><th>Token</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="token-name">--font-display</td><td>'IM Fell English', serif</td></tr>
+        <tr><td class="token-name">--font-body</td><td>'DM Sans', sans-serif</td></tr>
+        <tr><td class="token-name">--font-weight-display</td><td>400 (regular or italic)</td></tr>
+        <tr><td class="token-name">--font-weight-body</td><td>300 (light)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="copied-toast" id="toast">Copied</div>
+
+<script>
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function copyHex(hex, name) {
+  navigator.clipboard.writeText(hex).then(() => {
+    const toast = document.getElementById('toast');
+    toast.textContent = 'Copied ' + hex;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1800);
+  }).catch(() => {
+    const toast = document.getElementById('toast');
+    toast.textContent = hex;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1800);
+  });
+}
+</script>
