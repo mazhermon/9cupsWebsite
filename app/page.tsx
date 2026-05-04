@@ -1,5 +1,6 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useAudioEngine } from '@/hooks/useAudioEngine'
 import { RELEASE } from '@/lib/track-config'
 import Wordmark from '@/components/Wordmark/Wordmark'
@@ -8,6 +9,10 @@ import TrackTitle from '@/components/TrackTitle/TrackTitle'
 import ListenOn from '@/components/ListenOn/ListenOn'
 import PlayControl from '@/components/PlayControl/PlayControl'
 import GrainOverlay from '@/components/GrainOverlay/GrainOverlay'
+
+// R3F's <Canvas> applies inline style attributes that don't match server-render output.
+// Mount client-only to avoid the hydration mismatch.
+const SharedCanvas = dynamic(() => import('@/components/Stage/SharedCanvas'), { ssr: false })
 
 const STEM_URLS = RELEASE.stems.map(s => s.url)
 
@@ -37,19 +42,11 @@ export default function Home() {
               loaded={tracks[i].loaded}
               onToggle={() => toggleMute(i)}
             >
-              {/* Placeholder content — replaced by R3F <View> in later tasks */}
-              <div
-                aria-hidden="true"
-                style={{
-                  position: 'absolute',
-                  inset: '20%',
-                  background: stem.color,
-                  opacity: 0.12,
-                  borderRadius: '50%',
-                }}
-              />
+              {/* The visualiser <View> goes here — added per-stem in later tasks */}
             </Cell>
           ))}
+
+          <SharedCanvas />
         </section>
 
         <div aria-live="polite">
