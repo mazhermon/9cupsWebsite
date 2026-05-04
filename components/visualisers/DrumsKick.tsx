@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { View, PerspectiveCamera } from '@react-three/drei'
 import * as THREE from 'three'
 import { bandEnergy, lerpToward, useReducedMotion } from '@/lib/audio-reactive'
 import { TransientDetector } from '@/lib/transient-detect'
@@ -12,19 +11,12 @@ interface DrumsKickProps {
   muted: boolean
   color: string
   playing: boolean
+  position?: [number, number, number]
+  scale?: number
 }
 
 const RING_COUNT = 5
 const RING_LIFETIME = 0.85
-
-export default function DrumsKick(props: DrumsKickProps) {
-  return (
-    <View className="cell-view" index={2}>
-      <PerspectiveCamera makeDefault position={[0, 0, 4.6]} fov={38} near={0.1} far={100} />
-      <DrumsKickScene {...props} />
-    </View>
-  )
-}
 
 // Vertex shader: pushes vertices radially outward by uKick (transient flash) + uHigh (snare/hat).
 // Uses simplex noise to vary displacement per vertex for organic shatter.
@@ -135,7 +127,7 @@ interface RingState {
   intensity: number
 }
 
-function DrumsKickScene({ analyser, muted, color, playing }: DrumsKickProps) {
+export default function DrumsKick({ analyser, muted, color, playing, position = [0, 0, 0], scale = 1 }: DrumsKickProps) {
   const groupRef = useRef<THREE.Group | null>(null)
   const dataRef = useRef<Uint8Array | null>(null)
   const reducedMotion = useReducedMotion()
@@ -320,7 +312,7 @@ function DrumsKickScene({ analyser, muted, color, playing }: DrumsKickProps) {
   })
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} position={position} scale={scale}>
       <mesh material={meshMaterial}>
         <icosahedronGeometry args={[0.95, 3]} />
       </mesh>

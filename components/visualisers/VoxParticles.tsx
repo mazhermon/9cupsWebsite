@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { View, OrthographicCamera } from '@react-three/drei'
 import * as THREE from 'three'
 import { bandEnergy, lerpToward, useReducedMotion } from '@/lib/audio-reactive'
 
@@ -11,23 +10,15 @@ interface VoxParticlesProps {
   muted: boolean
   color: string
   playing: boolean
+  position?: [number, number, number]
+  scale?: number
 }
 
 const PARTICLE_COUNT = 240
-// VOX is now a horizontal river of particles drifting left → right.
-// The orthographic camera maps -1..1 to the (very wide, short) view rect,
-// so particles span the full width along X and a thin band along Y.
-const FLOW_LENGTH = 2.4
-const FLOW_THICKNESS = 0.7
-
-export default function VoxParticles(props: VoxParticlesProps) {
-  return (
-    <View className="cell-view" index={3}>
-      <OrthographicCamera makeDefault manual position={[0, 0, 5]} zoom={1} left={-1} right={1} top={1} bottom={-1} near={0.1} far={100} />
-      <VoxParticlesScene {...props} />
-    </View>
-  )
-}
+// Horizontal river of particles drifting left → right. FLOW_LENGTH is the
+// world-space span — sized to fit the visible stage in the shared scene.
+const FLOW_LENGTH = 7.5
+const FLOW_THICKNESS = 1.0
 
 const vertexShader = /* glsl */ `
   attribute float aSize;
@@ -92,7 +83,7 @@ const fragmentShader = /* glsl */ `
   }
 `
 
-function VoxParticlesScene({ analyser, muted, color, playing }: VoxParticlesProps) {
+export default function VoxParticles({ analyser, muted, color, playing, position = [0, 0, 0], scale = 1 }: VoxParticlesProps) {
   const dataRef = useRef<Uint8Array | null>(null)
   const reducedMotion = useReducedMotion()
   const timeRef = useRef(0)
@@ -176,7 +167,7 @@ function VoxParticlesScene({ analyser, muted, color, playing }: VoxParticlesProp
   })
 
   return (
-    <points material={material}>
+    <points material={material} position={position} scale={scale}>
       <primitive attach="geometry" object={geometry} />
     </points>
   )

@@ -360,8 +360,9 @@ a {
   background: transparent;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  /* overflow: visible so each cell-view can extend past its cell into the stage. */
   overflow: visible;
+  /* Sit above the shared canvas so clicks land on the buttons, not the canvas. */
+  z-index: 1;
   transition: opacity var(--dur-base) var(--ease-out);
 }
 
@@ -410,49 +411,20 @@ a {
   letter-spacing: 0.05em;
 }
 
-/* Each cell-view is the WebGL track rect.
-   We let it extend beyond the cell so the visualiser has more space than
-   the click-target button — main especially must overflow its cell so its
-   peaks are not cropped. */
-.cell-view {
-  position: absolute;
-  inset: -8%;
-  pointer-events: none;
-}
-
-.cell--main .cell-view {
-  /* MAIN gets very generous overflow so peaks never hit a hard edge. */
-  inset: -25% -8%;
-}
-
-.cell--drums .cell-view {
-  /* DRUMS shares the upper row with MAIN — generous all round so the full sphere is visible. */
-  inset: -16% -8%;
-}
-
-.cell--vox .cell-view {
-  /* VOX is a horizontal strip — small vertical overflow to bleed into the rows above and below. */
-  inset: -25% -2%;
-}
-
-.cell--bass .cell-view {
-  /* Bass is the ground — extends upward into main row, full width. */
-  inset: -35% -2% -2% -2%;
-  z-index: 0;
-}
-
+/* Single shared canvas covers the whole stage area; the four HTML cells sit
+   on top of it as click targets. The canvas is non-interactive so click events
+   pass through to the cell buttons. */
 .shared-canvas {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 1;
+  z-index: 0;
 }
 
-/* R3F's inner wrapper sets pointer-events: auto inline — override it so cell buttons remain clickable. */
-.shared-canvas > div,
 .shared-canvas canvas {
   pointer-events: none !important;
 }
+
 
 /* ─── Track title block ─────────────────────────────────────────────────────── */
 .track-title-block {

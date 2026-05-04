@@ -1,6 +1,6 @@
 'use client'
 
-import { forwardRef, type ReactNode } from 'react'
+import { forwardRef } from 'react'
 import type { StemKey } from '@/lib/track-config'
 
 interface CellProps {
@@ -10,12 +10,10 @@ interface CellProps {
   muted: boolean
   loaded: boolean
   onToggle: () => void
-  /** Children render INSIDE the cell, behind the label, with pointer-events: none. */
-  children?: ReactNode
 }
 
 const Cell = forwardRef<HTMLButtonElement, CellProps>(function Cell(
-  { stemKey, label, color, muted, loaded, onToggle, children },
+  { stemKey, label, color, muted, loaded, onToggle },
   ref,
 ) {
   return (
@@ -30,7 +28,6 @@ const Cell = forwardRef<HTMLButtonElement, CellProps>(function Cell(
       aria-pressed={muted}
       style={{ '--shape-color': color } as React.CSSProperties}
     >
-      {children}
       <span className="cell-label" aria-hidden="true">
         {label}
         {muted && <span className="muted-suffix">muted</span>}

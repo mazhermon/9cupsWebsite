@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { View, PerspectiveCamera } from '@react-three/drei'
 import * as THREE from 'three'
 import { bandEnergy, lerpToward, useReducedMotion } from '@/lib/audio-reactive'
 
@@ -11,17 +10,8 @@ interface MainSphereProps {
   muted: boolean
   color: string
   playing: boolean
-}
-
-export default function MainSphere(props: MainSphereProps) {
-  return (
-    <View className="cell-view" index={4}>
-      <PerspectiveCamera makeDefault position={[0, 0, 6.4]} fov={32} near={0.1} far={100} />
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[2, 2, 3]} intensity={1.1} />
-      <MainSphereScene {...props} />
-    </View>
-  )
+  position?: [number, number, number]
+  scale?: number
 }
 
 const vertexShader = /* glsl */ `
@@ -115,7 +105,7 @@ const fragmentShader = /* glsl */ `
   }
 `
 
-function MainSphereScene({ analyser, muted, color, playing }: MainSphereProps) {
+export default function MainSphere({ analyser, muted, color, playing, position = [0, 0, 0], scale = 1 }: MainSphereProps) {
   const meshRef = useRef<THREE.Mesh | null>(null)
   const dataRef = useRef<Uint8Array | null>(null)
   const reducedMotion = useReducedMotion()
@@ -171,7 +161,7 @@ function MainSphereScene({ analyser, muted, color, playing }: MainSphereProps) {
   })
 
   return (
-    <mesh ref={meshRef} material={material}>
+    <mesh ref={meshRef} material={material} position={position} scale={scale}>
       <icosahedronGeometry args={[1, 12]} />
     </mesh>
   )

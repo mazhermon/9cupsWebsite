@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
-import { View, PerspectiveCamera } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { bandEnergy, lerpToward, useReducedMotion } from '@/lib/audio-reactive'
 import { TransientDetector } from '@/lib/transient-detect'
@@ -12,6 +11,8 @@ interface BassTerrainProps {
   muted: boolean
   color: string
   playing: boolean
+  position?: [number, number, number]
+  scale?: number
 }
 
 const SPARK_COUNT = 140
@@ -19,26 +20,6 @@ const PLANE_WIDTH = 9
 const PLANE_DEPTH = 5
 const PLANE_SEG_W = 60
 const PLANE_SEG_D = 32
-const GROUND_Y = -0.55
-
-export default function BassTerrain(props: BassTerrainProps) {
-  return (
-    <View className="cell-view" index={1}>
-      <PerspectiveCamera makeDefault position={[0, 0.95, 1.65]} fov={52} near={0.1} far={30} />
-      <CameraLookAt target={[0, -0.4, -1.0]} />
-      <BassTerrainScene {...props} />
-    </View>
-  )
-}
-
-function CameraLookAt({ target }: { target: [number, number, number] }) {
-  const camera = useThree((s) => s.camera)
-  useEffect(() => {
-    camera.lookAt(target[0], target[1], target[2])
-    camera.updateProjectionMatrix()
-  }, [camera, target])
-  return null
-}
 
 const terrainVertex = /* glsl */ `
   uniform float uTime;
@@ -181,7 +162,7 @@ const sparkFragment = /* glsl */ `
   }
 `
 
-function BassTerrainScene({ analyser, muted, color, playing }: BassTerrainProps) {
+export default function BassTerrain({ analyser, muted, color, playing, position = [0, 0, 0], scale = 1 }: BassTerrainProps) {
   const groupRef = useRef<THREE.Group | null>(null)
   const dataRef = useRef<Uint8Array | null>(null)
   const reducedMotion = useReducedMotion()
@@ -308,7 +289,7 @@ function BassTerrainScene({ analyser, muted, color, playing }: BassTerrainProps)
         const wx = (Math.random() - 0.5) * PLANE_WIDTH * 0.85
         const wz = (Math.random() - 0.5) * PLANE_DEPTH * 0.85
         positions[idx * 3] = wx
-        positions[idx * 3 + 1] = GROUND_Y + 0.05
+        positions[idx * 3 + 1] = 0.05
         positions[idx * 3 + 2] = wz
         const upBoost = 0.85 + Math.random() * 0.7 + high * 1.4 + (kicked ? 0.6 : 0)
         velocities[idx * 3] = (Math.random() - 0.5) * 0.6
@@ -326,11 +307,10 @@ function BassTerrainScene({ analyser, muted, color, playing }: BassTerrainProps)
   })
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} position={position} scale={scale}>
       <mesh
         material={terrainMaterial}
         rotation={[-Math.PI / 2 + 0.04, 0, 0]}
-        position={[0, GROUND_Y, 0]}
       >
         <planeGeometry args={[PLANE_WIDTH, PLANE_DEPTH, PLANE_SEG_W, PLANE_SEG_D]} />
       </mesh>
