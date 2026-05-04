@@ -258,6 +258,101 @@ a {
   .wordmark-ghost-3 { animation: none; }
 }
 
+/* ─── Stem shapes (audio-reactive geometric characters per stem) ──────────── */
+.stem-shapes {
+  display: flex;
+  justify-content: center;
+}
+
+.stem-shapes ul {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: clamp(var(--space-6), 4vw, var(--space-12));
+  padding: 0;
+  margin: 0;
+}
+
+.stem-shape {
+  /* Outer click target. Stays still — the transform from the rAF loop is
+     applied to the inner `.stem-shape-surface`, so the label below doesn't
+     scale or rotate with the audio-reactive geometry. */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 6px 22px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    filter var(--dur-fast) var(--ease-out);
+}
+
+.stem-shape-surface {
+  display: block;
+  width: clamp(46px, 7.5vw, 60px);
+  height: clamp(46px, 7.5vw, 60px);
+  transform-origin: center center;
+  /* `transform` is owned by the rAF loop in StemShapes.tsx — never animate it
+     from CSS. */
+  will-change: transform;
+}
+
+.stem-shape svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* `currentColor` is the stem hex from inline `style="color: …"` on the
+     button; the SVG fills inherit it. */
+  filter: drop-shadow(0 0 14px color-mix(in srgb, currentColor 28%, transparent));
+  transition: filter var(--dur-fast) var(--ease-out);
+}
+
+.stem-shape:hover svg {
+  filter: drop-shadow(0 0 22px color-mix(in srgb, currentColor 50%, transparent));
+}
+
+.stem-shape:focus-visible {
+  outline: none;
+}
+
+.stem-shape:focus-visible svg {
+  filter: drop-shadow(0 0 22px color-mix(in srgb, currentColor 70%, transparent));
+}
+
+.stem-shape:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.stem-shape:disabled svg {
+  filter: none;
+}
+
+.stem-shape[data-muted="true"] {
+  opacity: 0.32;
+}
+
+.stem-shape[data-muted="true"] svg {
+  filter: saturate(0.4);
+}
+
+.stem-shape-label {
+  font-family: var(--font-body-stack);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 /* ─── Stem toggle stamps (Brutalist Stamp · D from playground) ─────────────── */
 .stem-toggles {
   display: flex;

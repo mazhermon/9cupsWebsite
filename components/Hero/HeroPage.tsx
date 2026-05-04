@@ -10,7 +10,7 @@ import type { TrackState } from '@/hooks/useAudioEngine'
 import { RELEASE } from '@/lib/track-config'
 import type { Stem } from '@/lib/track-config'
 import Wordmark from '@/components/Wordmark/Wordmark'
-import StemToggles from '@/components/StemToggles/StemToggles'
+import StemShapes from '@/components/StemShapes/StemShapes'
 import TrackTitle from '@/components/TrackTitle/TrackTitle'
 import ListenOn from '@/components/ListenOn/ListenOn'
 import PlayControl from '@/components/PlayControl/PlayControl'
@@ -29,11 +29,9 @@ export interface VisualiserProps {
 interface HeroPageProps {
   /** Visualiser component to render in the stage area. */
   Visualiser: ComponentType<VisualiserProps>
-  /** Optional badge so the user knows which variant they're looking at. */
-  variantLabel?: string
 }
 
-export default function HeroPage({ Visualiser, variantLabel }: HeroPageProps) {
+export default function HeroPage({ Visualiser }: HeroPageProps) {
   const {
     tracks,
     allLoaded,
@@ -49,18 +47,14 @@ export default function HeroPage({ Visualiser, variantLabel }: HeroPageProps) {
     <>
       <a href="#stage" className="skip-link">Skip to mixer</a>
 
-      {variantLabel && (
-        <a href="/" className="variant-pill" aria-label={`Currently viewing ${variantLabel}. Back to index.`}>
-          {variantLabel} <span aria-hidden="true">·</span> back
-        </a>
-      )}
-
       <main className="hero" aria-label="9cups · Catching A Feeling">
         <Wordmark eyebrow={`${RELEASE.artist} presents`} />
 
-        <StemToggles
+        <StemShapes
           stems={RELEASE.stems}
           trackStates={tracks}
+          analysers={analysers}
+          playing={isPlaying}
           onToggle={toggleMute}
           disabled={!allLoaded}
         />
