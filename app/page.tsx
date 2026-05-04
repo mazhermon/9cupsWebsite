@@ -1,74 +1,63 @@
-'use client'
+// Temporary index for visualiser A/B/C comparison. Pick a candidate, then
+// the winning route's content takes over `/` and this index goes away.
 
-import dynamic from 'next/dynamic'
-import { useAudioEngine } from '@/hooks/useAudioEngine'
-import { RELEASE } from '@/lib/track-config'
+import Link from 'next/link'
 import Wordmark from '@/components/Wordmark/Wordmark'
-import StemToggles from '@/components/StemToggles/StemToggles'
-import TrackTitle from '@/components/TrackTitle/TrackTitle'
-import ListenOn from '@/components/ListenOn/ListenOn'
-import PlayControl from '@/components/PlayControl/PlayControl'
 import GrainOverlay from '@/components/GrainOverlay/GrainOverlay'
 
-// All R3F (Canvas + visualisers) lives behind one dynamic-import boundary so drei's
-// View tunnel singleton is shared. Splitting into multiple ssr:false imports
-// duplicates the module and breaks the tunnel.
-const StageR3F = dynamic(() => import('@/components/Stage/StageR3F'), { ssr: false })
+const VARIANTS = [
+  {
+    href: '/vis-a',
+    badge: 'A',
+    title: 'Unified terrain',
+    summary:
+      'Single wireframe topographic plane. All four stems feed one vertex shader: bass = rolling hills, drums = radial pulses, main = wave field, vox = fine ripples. One mesh, one render pass.',
+    feel: '3D · single hero',
+  },
+  {
+    href: '/vis-b',
+    badge: 'B',
+    title: 'HUD meters + 3D',
+    summary:
+      'Per-stem CSS meters do the precise audio-visual sync. Behind them, a simpler bass/kick wireframe terrain provides atmospheric depth. Splits the work: 2D for lock-tight sync, 3D for mood.',
+    feel: '2D + 3D · analytical',
+  },
+  {
+    href: '/vis-c',
+    badge: 'C',
+    title: 'Canvas2D landscape',
+    summary:
+      'Pure Canvas2D. Stack of contour lines waving with bass and mid; spectrum bars at the bottom. Built to run at 60fps on a 2018 phone. No WebGL.',
+    feel: '2D only · classic',
+  },
+]
 
-const STEM_URLS = RELEASE.stems.map(s => s.url)
-
-export default function Home() {
-  const { tracks, allLoaded, isPlaying, hasStarted, analysers, toggleMute, startPlayback, togglePlayback } =
-    useAudioEngine(STEM_URLS)
-
+export default function ChooseVariant() {
   return (
     <>
-      <a href="#stage" className="skip-link">Skip to mixer</a>
+      <main className="variant-index" aria-label="9cups visualiser variants">
+        <header className="variant-index-head">
+          <Wordmark eyebrow="catching a feeling · pick a build" />
+          <p className="variant-index-blurb">
+            Three variants of the visualiser, each behind its own route. Open them, play the
+            track, listen for sync, watch the framerate. Tell me which lands and we ship it.
+          </p>
+        </header>
 
-      <main className="hero" aria-label="9cups · Catching A Feeling">
-        <Wordmark eyebrow={`${RELEASE.artist} presents`} />
-
-        <StemToggles
-          stems={RELEASE.stems}
-          trackStates={tracks}
-          onToggle={toggleMute}
-          disabled={!allLoaded}
-        />
-
-        <StageR3F
-          stems={RELEASE.stems}
-          trackStates={tracks}
-          analysers={analysers}
-          onToggle={toggleMute}
-          playing={isPlaying}
-        />
-
-        <div aria-live="polite">
-          {hasStarted ? (
-            <TrackTitle
-              title={RELEASE.title}
-              artist={RELEASE.artist}
-              year={RELEASE.year}
-            />
-          ) : (
-            <button
-              type="button"
-              className="cta-press-play"
-              onClick={startPlayback}
-              disabled={!allLoaded}
-              aria-label="Start playback"
-            >
-              {allLoaded ? 'Press play to enter' : 'Loading the room…'}
-            </button>
-          )}
-        </div>
-
-        <ListenOn platforms={RELEASE.platforms} />
+        <ul className="variant-grid">
+          {VARIANTS.map((v) => (
+            <li key={v.href}>
+              <Link href={v.href} className="variant-card">
+                <span className="variant-badge" aria-hidden="true">{v.badge}</span>
+                <h2 className="variant-title">{v.title}</h2>
+                <p className="variant-feel">{v.feel}</p>
+                <p className="variant-summary">{v.summary}</p>
+                <span className="variant-cta" aria-hidden="true">Open →</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </main>
-
-      {hasStarted && (
-        <PlayControl isPlaying={isPlaying} onToggle={togglePlayback} />
-      )}
 
       <GrainOverlay />
     </>
