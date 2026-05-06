@@ -1,5 +1,6 @@
-// Temporary index for image-treatment A–E comparison. Once you pick a
-// variant the chosen route's content takes over `/` and this index goes away.
+// Temporary index for the C / C2 / C3 image-treatment comparison. Once a
+// variant is picked, that route's content takes over `/` and this index
+// goes away.
 
 import Link from 'next/link'
 import Wordmark from '@/components/Wordmark/Wordmark'
@@ -7,56 +8,40 @@ import GrainOverlay from '@/components/GrainOverlay/GrainOverlay'
 
 const VARIANTS = [
   {
-    href: '/img-a',
-    badge: 'A',
-    title: 'Sky portrait',
-    feel: 'Backdrop · duotone',
-    summary:
-      'BW headshot fades in as a duotone-purple backdrop in the upper half, behind the wordmark; album cover slips into the TrackTitle once playback starts. Artist (sky) → wordmark (horizon) → terrain (ground).',
-  },
-  {
-    href: '/img-b',
-    badge: 'B',
-    title: 'Press-play preview',
-    feel: 'Foreground · cover-as-button',
-    summary:
-      'Album cover replaces "Press Play to Enter" — clickable square with a play glyph overlay. Tiny BW avatar joins the eyebrow as a persistent identity mark. Cover stays in TrackTitle after start.',
-  },
-  {
     href: '/img-c',
     badge: 'C',
-    title: 'Editorial split',
-    feel: '2-column · magazine',
+    title: 'Editorial · BW',
+    feel: 'Original · monochrome',
     summary:
-      'Hero becomes a 50/50: BW headshot fills the left, wordmark + toggles + cover live on the right with the terrain underneath. Less hero, more release-page.',
+      'BW headshot fills the left column full-bleed; wordmark + toggles + cover + listen-on live on the right with the terrain underneath. Untouched source — clean, journalistic.',
   },
   {
-    href: '/img-d',
-    badge: 'D',
-    title: 'Glitch reveal',
-    feel: 'Audio-sync · transient flash',
+    href: '/img-c2',
+    badge: 'C2',
+    title: 'Editorial · cover',
+    feel: 'Album cover replaces portrait',
     summary:
-      'BW portrait is invisible until a kick fires — each transient flashes the headshot at low opacity with a small translate jitter, then fades. Surprising, beat-locked, possibly aggressive.',
+      'Same layout, but the album cover takes the left column. Square cover crops via object-fit to fill the tall column — its leafy-purple texture tolerates the crop. The cover IS the artist statement here.',
   },
   {
-    href: '/img-e',
-    badge: 'E',
-    title: 'Watermark',
-    feel: 'Subtle · always present',
+    href: '/img-c3',
+    badge: 'C3',
+    title: 'Editorial · duotone',
+    feel: 'BW colourised · brand palette',
     summary:
-      'BW headshot sits as a 12% opacity background behind everything (including the terrain). No filter, no animation. Quiet artist presence without competing for attention.',
+      'BW headshot run through an SVG feColorMatrix duotone: blacks map to primary-dark (#3B1A6E), highlights to accent-vivid (#CC2E90). Smooth purple-to-magenta gradient mapping, brand-locked, modern CSS.',
   },
 ]
 
 export default function ChooseImgVariant() {
   return (
     <>
-      <main className="variant-index" aria-label="9cups image-treatment variants">
+      <main className="variant-index" aria-label="9cups · editorial variants">
         <header className="variant-index-head">
-          <Wordmark eyebrow="catching a feeling · pick an image treatment" />
+          <Wordmark eyebrow="catching a feeling · pick the editorial treatment" />
           <p className="variant-index-blurb">
-            Five ways to bring the album cover and the artist photo into the page.
-            Open each, hit Press Play, watch the layered intro. Tell me which lands.
+            Three takes on the editorial split. Open each, hit Press Play, watch the
+            layered intro fire. Tell me which lands and the rest goes away.
           </p>
         </header>
 
