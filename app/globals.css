@@ -825,7 +825,13 @@ a {
 .editorial-portrait-img {
   object-fit: cover;
   object-position: center 35%;
-  filter: contrast(1.04) brightness(0.92);
+  /* Note: per-variant inline `filter` (set on the <Image> by EditorialHero)
+     wins over this base contrast/brightness adjustment. Keep this lean. */
+  filter: contrast(1.02) brightness(0.96);
+}
+/* Optional second image layered on top via mix-blend-mode (variant C4). */
+.editorial-portrait-overlay {
+  pointer-events: none;
 }
 .editorial-right {
   position: relative;

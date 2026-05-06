@@ -38,6 +38,15 @@ export interface EditorialHeroProps {
   imageFilter?: string
   /** Optional SVG filter definitions to embed once at page load. */
   svgFilters?: ReactNode
+
+  // ── Optional second image overlaid on the first via mix-blend-mode.
+  // When set, a second <Image> is layered on top of the primary, blended
+  // using the supplied mode at the supplied opacity.
+  overlayImageSrc?: string
+  overlayBlendMode?: 'multiply' | 'screen' | 'overlay' | 'soft-light' | 'hard-light' | 'color' | 'hue' | 'lighten' | 'darken'
+  overlayOpacity?: number
+  overlayObjectPosition?: string
+  overlayFilter?: string
 }
 
 export default function EditorialHero({
@@ -46,6 +55,11 @@ export default function EditorialHero({
   imageObjectPosition = 'center 35%',
   imageFilter,
   svgFilters,
+  overlayImageSrc,
+  overlayBlendMode = 'overlay',
+  overlayOpacity = 0.7,
+  overlayObjectPosition = 'center center',
+  overlayFilter,
 }: EditorialHeroProps) {
   const {
     tracks,
@@ -83,6 +97,22 @@ export default function EditorialHero({
             }}
             priority
           />
+          {overlayImageSrc && (
+            <Image
+              src={overlayImageSrc}
+              alt=""
+              fill
+              sizes="50vw"
+              aria-hidden="true"
+              className="editorial-portrait-img editorial-portrait-overlay"
+              style={{
+                objectPosition: overlayObjectPosition,
+                mixBlendMode: overlayBlendMode,
+                opacity: overlayOpacity,
+                ...(overlayFilter ? { filter: overlayFilter } : {}),
+              }}
+            />
+          )}
         </div>
 
         <div className="editorial-right">
