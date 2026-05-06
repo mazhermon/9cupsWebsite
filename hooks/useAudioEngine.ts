@@ -15,9 +15,14 @@ export interface AudioEngineReturn {
   allLoaded: boolean
   isPlaying: boolean
   hasStarted: boolean
+  /** True while the post-play onboarding sequence is auto-unmuting stems. */
+  isOnboarding: boolean
   analysers: (AnalyserNode | null)[]
   toggleMute: (id: number) => void
-  startPlayback: () => void
+  /** Start playback with a staggered onboarding: all stems start silent, then
+   *  unmute one at a time so the user sees the buttons activate. Any user
+   *  toggle during the sequence cancels the remaining auto-on steps. */
+  startPlaybackOnboarded: (stepMs?: number) => void
   togglePlayback: () => void
 }
 
@@ -32,6 +37,11 @@ export function useAudioEngine(trackUrls: string[]): AudioEngineReturn {
   const startTimeRef = useRef<number>(0)
   const offsetRef = useRef<number>(0)
 
+  // Onboarding sequence — pending unmute timers + an "active" flag the
+  // toggleMute handler reads to decide whether to cancel remaining steps.
+  const onboardingTimersRef = useRef<number[]>([])
+  const onboardingActiveRef = useRef(false)
+
   const [tracks, setTracks] = useState<TrackState[]>(
     trackUrls.map((_, i) => ({
       id: i,
@@ -44,6 +54,7 @@ export function useAudioEngine(trackUrls: string[]): AudioEngineReturn {
   const [allLoaded, setAllLoaded] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
+  const [isOnboarding, setIsOnboarding] = useState(false)
 
   const updateTrack = useCallback((id: number, update: Partial<TrackState>) => {
     setTracks(prev => prev.map(t => (t.id === id ? { ...t, ...update } : t)))
@@ -132,13 +143,27 @@ export function useAudioEngine(trackUrls: string[]): AudioEngineReturn {
     })
   }, [])
 
-  const startPlayback = useCallback(() => {
+  const cancelOnboarding = useCallback(() => {
+    if (!onboardingActiveRef.current) return
+    onboardingActiveRef.current = false
+    onboardingTimersRef.current.forEach(t => window.clearTimeout(t))
+    onboardingTimersRef.current = []
+    setIsOnboarding(false)
+  }, [])
+
+  const startPlaybackOnboarded = useCallback((stepMs = 700) => {
     const ctx = audioCtxRef.current
     if (!ctx || !allLoaded) return
 
     buildGraph()
 
-    // Resume context if suspended (autoplay policy)
+    // Mute every gain BEFORE audio starts so the first frame is silent.
+    // Direct .value assignment (not setTargetAtTime) — we want instant silence.
+    gainsRef.current.forEach(g => {
+      if (g) g.gain.value = 0
+    })
+    setTracks(prev => prev.map(t => ({ ...t, muted: true })))
+
     ctx.resume().then(() => {
       const startAt = ctx.currentTime
       startTimeRef.current = startAt
@@ -150,6 +175,32 @@ export function useAudioEngine(trackUrls: string[]): AudioEngineReturn {
 
       setIsPlaying(true)
       setHasStarted(true)
+
+      // Kick off the onboarding sequence.
+      onboardingActiveRef.current = true
+      setIsOnboarding(true)
+
+      const numStems = sourcesRef.current.length
+      for (let i = 0; i < numStems; i++) {
+        const stemId = i
+        const isLast = i === numStems - 1
+        const timer = window.setTimeout(() => {
+          // User canceled (clicked a stamp) — bail out without touching this stem.
+          if (!onboardingActiveRef.current) return
+
+          const gain = gainsRef.current[stemId]
+          if (gain) {
+            gain.gain.setTargetAtTime(1, gain.context.currentTime, 0.06)
+          }
+          setTracks(prev => prev.map(t => (t.id === stemId ? { ...t, muted: false } : t)))
+
+          if (isLast) {
+            onboardingActiveRef.current = false
+            setIsOnboarding(false)
+          }
+        }, stepMs * (i + 1))
+        onboardingTimersRef.current.push(timer)
+      }
     })
   }, [allLoaded, buildGraph])
 
@@ -158,14 +209,21 @@ export function useAudioEngine(trackUrls: string[]): AudioEngineReturn {
     if (!ctx) return
 
     if (isPlaying) {
+      // Pausing during onboarding — cancel the sequence; resume restores the
+      // suspended context but doesn't restart the staggered unmutes.
+      if (onboardingActiveRef.current) cancelOnboarding()
       offsetRef.current = ctx.currentTime - startTimeRef.current
       ctx.suspend().then(() => setIsPlaying(false))
     } else {
       ctx.resume().then(() => setIsPlaying(true))
     }
-  }, [isPlaying])
+  }, [isPlaying, cancelOnboarding])
 
   const toggleMute = useCallback((id: number) => {
+    // Any manual toggle during onboarding hands full control to the user
+    // and skips any remaining auto-on steps.
+    if (onboardingActiveRef.current) cancelOnboarding()
+
     const gain = gainsRef.current[id]
     if (!gain) return
 
@@ -177,11 +235,12 @@ export function useAudioEngine(trackUrls: string[]): AudioEngineReturn {
         return { ...t, muted: nextMuted }
       })
     )
-  }, [])
+  }, [cancelOnboarding])
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      onboardingTimersRef.current.forEach(t => window.clearTimeout(t))
       sourcesRef.current.forEach(s => {
         try { s?.stop() } catch { /* already stopped */ }
       })
@@ -194,9 +253,10 @@ export function useAudioEngine(trackUrls: string[]): AudioEngineReturn {
     allLoaded,
     isPlaying,
     hasStarted,
+    isOnboarding,
     analysers: analysersRef.current,
     toggleMute,
-    startPlayback,
+    startPlaybackOnboarded,
     togglePlayback,
   }
 }

@@ -22,12 +22,24 @@
 //   Mute a stem → its multiplier lerps to 0 → its layer disappears.
 
 import { useEffect, useRef, useState } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { PerspectiveCamera } from '@react-three/drei'
 import * as THREE from 'three'
 import type { VisualiserProps } from '@/components/Hero/HeroPage'
 import { bandEnergy, lerpToward, useReducedMotion } from '@/lib/audio-reactive'
 import { TransientDetector } from '@/lib/transient-detect'
+
+// Force the active camera to look at a fixed world target — drei's
+// PerspectiveCamera doesn't expose a lookAt prop, so we apply it via R3F's
+// camera object once on mount and on target change.
+function CameraLookAt({ target }: { target: [number, number, number] }) {
+  const camera = useThree((s) => s.camera)
+  useEffect(() => {
+    camera.lookAt(target[0], target[1], target[2])
+    camera.updateProjectionMatrix()
+  }, [camera, target])
+  return null
+}
 
 export interface TerrainProps extends VisualiserProps {
   /** Hex colour for the wireframe lines. Default is the brand mid-purple. */
@@ -190,7 +202,10 @@ export default function Terrain(props: TerrainProps) {
         frameloop="always"
         style={{ width: '100%', height: '100%' }}
       >
-        <PerspectiveCamera makeDefault position={[0, 3.6, 7.2]} fov={42} near={0.1} far={60} />
+        {/* Camera tuned for the short-wide hero canvas (100vw × 50vh).
+            Lower Y + wider fov keeps the wireframe filling the viewport. */}
+        <PerspectiveCamera makeDefault position={[0, 2.2, 5.8]} fov={52} near={0.1} far={60} />
+        <CameraLookAt target={[0, -0.6, 0]} />
         <TerrainMesh {...props} />
       </Canvas>
     </section>

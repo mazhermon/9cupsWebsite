@@ -155,8 +155,14 @@ a {
 }
 
 .terrain {
+  /* Sits in the bottom half of the viewport — the wireframe landscape that
+     the wordmark anchors over. Empty space above the terrain stays dark, so
+     the hero reads as "sky → horizon → ground". */
   position: absolute;
-  inset: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50vh;
   z-index: 0;
   pointer-events: none;
 }
@@ -280,13 +286,18 @@ a {
 }
 
 .stem-stamp {
+  /* Off-white background with charcoal text for AA contrast on the ON / OFF
+     state regardless of stem hue. The stem colour comes back via a thin
+     left-edge accent bar so each stamp is still visually distinct. */
   display: inline-flex;
   align-items: baseline;
   gap: 0.7rem;
-  padding: 0.55rem 1.05rem 0.55rem 0.95rem;
+  padding: 0.55rem 1.05rem 0.55rem 1.15rem;
   /* The corner cut on the right edge gives this its ticker-tape silhouette. */
   clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
-  background: var(--stem-color);
+  /* Stem colour as a 6px left bar; rest of the stamp is light surface. */
+  background:
+    linear-gradient(to right, var(--stem-color) 0 6px, var(--color-ground-light) 6px 100%);
   color: var(--color-surface-deeper);
   border: 0;
   border-radius: 0;
@@ -297,17 +308,16 @@ a {
   text-transform: uppercase;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  /* Filter-based outline so we can keep the clip-path; box-shadow alone gets clipped. */
-  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--stem-color) 35%, transparent));
+  /* Soft drop-shadow tinted to the stem colour — keeps the brand link without
+     hurting legibility. */
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--stem-color) 28%, transparent));
   transition:
-    background var(--dur-fast) var(--ease-out),
-    color var(--dur-fast) var(--ease-out),
     filter var(--dur-fast) var(--ease-out),
     opacity var(--dur-fast) var(--ease-out);
 }
 
 .stem-stamp:hover {
-  filter: drop-shadow(0 0 20px color-mix(in srgb, var(--stem-color) 55%, transparent));
+  filter: drop-shadow(0 0 20px color-mix(in srgb, var(--stem-color) 50%, transparent));
 }
 
 .stem-stamp:focus-visible {
@@ -322,17 +332,19 @@ a {
   filter: none;
 }
 
-/* Muted: the stamp fades and desaturates — clip-path makes outline tricks unreliable
-   on the diagonal cut, so opacity + saturate is the cleaner read. */
+/* Muted: stamp fades — the off-white surface stays legible at low alpha,
+   no need for saturate() tricks like the original colour version needed. */
 .stem-stamp[data-muted="true"] {
-  opacity: 0.34;
-  filter: saturate(0.5);
+  opacity: 0.4;
+  filter: none;
 }
 
 .stem-stamp-state {
   font-size: 0.62rem;
   letter-spacing: 0.18em;
-  opacity: 0.85;
+  /* High-contrast state label — slightly faded vs the stem name so the name
+     reads as the primary, the ON/OFF as the secondary. */
+  color: color-mix(in srgb, var(--color-surface-deeper) 70%, transparent);
   /* Small shift so ON/OFF doesn't crowd the corner cut. */
   margin-right: 0.2rem;
 }

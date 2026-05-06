@@ -40,7 +40,7 @@ export default function HeroPage({ Visualiser }: HeroPageProps) {
     hasStarted,
     analysers,
     toggleMute,
-    startPlayback,
+    startPlaybackOnboarded,
     togglePlayback,
   } = useAudioEngine(STEM_URLS)
 
@@ -88,7 +88,7 @@ export default function HeroPage({ Visualiser }: HeroPageProps) {
               <button
                 type="button"
                 className="cta-press-play"
-                onClick={startPlayback}
+                onClick={() => startPlaybackOnboarded()}
                 disabled={!allLoaded}
                 aria-label="Start playback"
               >
