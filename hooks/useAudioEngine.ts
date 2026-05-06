@@ -21,8 +21,13 @@ export interface AudioEngineReturn {
   toggleMute: (id: number) => void
   /** Start playback with a staggered onboarding: all stems start silent, then
    *  unmute one at a time so the user sees the buttons activate. Any user
-   *  toggle during the sequence cancels the remaining auto-on steps. */
-  startPlaybackOnboarded: (stepMs?: number) => void
+   *  toggle during the sequence cancels the remaining auto-on steps.
+   *
+   *  - `order` is the sequence of stem indices to unmute. The first index
+   *    fires immediately (t=0); each subsequent index fires `stepMs` later.
+   *  - Default order is [0, 1, 2, 3] at 700ms intervals.
+   */
+  startPlaybackOnboarded: (opts?: { stepMs?: number; order?: number[] }) => void
   togglePlayback: () => void
 }
 
@@ -151,9 +156,13 @@ export function useAudioEngine(trackUrls: string[]): AudioEngineReturn {
     setIsOnboarding(false)
   }, [])
 
-  const startPlaybackOnboarded = useCallback((stepMs = 700) => {
+  const startPlaybackOnboarded = useCallback((opts?: { stepMs?: number; order?: number[] }) => {
     const ctx = audioCtxRef.current
     if (!ctx || !allLoaded) return
+
+    const numStems = sourcesRef.current.length || trackUrls.length
+    const stepMs = opts?.stepMs ?? 700
+    const order = opts?.order ?? Array.from({ length: numStems }, (_, i) => i)
 
     buildGraph()
 
@@ -176,14 +185,15 @@ export function useAudioEngine(trackUrls: string[]): AudioEngineReturn {
       setIsPlaying(true)
       setHasStarted(true)
 
-      // Kick off the onboarding sequence.
+      // Kick off the onboarding sequence. First entry fires at t=0 (immediate
+      // unmute on resume), rest at i * stepMs after the first.
       onboardingActiveRef.current = true
       setIsOnboarding(true)
 
-      const numStems = sourcesRef.current.length
-      for (let i = 0; i < numStems; i++) {
-        const stemId = i
-        const isLast = i === numStems - 1
+      for (let i = 0; i < order.length; i++) {
+        const stemId = order[i]
+        const isLast = i === order.length - 1
+        const delayMs = i * stepMs
         const timer = window.setTimeout(() => {
           // User canceled (clicked a stamp) — bail out without touching this stem.
           if (!onboardingActiveRef.current) return
@@ -198,11 +208,11 @@ export function useAudioEngine(trackUrls: string[]): AudioEngineReturn {
             onboardingActiveRef.current = false
             setIsOnboarding(false)
           }
-        }, stepMs * (i + 1))
+        }, delayMs)
         onboardingTimersRef.current.push(timer)
       }
     })
-  }, [allLoaded, buildGraph])
+  }, [allLoaded, buildGraph, trackUrls.length])
 
   const togglePlayback = useCallback(() => {
     const ctx = audioCtxRef.current

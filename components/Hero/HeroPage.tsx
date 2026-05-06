@@ -19,6 +19,16 @@ import GrainOverlay from '@/components/GrainOverlay/GrainOverlay'
 const STEM_URLS = RELEASE.stems.map(s => s.url)
 const DRUMS_INDEX = RELEASE.stems.findIndex(s => s.key === 'drums')
 
+// Onboarding sequence: drums first, then layer in the rhythm section, the
+// core, then the topline at 4-second intervals.
+const ONBOARDING_ORDER = [
+  RELEASE.stems.findIndex(s => s.key === 'drums'),
+  RELEASE.stems.findIndex(s => s.key === 'bass'),
+  RELEASE.stems.findIndex(s => s.key === 'main'),
+  RELEASE.stems.findIndex(s => s.key === 'vox'),
+].filter(i => i >= 0)
+const ONBOARDING_STEP_MS = 4000
+
 export interface VisualiserProps {
   stems: Stem[]
   trackStates: TrackState[]
@@ -88,7 +98,7 @@ export default function HeroPage({ Visualiser }: HeroPageProps) {
               <button
                 type="button"
                 className="cta-press-play"
-                onClick={() => startPlaybackOnboarded()}
+                onClick={() => startPlaybackOnboarded({ stepMs: ONBOARDING_STEP_MS, order: ONBOARDING_ORDER })}
                 disabled={!allLoaded}
                 aria-label="Start playback"
               >
