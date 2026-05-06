@@ -1,31 +1,44 @@
-// Static mocks of the wordmark in 8 display fonts. Each card is a small
-// reproduction of the hero (terrain stripe + wordmark + eyebrow) using a
-// different font for "9cups". Pure CSS — no audio engine, no WebGL, just
-// fonts + a static gradient stand-in for the terrain so layout proportions
-// read accurately.
+// Static mocks of the wordmark in 10 display fonts.
+//
+// Curated against the taste-skill rubric:
+//   - Serifs ARE allowed because 9cups is creative/editorial (the rule
+//     bans serifs only for dashboard/software UIs).
+//   - "Inter" and other generic AI-default sans are excluded.
+//   - Modern variable fonts preferred for richer character at display
+//     sizes; carefully chosen static picks are kept where they bring
+//     a sharper personality (Anton, Caprasimo).
+//   - No cartoon-display picks (Bagel Fat / Bowlby / Frijole) — the
+//     previous list was too uniformly playful; this set spans
+//     editorial → poster → industrial → digital.
+//
+// Caprasimo (current) stays in slot 1 as the reference baseline.
 
 import {
-  Bagel_Fat_One,
-  Bowlby_One,
-  Bungee_Inline,
-  Frijole,
-  Major_Mono_Display,
-  Knewave,
-  Ultra,
-  DM_Serif_Display,
   Caprasimo,
+  Fraunces,
+  Newsreader,
+  Bricolage_Grotesque,
+  Honk,
+  Workbench,
+  Anton,
+  Big_Shoulders,
+  Climate_Crisis,
+  Sixtyfour,
 } from 'next/font/google'
 
-const bagelFatOne = Bagel_Fat_One({ subsets: ['latin'], weight: '400', variable: '--font-bagel' })
-const bowlbyOne = Bowlby_One({ subsets: ['latin'], weight: '400', variable: '--font-bowlby' })
-const bungeeInline = Bungee_Inline({ subsets: ['latin'], weight: '400', variable: '--font-bungee' })
-const frijole = Frijole({ subsets: ['latin'], weight: '400', variable: '--font-frijole' })
-const majorMono = Major_Mono_Display({ subsets: ['latin'], weight: '400', variable: '--font-mono' })
-const knewave = Knewave({ subsets: ['latin'], weight: '400', variable: '--font-knewave' })
-const ultra = Ultra({ subsets: ['latin'], weight: '400', variable: '--font-ultra' })
-const dmSerif = DM_Serif_Display({ subsets: ['latin'], weight: '400', variable: '--font-dmserif' })
-// Reference (current) — included as a comparison baseline.
+// Static fonts — explicit weight required.
 const caprasimo = Caprasimo({ subsets: ['latin'], weight: '400', variable: '--font-caprasimo' })
+const anton = Anton({ subsets: ['latin'], weight: '400', variable: '--font-anton' })
+
+// Variable fonts — no `weight` (covered by the wght axis); some need explicit axes.
+const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces' })
+const newsreader = Newsreader({ subsets: ['latin'], variable: '--font-newsreader' })
+const bricolage = Bricolage_Grotesque({ subsets: ['latin'], variable: '--font-bricolage' })
+const honk = Honk({ subsets: ['latin'], variable: '--font-honk' })
+const workbench = Workbench({ subsets: ['latin'], variable: '--font-workbench' })
+const bigShoulders = Big_Shoulders({ subsets: ['latin'], variable: '--font-bigshoulders' })
+const climateCrisis = Climate_Crisis({ subsets: ['latin'], axes: ['YEAR'], variable: '--font-climate' })
+const sixtyfour = Sixtyfour({ subsets: ['latin'], axes: ['BLED', 'SCAN'], variable: '--font-sixtyfour' })
 
 interface FontOption {
   className: string
@@ -35,15 +48,16 @@ interface FontOption {
 }
 
 const FONT_OPTIONS: FontOption[] = [
-  { className: caprasimo.variable,      variable: '--font-caprasimo', name: 'Caprasimo',          feel: 'current · playful display serif' },
-  { className: bagelFatOne.variable,    variable: '--font-bagel',     name: 'Bagel Fat One',      feel: 'chunky soft serif' },
-  { className: bowlbyOne.variable,      variable: '--font-bowlby',    name: 'Bowlby One',         feel: 'bold display, retro poster' },
-  { className: bungeeInline.variable,   variable: '--font-bungee',    name: 'Bungee Inline',      feel: 'punk graphic, outlined' },
-  { className: frijole.variable,        variable: '--font-frijole',   name: 'Frijole',            feel: 'woodtype / saloon poster' },
-  { className: majorMono.variable,      variable: '--font-mono',      name: 'Major Mono Display', feel: 'futuristic monospace' },
-  { className: knewave.variable,        variable: '--font-knewave',   name: 'Knewave',            feel: 'chunky brush, hand-drawn' },
-  { className: ultra.variable,          variable: '--font-ultra',     name: 'Ultra',              feel: 'classic slab serif' },
-  { className: dmSerif.variable,        variable: '--font-dmserif',   name: 'DM Serif Display',   feel: 'refined editorial serif' },
+  { className: caprasimo.variable,      variable: '--font-caprasimo',     name: 'Caprasimo',          feel: 'current · playful display serif' },
+  { className: fraunces.variable,       variable: '--font-fraunces',      name: 'Fraunces',           feel: 'variable · expressive editorial serif (opsz · SOFT · WONK)' },
+  { className: newsreader.variable,     variable: '--font-newsreader',    name: 'Newsreader',         feel: 'variable · refined editorial serif' },
+  { className: bricolage.variable,      variable: '--font-bricolage',     name: 'Bricolage Grotesque', feel: 'variable · geometric grotesque, warm' },
+  { className: honk.variable,           variable: '--font-honk',          name: 'Honk',               feel: 'variable · 3D chromatic display' },
+  { className: workbench.variable,      variable: '--font-workbench',     name: 'Workbench',          feel: 'variable · industrial serif w/ BLED axis' },
+  { className: anton.variable,          variable: '--font-anton',         name: 'Anton',              feel: 'static · heavy condensed sans · poster' },
+  { className: bigShoulders.variable,   variable: '--font-bigshoulders',  name: 'Big Shoulders',      feel: 'variable · brutalist condensed' },
+  { className: climateCrisis.variable,  variable: '--font-climate',       name: 'Climate Crisis',     feel: 'variable · YEAR axis statement' },
+  { className: sixtyfour.variable,      variable: '--font-sixtyfour',     name: 'Sixtyfour',          feel: 'variable · pixel grid, retro digital' },
 ]
 
 export const metadata = {
@@ -51,8 +65,6 @@ export const metadata = {
 }
 
 export default function FontsPage() {
-  // Concat all font variables onto the wrapper so each card can reference
-  // its custom property via `font-family: var(--font-X)`.
   const allFontVars = FONT_OPTIONS.map(o => o.className).join(' ')
 
   return (
@@ -62,8 +74,9 @@ export default function FontsPage() {
       <header className="fonts-head">
         <h1 className="fonts-title">9cups · font picks</h1>
         <p className="fonts-blurb">
-          Nine display fonts on the wordmark, each in the live page composition (eyebrow → wordmark → terrain
-          stripe). Static — no audio. Tell me which lands.
+          Ten display fonts on the wordmark — Caprasimo first as the current baseline, then nine
+          alternatives picked for distinct character at large display sizes. Mix of editorial
+          serifs, modern grotesques, condensed posters, and digital/variable curiosities.
         </p>
       </header>
 

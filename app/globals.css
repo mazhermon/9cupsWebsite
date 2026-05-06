@@ -896,13 +896,16 @@ a {
   }
 }
 
-/* ─── C4 hover overlay (CSS-only) ────────────────────────────────────── */
+/* ─── C4 hover overlay (CSS-only) ──────────────────────────────────────
+   Reversed: cover sits at FULL blend by default; hovering pulls it back
+   so the portrait shows through. Reads as "peek behind the cover" — the
+   artist surfaces only when the user reaches in. */
 .hover-overlay {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.35;
-  filter: saturate(1);
+  opacity: 0.9;
+  filter: saturate(1.45);
   mix-blend-mode: overlay;
   transition:
     opacity 0.55s var(--ease-out),
@@ -914,8 +917,8 @@ a {
 }
 .editorial-portrait:hover .hover-overlay,
 .editorial-portrait:focus-within .hover-overlay {
-  opacity: 0.9;
-  filter: saturate(1.45);
+  opacity: 0.35;
+  filter: saturate(1);
 }
 
 /* ─── C4 spotlight overlay (cursor-tracked radial mask) ──────────────── */
