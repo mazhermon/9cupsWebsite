@@ -142,19 +142,48 @@ a {
   }
 }
 
-/* ─── Hero (triptych) ──────────────────────────────────────────────────────── */
+/* ─── Hero ─────────────────────────────────────────────────────────────────
+   The Terrain visualiser fills the hero as a non-interactive background
+   (.terrain · position: absolute, z-index: 0). All foreground content lives
+   inside .hero-stack which sits above via z-index. */
 .hero {
   position: relative;
   width: 100vw;
   height: 100dvh;
-  display: grid;
-  /* Wordmark · stem toggles · stage · live region · listen-on */
-  grid-template-rows: auto auto 1fr auto auto;
-  align-items: stretch;
-  justify-items: stretch;
-  gap: var(--space-3);
-  padding: clamp(var(--space-4), 3vw, var(--space-8)) clamp(var(--space-4), 4vw, var(--space-12));
   isolation: isolate;
+  overflow: hidden;
+}
+
+.terrain {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero-stack {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: grid;
+  /* Empty 1fr top row pushes the wordmark down so it sits on/near the
+     terrain horizon; toggles, CTA and listen-on flow under it. */
+  grid-template-rows: 0.55fr auto auto 0.6fr auto auto;
+  justify-items: center;
+  align-items: end;
+  gap: var(--space-4);
+  padding: clamp(var(--space-4), 3vw, var(--space-8)) clamp(var(--space-4), 4vw, var(--space-12));
+  pointer-events: none;
+}
+
+/* Inner foreground children take pointer events back so toggles + listen
+   links remain interactive. */
+.hero-stack > * {
+  pointer-events: auto;
+}
+
+.hero-cta {
+  align-self: start;
 }
 
 .hero::before {
@@ -171,7 +200,8 @@ a {
 /* ─── Wordmark ──────────────────────────────────────────────────────────────── */
 .wordmark {
   font-family: var(--font-display-stack);
-  font-size: clamp(2.5rem, 6.5vw, 4.5rem);
+  /* Featured size — wordmark anchors visually over the terrain horizon. */
+  font-size: clamp(3rem, 10vw, 7.5rem);
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1;
@@ -214,143 +244,24 @@ a {
   white-space: nowrap;
   pointer-events: none;
   z-index: 1;
-  /* Each ghost is slightly larger than the main word so it peeks out
-     around the edges. Transformed via individual keyframe sets below. */
+  /* `transform` is owned by the rAF loop in Wordmark.tsx — do NOT animate
+     transform here. The component writes scale/translate/skew on each kick
+     transient, glitching the ghost briefly before settling back to base. */
   transform-origin: center center;
-  will-change: transform, opacity;
+  will-change: transform;
 }
 
 .wordmark-ghost-1 {
   color: var(--color-accent-vivid);
-  opacity: 0.18;
-  animation: wordmark-ghost-1 9s ease-in-out infinite alternate;
+  opacity: 0.20;
 }
 .wordmark-ghost-2 {
   color: var(--color-primary-mid);
-  opacity: 0.12;
-  animation: wordmark-ghost-2 11s ease-in-out infinite alternate;
+  opacity: 0.14;
 }
 .wordmark-ghost-3 {
   color: var(--color-accent-warm);
-  opacity: 0.08;
-  animation: wordmark-ghost-3 7s ease-in-out infinite alternate;
-}
-
-@keyframes wordmark-ghost-1 {
-  0%   { transform: translate(-12px, -2px) scale(1.08) skewX(-2deg); }
-  50%  { transform: translate(8px,  4px) scale(1.10) skewX(0deg);   }
-  100% { transform: translate(14px, -3px) scale(1.07) skewX(2deg);  }
-}
-@keyframes wordmark-ghost-2 {
-  0%   { transform: translate(6px,  -6px) scale(1.16) rotate(-1.5deg); }
-  50%  { transform: translate(-4px, 8px)  scale(1.13) rotate(0deg);    }
-  100% { transform: translate(-10px,-4px) scale(1.18) rotate(1.5deg);  }
-}
-@keyframes wordmark-ghost-3 {
-  0%   { transform: translate(0, 4px)  scale(1.24) rotate(0.8deg);  }
-  50%  { transform: translate(2px, -2px) scale(1.27) rotate(-1deg); }
-  100% { transform: translate(-2px, 6px) scale(1.22) rotate(0.4deg);}
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .wordmark-ghost-1,
-  .wordmark-ghost-2,
-  .wordmark-ghost-3 { animation: none; }
-}
-
-/* ─── Stem shapes (audio-reactive geometric characters per stem) ──────────── */
-.stem-shapes {
-  display: flex;
-  justify-content: center;
-}
-
-.stem-shapes ul {
-  list-style: none;
-  display: flex;
-  align-items: center;
-  gap: clamp(var(--space-6), 4vw, var(--space-12));
-  padding: 0;
-  margin: 0;
-}
-
-.stem-shape {
-  /* Outer click target. Stays still — the transform from the rAF loop is
-     applied to the inner `.stem-shape-surface`, so the label below doesn't
-     scale or rotate with the audio-reactive geometry. */
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-  padding: 6px 6px 22px;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition:
-    opacity var(--dur-fast) var(--ease-out),
-    filter var(--dur-fast) var(--ease-out);
-}
-
-.stem-shape-surface {
-  display: block;
-  width: clamp(46px, 7.5vw, 60px);
-  height: clamp(46px, 7.5vw, 60px);
-  transform-origin: center center;
-  /* `transform` is owned by the rAF loop in StemShapes.tsx — never animate it
-     from CSS. */
-  will-change: transform;
-}
-
-.stem-shape svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-  /* `currentColor` is the stem hex from inline `style="color: …"` on the
-     button; the SVG fills inherit it. */
-  filter: drop-shadow(0 0 14px color-mix(in srgb, currentColor 28%, transparent));
-  transition: filter var(--dur-fast) var(--ease-out);
-}
-
-.stem-shape:hover svg {
-  filter: drop-shadow(0 0 22px color-mix(in srgb, currentColor 50%, transparent));
-}
-
-.stem-shape:focus-visible {
-  outline: none;
-}
-
-.stem-shape:focus-visible svg {
-  filter: drop-shadow(0 0 22px color-mix(in srgb, currentColor 70%, transparent));
-}
-
-.stem-shape:disabled {
-  cursor: not-allowed;
-  opacity: 0.35;
-}
-
-.stem-shape:disabled svg {
-  filter: none;
-}
-
-.stem-shape[data-muted="true"] {
-  opacity: 0.32;
-}
-
-.stem-shape[data-muted="true"] svg {
-  filter: saturate(0.4);
-}
-
-.stem-shape-label {
-  font-family: var(--font-body-stack);
-  font-size: 0.625rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--color-text-faint);
-  white-space: nowrap;
-  pointer-events: none;
+  opacity: 0.10;
 }
 
 /* ─── Stem toggle stamps (Brutalist Stamp · D from playground) ─────────────── */
@@ -425,101 +336,6 @@ a {
   /* Small shift so ON/OFF doesn't crowd the corner cut. */
   margin-right: 0.2rem;
 }
-
-/* ─── Stage: drums + main upper · vox horizontal · bass ground ─────────────── */
-.stage {
-  position: relative;
-  display: grid;
-  /* Side gutters keep drums + main hugging the middle; the centre two columns
-     hold them at equal width so they sit as a balanced pair. */
-  grid-template-columns: 0.4fr 1.1fr 1.1fr 0.4fr;
-  /* Bass takes more vertical room — it's the ground, the rest sits on it. */
-  grid-template-rows: 1.4fr 0.45fr 1.6fr;
-  grid-template-areas:
-    ".    drums main .   "
-    "vox  vox   vox  vox "
-    "bass bass  bass bass";
-  gap: 0;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  overflow: visible;
-}
-
-.cell {
-  position: relative;
-  display: block;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  overflow: visible;
-  /* Sit above the shared canvas so clicks land on the buttons, not the canvas. */
-  z-index: 1;
-  transition: opacity var(--dur-base) var(--ease-out);
-}
-
-.cell:hover .cell-label {
-  color: var(--shape-color, var(--color-primary-light));
-}
-
-.cell:focus-visible {
-  outline: none;
-}
-
-.cell:focus-visible .cell-label {
-  color: var(--shape-color, var(--color-primary-light));
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-.cell[data-muted="true"] {
-  opacity: 0.32;
-}
-
-.cell--bass  { grid-area: bass; }
-.cell--main  { grid-area: main; }
-.cell--drums { grid-area: drums; }
-.cell--vox   { grid-area: vox; }
-
-.cell-label {
-  position: absolute;
-  left: var(--space-3);
-  bottom: var(--space-3);
-  font-family: var(--font-body-stack);
-  font-size: 0.625rem;
-  font-weight: 500;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--color-text-faint);
-  user-select: none;
-  pointer-events: none;
-  z-index: 2;
-}
-
-.cell-label .muted-suffix {
-  font-style: italic;
-  margin-left: 0.5em;
-  text-transform: none;
-  letter-spacing: 0.05em;
-}
-
-/* Single shared canvas covers the whole stage area; the four HTML cells sit
-   on top of it as click targets. The canvas is non-interactive so click events
-   pass through to the cell buttons. */
-.shared-canvas {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.shared-canvas canvas {
-  pointer-events: none !important;
-}
-
 
 /* ─── Track title block ─────────────────────────────────────────────────────── */
 .track-title-block {
@@ -758,223 +574,3 @@ a {
   }
 }
 
-/* ─── Variant index (temporary A/B/C comparison page) ──────────────────── */
-.variant-index {
-  position: relative;
-  min-height: 100dvh;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: clamp(var(--space-6), 4vw, var(--space-12));
-  padding: clamp(var(--space-6), 5vw, var(--space-16)) clamp(var(--space-4), 5vw, var(--space-12));
-  isolation: isolate;
-}
-
-.variant-index::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 60% 50% at 50% 35%, rgb(139 58 196 / 0.18) 0%, transparent 70%),
-    radial-gradient(ellipse 80% 60% at 50% 100%, rgb(59 26 110 / 0.40) 0%, transparent 60%);
-  z-index: -2;
-  pointer-events: none;
-}
-
-.variant-index-head {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-6);
-}
-
-.variant-index-blurb {
-  max-width: 56ch;
-  font-family: var(--font-body-stack);
-  font-size: 0.9375rem;
-  line-height: 1.55;
-  color: var(--color-text-muted);
-}
-
-.variant-grid {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  /* Three asymmetric tiles — auto-fits to one column under ~720px */
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-  gap: var(--space-6);
-  align-items: stretch;
-  max-width: 1200px;
-  width: 100%;
-  margin-inline: auto;
-}
-
-.variant-card {
-  display: grid;
-  grid-template-rows: auto auto auto 1fr auto;
-  gap: var(--space-3);
-  padding: var(--space-8);
-  border: 1px solid var(--color-line);
-  background: rgb(26 13 46 / 0.55);
-  color: inherit;
-  text-decoration: none;
-  transition:
-    border-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    background var(--dur-fast) var(--ease-out);
-  height: 100%;
-}
-
-.variant-card:hover,
-.variant-card:focus-visible {
-  border-color: var(--color-primary-light);
-  background: rgb(26 13 46 / 0.85);
-  transform: translateY(-2px);
-}
-
-.variant-card:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 var(--focus-ring-width) var(--color-primary-light);
-}
-
-.variant-badge {
-  font-family: var(--font-display-stack);
-  font-size: 2.5rem;
-  font-weight: 400;
-  line-height: 1;
-  color: var(--color-accent-vivid);
-}
-
-.variant-title {
-  font-family: var(--font-display-stack);
-  font-size: 1.5rem;
-  font-weight: 400;
-  line-height: 1.05;
-  color: var(--color-ground-light);
-  letter-spacing: -0.01em;
-}
-
-.variant-feel {
-  font-family: var(--font-body-stack);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--color-text-faint);
-}
-
-.variant-summary {
-  font-family: var(--font-body-stack);
-  font-size: 0.9375rem;
-  line-height: 1.55;
-  color: var(--color-text-muted);
-  margin: 0;
-}
-
-.variant-cta {
-  font-family: var(--font-body-stack);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  letter-spacing: 0.10em;
-  color: var(--color-primary-light);
-  margin-top: var(--space-2);
-}
-
-/* ─── Variant pill (back-to-index link on /vis-* pages) ─────────────────── */
-.variant-pill {
-  position: fixed;
-  top: 12px;
-  right: 12px;
-  z-index: 1000;
-  padding: 6px 14px;
-  font-family: var(--font-body-stack);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  background: rgb(26 13 46 / 0.7);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-full);
-  text-decoration: none;
-  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
-}
-
-.variant-pill:hover,
-.variant-pill:focus-visible {
-  color: var(--color-ground-light);
-  border-color: var(--color-primary-light);
-}
-
-/* ─── Stage variants (used by visualiser pages) ────────────────────────── */
-/* `.stage--full` lets a single visualiser fill the stage area without the
-   per-cell grid that the original /Stage component used. */
-.stage--full {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-}
-
-/* ─── Option B: HUD meters ─────────────────────────────────────────────── */
-.hud-meters {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: clamp(var(--space-3), 2vw, var(--space-6));
-  align-items: end;
-  padding: 0 clamp(var(--space-4), 4vw, var(--space-8));
-  pointer-events: none;
-  z-index: 1;
-}
-
-.hud-meter {
-  position: relative;
-  height: clamp(140px, 38vh, 360px);
-  align-self: end;
-  margin-bottom: var(--space-8);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.hud-meter-bg {
-  position: absolute;
-  inset: 0 0 1.6em 0;
-  background: rgb(212 170 238 / 0.06);
-  border-left: 1px solid rgb(212 170 238 / 0.20);
-}
-
-.hud-meter-fill {
-  position: absolute;
-  inset: auto 0 1.6em 0;
-  height: 100%;
-  background: linear-gradient(to top, var(--meter-color), color-mix(in srgb, var(--meter-color) 60%, white 30%));
-  transform-origin: bottom center;
-  transform: scaleY(0);
-  will-change: transform;
-}
-
-.hud-meter-label {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  font-family: var(--font-body-stack);
-  font-size: 0.625rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--color-text-faint);
-}
-
-/* ─── Option C: Canvas2D wrapper ───────────────────────────────────────── */
-.canvas2d-landscape {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  pointer-events: none;
-}
