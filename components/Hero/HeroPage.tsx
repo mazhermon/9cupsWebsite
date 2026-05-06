@@ -4,7 +4,7 @@
 // scaffolding. The Visualiser slot mounts as a full-viewport background; all
 // other UI floats above it via z-index.
 
-import type { ComponentType } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import { useAudioEngine } from '@/hooks/useAudioEngine'
 import type { TrackState } from '@/hooks/useAudioEngine'
 import { RELEASE } from '@/lib/track-config'
@@ -37,12 +37,39 @@ export interface VisualiserProps {
   onToggle: (id: number) => void
 }
 
-interface HeroPageProps {
+export interface HeroPageProps {
   /** Visualiser component — mounts as the hero's full-viewport background. */
   Visualiser: ComponentType<VisualiserProps>
+  /** Optional element rendered behind the foreground content + above the
+      visualiser. Useful for backdrop imagery / watermarks. */
+  backdropSlot?: ReactNode
+  /** Replaces the default Press Play button content. Receives the audio-engine
+      bits the variant might need. */
+  renderPressPlay?: (args: {
+    allLoaded: boolean
+    startPlayback: () => void
+  }) => ReactNode
+  /** Element rendered alongside TrackTitle in the CTA area after playback starts. */
+  trackTitleAside?: ReactNode
+  /** Optional element next to the wordmark eyebrow text (e.g. small avatar). */
+  eyebrowAside?: ReactNode
+  /** Optional element rendered above .hero-stack but in front of the
+      visualiser — used by the kick-glitch variant for transient overlays. */
+  glitchOverlay?: (args: {
+    drumsAnalyser: AnalyserNode | null
+    drumsMuted: boolean
+    playing: boolean
+  }) => ReactNode
 }
 
-export default function HeroPage({ Visualiser }: HeroPageProps) {
+export default function HeroPage({
+  Visualiser,
+  backdropSlot,
+  renderPressPlay,
+  trackTitleAside,
+  eyebrowAside,
+  glitchOverlay,
+}: HeroPageProps) {
   const {
     tracks,
     allLoaded,
@@ -56,6 +83,9 @@ export default function HeroPage({ Visualiser }: HeroPageProps) {
 
   const drumsAnalyser = analysers[DRUMS_INDEX] ?? null
   const drumsMuted = tracks[DRUMS_INDEX]?.muted ?? false
+
+  const startPlayback = () =>
+    startPlaybackOnboarded({ stepMs: ONBOARDING_STEP_MS, order: ONBOARDING_ORDER })
 
   return (
     <>
@@ -71,14 +101,20 @@ export default function HeroPage({ Visualiser }: HeroPageProps) {
           onToggle={toggleMute}
         />
 
+        {backdropSlot}
+        {glitchOverlay?.({ drumsAnalyser, drumsMuted, playing: isPlaying })}
+
         {/* Foreground content — stacks on top of the visualiser */}
         <div className="hero-stack">
-          <Wordmark
-            eyebrow={`${RELEASE.artist} presents`}
-            kickAnalyser={drumsAnalyser}
-            kickMuted={drumsMuted}
-            playing={isPlaying}
-          />
+          <div className="hero-eyebrow-row">
+            {eyebrowAside}
+            <Wordmark
+              eyebrow={`${RELEASE.artist} presents`}
+              kickAnalyser={drumsAnalyser}
+              kickMuted={drumsMuted}
+              playing={isPlaying}
+            />
+          </div>
 
           <StemToggles
             stems={RELEASE.stems}
@@ -89,21 +125,28 @@ export default function HeroPage({ Visualiser }: HeroPageProps) {
 
           <div aria-live="polite" className="hero-cta">
             {hasStarted ? (
-              <TrackTitle
-                title={RELEASE.title}
-                artist={RELEASE.artist}
-                year={RELEASE.year}
-              />
+              <div className="track-title-row">
+                {trackTitleAside}
+                <TrackTitle
+                  title={RELEASE.title}
+                  artist={RELEASE.artist}
+                  year={RELEASE.year}
+                />
+              </div>
             ) : (
-              <button
-                type="button"
-                className="cta-press-play"
-                onClick={() => startPlaybackOnboarded({ stepMs: ONBOARDING_STEP_MS, order: ONBOARDING_ORDER })}
-                disabled={!allLoaded}
-                aria-label="Start playback"
-              >
-                {allLoaded ? 'Press play to enter' : 'Loading the room…'}
-              </button>
+              renderPressPlay
+                ? renderPressPlay({ allLoaded, startPlayback })
+                : (
+                  <button
+                    type="button"
+                    className="cta-press-play"
+                    onClick={startPlayback}
+                    disabled={!allLoaded}
+                    aria-label="Start playback"
+                  >
+                    {allLoaded ? 'Press play to enter' : 'Loading the room…'}
+                  </button>
+                )
             )}
           </div>
 
