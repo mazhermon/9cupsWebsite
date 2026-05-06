@@ -8,7 +8,9 @@ import dynamic from 'next/dynamic'
 import type { ReactNode } from 'react'
 import Image from 'next/image'
 import { useAudioEngine } from '@/hooks/useAudioEngine'
+import type { TrackState } from '@/hooks/useAudioEngine'
 import { RELEASE } from '@/lib/track-config'
+import type { Stem } from '@/lib/track-config'
 import Wordmark from '@/components/Wordmark/Wordmark'
 import StemToggles from '@/components/StemToggles/StemToggles'
 import TrackTitle from '@/components/TrackTitle/TrackTitle'
@@ -47,6 +49,17 @@ export interface EditorialHeroProps {
   overlayOpacity?: number
   overlayObjectPosition?: string
   overlayFilter?: string
+
+  /** Custom overlay render-prop. Receives audio + stem context so the slot
+      can drive blend animations from the analyser data. Mounts inside the
+      same .editorial-portrait box as the static overlay; both render if
+      both are supplied (custom on top). */
+  overlaySlot?: (ctx: {
+    analysers: (AnalyserNode | null)[]
+    trackStates: TrackState[]
+    stems: Stem[]
+    playing: boolean
+  }) => ReactNode
 }
 
 export default function EditorialHero({
@@ -60,6 +73,7 @@ export default function EditorialHero({
   overlayOpacity = 0.7,
   overlayObjectPosition = 'center center',
   overlayFilter,
+  overlaySlot,
 }: EditorialHeroProps) {
   const {
     tracks,
@@ -113,6 +127,12 @@ export default function EditorialHero({
               }}
             />
           )}
+          {overlaySlot?.({
+            analysers,
+            trackStates: tracks,
+            stems: RELEASE.stems,
+            playing: isPlaying,
+          })}
         </div>
 
         <div className="editorial-right">
