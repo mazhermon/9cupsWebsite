@@ -26,6 +26,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { PerspectiveCamera } from '@react-three/drei'
 import * as THREE from 'three'
 import type { VisualiserProps } from '@/components/Hero/HeroPage'
+import type { StemKey } from '@/lib/track-config'
 import { bandEnergy, lerpToward, useReducedMotion } from '@/lib/audio-reactive'
 import { TransientDetector } from '@/lib/transient-detect'
 
@@ -41,11 +42,40 @@ function CameraLookAt({ target }: { target: [number, number, number] }) {
   return null
 }
 
-export interface TerrainProps extends VisualiserProps {
+// The stem props are optional because single-source mode has no stems to
+// describe. `playing` stays required — the terrain always needs to know whether
+// to run its frame loop.
+export interface TerrainProps extends Partial<Omit<VisualiserProps, 'playing'>> {
+  playing: boolean
   /** Hex colour for the wireframe lines. Default is the brand mid-purple. */
   color?: string
   /** Override mesh segmentation if perf needs it lower. Default 180 × 90 ≈ 16k verts. */
   segments?: { w: number; d: number }
+  /** Optional whitelist of stems this terrain reacts to. Stems not listed
+   *  are treated as both null-analyser and muted from terrain's perspective —
+   *  user toggle state for those stems doesn't affect the mesh. Omit to
+   *  keep the original behaviour (all four stems drive the terrain). */
+  activeKeys?: StemKey[]
+  /** Pixel ratio override for the underlying R3F Canvas. Default 1.
+   *  Drop to ~0.75 if the host page renders the terrain at large pixel
+   *  sizes and the GPU is struggling. */
+  dpr?: number
+  /** Single-source mode: drive all four displacement layers from one analyser
+   *  instead of four per-stem ones. The frequency bands are unchanged, so the
+   *  terrain keeps its character — only where the numbers come from differs.
+   *  Used by the landing page, which plays a single summed mixdown.
+   *
+   *  Takes precedence over `activeKeys`, and makes `stems` / `trackStates` /
+   *  `onToggle` unnecessary (there are no stems to mute). */
+  singleAnalyser?: AnalyserNode | null
+  /** Extra class on the terrain <section>, for hosts that need a different
+   *  size or placement than the default (bottom 50vh of its container). */
+  className?: string
+  /** Scales the ground plane in X and Z. The default plane is sized for the
+   *  mixer's half-width column; a full-bleed host needs it wider or the
+   *  plane's own edges show as diagonals at the left and right of frame.
+   *  Purely geometric — segment count, and therefore cost, is unchanged. */
+  planeScale?: number
 }
 
 const PLANE_W = 22
@@ -103,7 +133,18 @@ const fragmentShader = /* glsl */ `
   }
 `
 
-function TerrainMesh({ stems, trackStates, analysers, playing, color = '#8B3AC4' }: TerrainProps) {
+function TerrainMesh({
+  stems = [],
+  trackStates = [],
+  analysers = [],
+  playing,
+  color = '#8B3AC4',
+  activeKeys,
+  segments,
+  singleAnalyser,
+  planeScale,
+}: TerrainProps) {
+  const isActive = (key: StemKey) => !activeKeys || activeKeys.includes(key)
   const reducedMotion = useReducedMotion()
   const detector = useState(() => new TransientDetector({ threshold: 1.32, cooldownFrames: 5, windowSize: 8 }))[0]
   const dataRefs = useRef<(Uint8Array | null)[]>([null, null, null, null])
@@ -148,15 +189,22 @@ function TerrainMesh({ stems, trackStates, analysers, playing, color = '#8B3AC4'
 
     timeRef.current += delta
 
+    // Fetch an analyser's spectrum into a per-slot cached buffer. `slot`
+    // indexes dataRefs, not the analysers array, so single-source mode can
+    // reuse slot 0 without colliding with the per-stem slots.
+    const readSpectrum = (a: AnalyserNode, slot: number) => {
+      const cur = dataRefs.current[slot]
+      const buf = (!cur || cur.length !== a.frequencyBinCount)
+        ? (dataRefs.current[slot] = new Uint8Array(a.frequencyBinCount))
+        : cur
+      a.getByteFrequencyData(buf as Uint8Array<ArrayBuffer>)
+      return buf
+    }
+
     const readBand = (idx: number, lo: number, hi: number) => {
       const a = analysers[idx]
       if (!a) return 0
-      const cur = dataRefs.current[idx]
-      const buf = (!cur || cur.length !== a.frequencyBinCount)
-        ? (dataRefs.current[idx] = new Uint8Array(a.frequencyBinCount))
-        : cur
-      a.getByteFrequencyData(buf as Uint8Array<ArrayBuffer>)
-      return bandEnergy(buf, lo, hi)
+      return bandEnergy(readSpectrum(a, idx), lo, hi)
     }
 
     const bassIdx  = idxByKey.bass
@@ -164,21 +212,40 @@ function TerrainMesh({ stems, trackStates, analysers, playing, color = '#8B3AC4'
     const mainIdx  = idxByKey.main
     const voxIdx   = idxByKey.vox
 
-    const low      = bassIdx  != null ? readBand(bassIdx,  1, 14) : 0
-    const kick     = drumsIdx != null ? readBand(drumsIdx, 2, 8)  : 0
-    // Drum body — snare / mid-frequency drum content (~200-1500 Hz). Drives
-    // the continuous drumWave layer so drums has motion between kicks.
-    const drumBody = drumsIdx != null ? readBand(drumsIdx, 9, 60) : 0
-    const mid      = mainIdx  != null ? readBand(mainIdx, 14, 95) : 0
-    const high     = voxIdx   != null ? readBand(voxIdx,  95, 280): 0
+    let low = 0, kick = 0, drumBody = 0, mid = 0, high = 0
+    let kicked = false
 
-    const kicked = drumsIdx != null && detector.push(kick, frameIdx.current)
+    if (singleAnalyser) {
+      // One FFT read per frame, five bands sliced out of it — the same bands
+      // the per-stem path uses, so the displacement layers look the same.
+      const buf = readSpectrum(singleAnalyser, 0)
+      low      = bandEnergy(buf,  1,  14)
+      kick     = bandEnergy(buf,  2,   8)
+      drumBody = bandEnergy(buf,  9,  60)
+      mid      = bandEnergy(buf, 14,  95)
+      high     = bandEnergy(buf, 95, 280)
+      kicked   = detector.push(kick, frameIdx.current)
+    } else {
+      low      = bassIdx  != null && isActive('bass')  ? readBand(bassIdx,  1, 14) : 0
+      kick     = drumsIdx != null && isActive('drums') ? readBand(drumsIdx, 2, 8)  : 0
+      // Drum body — snare / mid-frequency drum content (~200-1500 Hz). Drives
+      // the continuous drumWave layer so drums has motion between kicks.
+      drumBody = drumsIdx != null && isActive('drums') ? readBand(drumsIdx, 9, 60) : 0
+      mid      = mainIdx  != null && isActive('main')  ? readBand(mainIdx, 14, 95) : 0
+      high     = voxIdx   != null && isActive('vox')   ? readBand(voxIdx,  95, 280): 0
+
+      kicked = drumsIdx != null && isActive('drums') && detector.push(kick, frameIdx.current)
+    }
     frameIdx.current++
 
-    // Drum-solo target: 1 when drums is the only unmuted stem, else 0.
-    const isUnmuted = (idx: number | undefined) => idx != null && !trackStates[idx]?.muted
-    const drumSoloTarget = isUnmuted(drumsIdx)
-      && !isUnmuted(bassIdx) && !isUnmuted(mainIdx) && !isUnmuted(voxIdx)
+    // Drum-solo target: 1 when drums is the only *active and unmuted* stem.
+    // Inactive (filtered-out) stems don't count.
+    const isLive = (idx: number | undefined, key: StemKey) =>
+      idx != null && !trackStates[idx]?.muted && isActive(key)
+    // No stems in single-source mode, so no stem can be soloed.
+    const drumSoloTarget = !singleAnalyser
+      && isLive(drumsIdx, 'drums')
+      && !isLive(bassIdx, 'bass') && !isLive(mainIdx, 'main') && !isLive(voxIdx, 'vox')
       ? 1 : 0
 
     /* eslint-disable react-hooks/immutability -- THREE uniforms mutated each frame */
@@ -191,19 +258,25 @@ function TerrainMesh({ stems, trackStates, analysers, playing, color = '#8B3AC4'
     if (kicked) u.uKick.value = 1
     u.uKick.value = lerpToward(u.uKick.value, 0, 0.13)
 
-    const target = (idx: number) => (idx != null && trackStates[idx]?.muted ? 0 : 1)
-    u.uLowMute.value  = lerpToward(u.uLowMute.value,  target(bassIdx),  0.18)
-    u.uMidMute.value  = lerpToward(u.uMidMute.value,  target(mainIdx),  0.18)
-    u.uKickMute.value = lerpToward(u.uKickMute.value, target(drumsIdx), 0.18)
-    u.uHighMute.value = lerpToward(u.uHighMute.value, target(voxIdx),   0.18)
+    // Inactive stems collapse to mute=0 so their displacement layers fade out.
+    // Single-source mode holds every layer open: there are no mute controls,
+    // so all four displacement layers stay fully weighted.
+    const target = (idx: number | undefined, key: StemKey) =>
+      singleAnalyser ? 1
+        : (idx != null && !trackStates[idx]?.muted && isActive(key)) ? 1 : 0
+    u.uLowMute.value  = lerpToward(u.uLowMute.value,  target(bassIdx,  'bass'),  0.18)
+    u.uMidMute.value  = lerpToward(u.uMidMute.value,  target(mainIdx,  'main'),  0.18)
+    u.uKickMute.value = lerpToward(u.uKickMute.value, target(drumsIdx, 'drums'), 0.18)
+    u.uHighMute.value = lerpToward(u.uHighMute.value, target(voxIdx,   'vox'),   0.18)
     // Slow lerp on the solo flag — gives a smooth ramp-down as other stems
     // come in during the onboarding rather than a hard cut.
     u.uDrumSolo.value = lerpToward(u.uDrumSolo.value, drumSoloTarget, 0.04)
     /* eslint-enable react-hooks/immutability */
   })
 
-  const segW = 180
-  const segD = 90
+  const segW = segments?.w ?? 180
+  const segD = segments?.d ?? 90
+  const scale = planeScale ?? 1
 
   return (
     <mesh
@@ -211,7 +284,7 @@ function TerrainMesh({ stems, trackStates, analysers, playing, color = '#8B3AC4'
       rotation={[-Math.PI / 2 + 0.05, 0, 0]}
       position={[0, -0.4, 0]}
     >
-      <planeGeometry args={[PLANE_W, PLANE_D, segW, segD]} />
+      <planeGeometry args={[PLANE_W * scale, PLANE_D * scale, segW, segD]} />
     </mesh>
   )
 }
@@ -219,11 +292,11 @@ function TerrainMesh({ stems, trackStates, analysers, playing, color = '#8B3AC4'
 export default function Terrain(props: TerrainProps) {
   return (
     <section
-      className="terrain"
+      className={props.className ? `terrain ${props.className}` : 'terrain'}
       aria-hidden="true"
     >
       <Canvas
-        dpr={1}
+        dpr={props.dpr ?? 1}
         gl={{ antialias: false, alpha: true, powerPreference: 'high-performance' }}
         frameloop="always"
         style={{ width: '100%', height: '100%' }}
