@@ -1,7 +1,7 @@
-import type { PlatformLink } from '@/lib/track-config'
+import type { LinkItem } from '@/lib/track-config'
 
 interface ListenOnProps {
-  platforms: PlatformLink[]
+  platforms: LinkItem[]
 }
 
 export default function ListenOn({ platforms }: ListenOnProps) {

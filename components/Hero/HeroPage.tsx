@@ -7,7 +7,7 @@
 import type { ComponentType, ReactNode } from 'react'
 import { useAudioEngine } from '@/hooks/useAudioEngine'
 import type { TrackState } from '@/hooks/useAudioEngine'
-import { RELEASE } from '@/lib/track-config'
+import { RELEASE, LISTEN_LINKS } from '@/lib/track-config'
 import type { Stem } from '@/lib/track-config'
 import Wordmark from '@/components/Wordmark/Wordmark'
 import StemToggles from '@/components/StemToggles/StemToggles'
@@ -150,7 +150,7 @@ export default function HeroPage({
             )}
           </div>
 
-          <ListenOn platforms={RELEASE.platforms} />
+          <ListenOn platforms={LISTEN_LINKS} />
         </div>
       </main>
 
