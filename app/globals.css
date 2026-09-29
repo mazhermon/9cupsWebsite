@@ -133,6 +133,20 @@ a {
   transform: translateY(0);
 }
 
+/* Visually hidden but announced. Used for live state that the UI conveys
+   graphically (e.g. the play/pause icon swap). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -1113,4 +1127,506 @@ body:has(.fonts-page) {
 }
 .variant-card--pinned .variant-badge {
   color: var(--color-primary-light);
+}
+
+/* ─── DevDock ────────────────────────────────────────────────────────────────
+   TEMP dev overlay rendered on the home page only (and any page that mounts
+   <DevDock />). Yellow "dev tape" border so it's never confused for live UI.
+   Delete this block (and the component) before shipping clean. */
+
+.devdock {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 999;
+  width: 280px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 24px);
+  overflow: auto;
+  padding: 8px 12px 12px;
+  background: rgb(20 8 36 / 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid #FFD60A;
+  border-radius: 4px;
+  font-family: ui-monospace, 'JetBrains Mono', Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #E8C9F5;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.4);
+}
+
+.devdock[data-open="false"] {
+  width: auto;
+  padding: 5px 10px;
+  border-color: rgb(255 214 10 / 0.7);
+}
+
+.devdock-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #FFD60A;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 6px;
+}
+.devdock[data-open="false"] .devdock-toggle {
+  margin-bottom: 0;
+}
+
+.devdock-tag {
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  font-weight: 600;
+}
+
+.devdock-focus {
+  flex: 1;
+  font-size: 10px;
+  color: #D4AAEE;
+  letter-spacing: 0.05em;
+  text-align: left;
+  font-weight: 400;
+}
+.devdock[data-open="true"] .devdock-focus {
+  display: none;
+}
+
+.devdock-toggle-icon {
+  font-size: 14px;
+  line-height: 1;
+  color: #FFD60A;
+  margin-left: auto;
+}
+
+.devdock-section {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgb(255 214 10 / 0.25);
+}
+.devdock-section:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.devdock-h {
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #FFD60A;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.devdock-task {
+  color: #D4AAEE;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.devdock-list {
+  list-style: none;
+  display: grid;
+  gap: 2px;
+  padding: 0;
+  margin: 0;
+}
+
+.devdock-row {
+  border-radius: 3px;
+}
+.devdock-row[data-current="true"] {
+  background: rgb(255 214 10 / 0.12);
+  outline: 1px solid rgb(255 214 10 / 0.4);
+}
+
+.devdock-link {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 4px;
+  padding: 4px 6px;
+  color: #E8C9F5;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: color 80ms ease-out, background 80ms ease-out;
+}
+.devdock-link:hover {
+  color: #FFCFEF;
+  background: rgb(196 126 232 / 0.08);
+}
+.devdock-row[data-current="true"] .devdock-link {
+  color: #FFD60A;
+}
+.devdock-row[data-current="true"] .devdock-link:hover {
+  color: #FFD60A;
+  background: rgb(255 214 10 / 0.18);
+}
+
+.devdock-marker {
+  grid-column: 1;
+  grid-row: 1;
+  font-weight: 600;
+  color: #FFD60A;
+}
+.devdock-path {
+  grid-column: 2;
+  grid-row: 1;
+  font-weight: 500;
+}
+.devdock-blurb {
+  grid-column: 2;
+  grid-row: 2;
+  font-size: 10px;
+  color: rgb(212 170 238 / 0.65);
+  letter-spacing: 0.02em;
+}
+.devdock-row[data-current="true"] .devdock-blurb {
+  color: rgb(255 214 10 / 0.75);
+}
+
+/* ─── Landing page (/) ──────────────────────────────────────────────────────
+   The front door. Terrain as the ground across the bottom; content left-
+   aligned above it. Asymmetric on purpose — a centered stack is on the
+   anti-pattern list in DESIGN.md.
+
+   Layering: terrain z-0 → content z-1 → grain z-100 (fixed, set above).
+   `body` is `overflow: hidden`, so the content column owns its own scroll
+   on short viewports rather than the document.                             */
+.landing {
+  position: relative;
+  min-height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Taller than the mixer's 50vh: this page has less content stacked above it,
+   so the horizon can sit higher and the wireframe gets room to read. */
+.terrain--landing {
+  height: 68vh;
+}
+
+.landing-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  /* Varied, not uniform: tight inside groups, generous between them. The
+     gap here is the between-group rhythm; groups set their own internal gaps. */
+  gap: var(--space-8);
+  padding:
+    clamp(var(--space-8), 7vh, var(--space-24))
+    clamp(var(--space-6), 6vw, var(--space-24));
+  /* Content stops well short of the right edge so the terrain reads as
+     landscape rather than as a backdrop behind a full-width slab. */
+  max-width: min(760px, 92vw);
+}
+
+/* The wordmark is centered by default for the mixer's hero; the landing
+   left-aligns it with everything else in the column. */
+.landing-content .wordmark {
+  text-align: left;
+  /* Smaller than the mixer hero: this page is a signpost, not a stage. */
+  font-size: clamp(2.75rem, 8vw, 5.5rem);
+}
+
+/* ─── Landing: play control in the content flow ─────────────────────────── */
+/* Overrides the default fixed right-edge placement. The play button is this
+   page's one interactive flourish, so it sits where the eye already is
+   rather than hiding in a corner. */
+.play-control--inline {
+  position: static;
+  transform: none;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-4);
+  margin-block: calc(var(--space-2) * -1) var(--space-2);
+}
+
+/* The hint reads as a now-playing line here, so it runs horizontally and
+   carries more weight than the mixer's vertical micro-label. */
+.play-control--inline .play-hint {
+  writing-mode: horizontal-tb;
+  font-family: var(--font-display-stack);
+  font-size: var(--text-lg);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--color-text-muted);
+}
+
+.play-control--inline .play-btn:disabled {
+  background: rgb(139 58 196 / 0.35);
+  box-shadow: none;
+  cursor: default;
+}
+
+.play-control--inline .play-btn:disabled:hover {
+  background: rgb(139 58 196 / 0.35);
+  transform: none;
+}
+
+/* ─── Landing: grouped links ────────────────────────────────────────────── */
+.linkgroups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  width: 100%;
+}
+
+.linkgroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.linkgroup-label {
+  font-family: var(--font-body-stack);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+.linkgroup-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+}
+
+/* Pills carry their own surface rather than sitting as bare type over the
+   wireframe — the terrain is the page's only variable-luminance background
+   and text over it would fail contrast at the bright moments. */
+.linkgroup-pill {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  padding: 9px 18px;
+  min-height: var(--touch-target-min);
+  border-radius: var(--radius-full);
+  background: rgb(139 58 196 / 0.14);
+  border: 1px solid rgb(196 126 232 / 0.25);
+  backdrop-filter: blur(6px);
+  color: var(--color-ground-light);
+  font-family: var(--font-display-stack);
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.linkgroup-pill:hover {
+  background: rgb(204 46 144 / 0.18);
+  border-color: rgb(204 46 144 / 0.45);
+  transform: translateY(-1px);
+}
+
+/* A quiet acknowledgement they've already been there (DESIGN.md). */
+.linkgroup-pill:visited {
+  border-color: rgb(122 138 26 / 0.40);
+}
+
+.linkgroup-note {
+  font-family: var(--font-body-stack);
+  font-size: 0.5625rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+/* ─── Landing: foot (mixer doorway + contact) ───────────────────────────── */
+.landing-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  width: 100%;
+  margin-top: auto;
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-line);
+}
+
+/* Heavier than the pills on purpose: this is a doorway into the other half
+   of the site, not a sixth platform link. */
+.landing-mixer-cta {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-1) var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  border-radius: var(--radius-md);
+  background: rgb(59 26 110 / 0.55);
+  border: 1px solid rgb(196 126 232 / 0.22);
+  backdrop-filter: blur(6px);
+  min-height: var(--touch-target-min);
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.landing-mixer-cta:hover {
+  background: rgb(139 58 196 / 0.55);
+  border-color: rgb(204 46 144 / 0.45);
+  transform: translateY(-1px);
+}
+
+.landing-mixer-label {
+  grid-column: 1;
+  font-family: var(--font-display-stack);
+  font-size: var(--text-lg);
+  line-height: 1.15;
+  color: var(--color-ground-light);
+}
+
+.landing-mixer-sub {
+  grid-column: 1;
+  font-family: var(--font-body-stack);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.landing-mixer-arrow {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-size: 1.5rem;
+  color: var(--color-primary-light);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.landing-mixer-cta:hover .landing-mixer-arrow {
+  transform: translateX(4px);
+}
+
+.landing-contact {
+  font-family: var(--font-body-stack);
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-line);
+  padding-bottom: 2px;
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+
+.landing-contact:hover {
+  color: var(--color-ground-light);
+  border-color: rgb(204 46 144 / 0.55);
+}
+
+/* ─── Landing: short + narrow viewports ─────────────────────────────────── */
+/* `body { overflow: hidden }` means the document can't scroll, so the content
+   column takes the scroll when it outgrows the viewport. */
+@media (max-height: 760px), (max-width: 720px) {
+  .landing {
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+
+  .landing-content {
+    min-height: auto;
+    gap: var(--space-4);
+    padding-block: var(--space-8);
+  }
+
+  .landing-content .wordmark {
+    font-size: clamp(2.25rem, 7vw, 4rem);
+  }
+
+  .linkgroups {
+    gap: var(--space-4);
+  }
+
+  /* Terrain shrinks so the horizon sits below the link groups rather than
+     cutting through them — the wireframe is brightest right at the horizon
+     and faint labels stop reading against it. */
+  .terrain--landing {
+    height: 42vh;
+  }
+
+  .landing-foot {
+    margin-top: var(--space-6);
+  }
+}
+
+@media (max-width: 720px) {
+  .play-control--inline {
+    gap: var(--space-3);
+  }
+
+  /* The mixer's mobile rule hides .play-hint — correct there, where it's a
+     vertical micro-label beside a fixed corner button. Here it's the
+     now-playing line and has to stay. Higher specificity wins regardless of
+     source order. */
+  .play-control--inline .play-hint {
+    display: block;
+    font-size: var(--text-base);
+    line-height: 1.2;
+  }
+}
+
+/* ─── Mixer: back-to-landing link ───────────────────────────────────────── */
+/* The mixer is a full-bleed hero with no chrome, so the way home is a single
+   quiet fixed link rather than a nav bar. */
+.mixer-back {
+  position: fixed;
+  top: clamp(var(--space-4), 3vh, var(--space-8));
+  left: clamp(var(--space-4), 3vw, var(--space-8));
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 8px 16px;
+  min-height: 36px;
+  border-radius: var(--radius-full);
+  background: rgb(26 13 46 / 0.55);
+  border: 1px solid rgb(196 126 232 / 0.20);
+  backdrop-filter: blur(8px);
+  font-family: var(--font-display-stack);
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.mixer-back:hover {
+  color: var(--color-ground-light);
+  background: rgb(59 26 110 / 0.65);
+  border-color: rgb(204 46 144 / 0.45);
+}
+
+/* Scrim between the terrain and the landing content. Sits in the same stacking
+   level as the terrain but later in the DOM, so it paints over the wireframe
+   and under the content column. Bottom-weighted: the horizon is the brightest,
+   busiest part of the mesh and the foot content sits right on it. */
+.landing-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 30%,
+    rgb(26 13 46 / 0.55) 52%,
+    rgb(26 13 46 / 0.45) 68%,
+    rgb(26 13 46 / 0.78) 88%,
+    rgb(26 13 46 / 0.92) 100%
+  );
 }

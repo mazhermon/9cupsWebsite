@@ -1,0 +1,180 @@
+/* /review — single-page route index. Terminal-ish, tabular, no decoration.
+   Scoped via a single .rv ancestor on the main element. */
+
+body:has(.rv) { overflow: auto; }
+
+.rv {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(40px, 6vh, 88px) clamp(20px, 4vw, 56px) 96px;
+  color: var(--color-text);
+  font-family: var(--font-body-stack);
+}
+
+.rv code {
+  font-family: ui-monospace, 'JetBrains Mono', Menlo, monospace;
+  background: rgb(212 170 238 / 0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.92em;
+  color: var(--color-primary-light);
+}
+
+/* ─── Head ─────────────────────────────────────────────────────────────────── */
+.rv-head {
+  display: grid;
+  gap: var(--space-4);
+  padding-bottom: var(--space-12);
+  margin-bottom: var(--space-12);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.rv-eyebrow {
+  font-family: ui-monospace, 'JetBrains Mono', Menlo, monospace;
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+.rv-title {
+  font-family: var(--font-display-stack);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.rv-blurb {
+  max-width: 78ch;
+  color: var(--color-text-muted);
+  font-size: var(--text-base);
+  line-height: 1.6;
+}
+
+/* ─── Section ─────────────────────────────────────────────────────────────── */
+.rv-section { margin-bottom: var(--space-16); }
+
+.rv-section-head {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.rv-section-title {
+  font-family: ui-monospace, 'JetBrains Mono', Menlo, monospace;
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--color-primary-light);
+}
+
+.rv-section-blurb {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  max-width: 78ch;
+}
+
+/* ─── Row ─────────────────────────────────────────────────────────────────── */
+.rv-list { list-style: none; display: grid; gap: 1px; background: var(--color-line); border-block: 1px solid var(--color-line); }
+
+.rv-row { background: var(--color-surface); }
+
+.rv-row-link {
+  display: grid;
+  grid-template-columns: 130px 200px 1fr auto;
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  color: inherit;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.rv-row-link:hover { background: rgb(212 170 238 / 0.04); }
+
+.rv-row-picked .rv-row-link { background: rgb(176 48 96 / 0.05); }
+.rv-row-picked .rv-row-link:hover { background: rgb(176 48 96 / 0.1); }
+
+.rv-row-live .rv-row-link { background: rgb(122 138 26 / 0.06); }
+.rv-row-live .rv-row-link:hover { background: rgb(122 138 26 / 0.12); }
+
+.rv-row-clean { opacity: 0.7; }
+
+.rv-path {
+  font-family: ui-monospace, 'JetBrains Mono', Menlo, monospace;
+  font-size: var(--text-sm);
+  color: var(--color-primary-light);
+  letter-spacing: 0.01em;
+}
+
+.rv-meta {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rv-row-title {
+  font-size: var(--text-base);
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.rv-row-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+
+.rv-open {
+  font-family: ui-monospace, monospace;
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  letter-spacing: 0.1em;
+  transition: color var(--dur-fast) var(--ease-out), transform var(--dur-base) var(--ease-out);
+}
+.rv-row-link:hover .rv-open {
+  color: var(--color-primary-light);
+  transform: translateX(4px);
+}
+
+/* ─── Badge ───────────────────────────────────────────────────────────────── */
+.rv-badge {
+  font-family: ui-monospace, 'JetBrains Mono', Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid currentColor;
+  text-align: center;
+  display: inline-block;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.rv-badge-live    { color: #C8D55A; background: rgb(122 138 26 / 0.15); }
+.rv-badge-picked  { color: var(--color-accent-vivid); background: rgb(204 46 144 / 0.12); }
+.rv-badge-new     { color: var(--color-primary-light); background: rgb(196 126 232 / 0.12); }
+.rv-badge-clean   { color: var(--color-text-faint); background: rgb(240 235 224 / 0.04); }
+
+/* ─── Footer ──────────────────────────────────────────────────────────────── */
+.rv-footer {
+  margin-top: var(--space-16);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-line);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+/* ─── Narrow viewport ─────────────────────────────────────────────────────── */
+@media (max-width: 820px) {
+  .rv-row-link {
+    grid-template-columns: 110px 1fr;
+    grid-template-rows: auto auto;
+    row-gap: var(--space-2);
+  }
+  .rv-path { grid-column: 1 / -1; grid-row: 2; }
+  .rv-meta { grid-column: 1 / -1; grid-row: 3; }
+  .rv-open { display: none; }
+}

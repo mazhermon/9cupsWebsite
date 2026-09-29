@@ -1,0 +1,896 @@
+/* ───────────────────────────────────────────────────────────────────────────
+   /explore — prototype directions inspired by brik.space.
+   Scoped to /explore/* via app/explore/layout.tsx.
+   Brand tokens reused from globals.css.
+   --font-recursive is set on the wrapping <div> by next/font.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* The explore index page wants vertical scroll for the card grid; restore it. */
+body:has(.ex-index) { overflow: auto; }
+
+/* ─── /explore index ──────────────────────────────────────────────────────── */
+.ex-index {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(48px, 8vh, 120px) clamp(24px, 4vw, 56px) 96px;
+  color: var(--color-text);
+}
+
+.ex-index-head {
+  display: grid;
+  gap: var(--space-6);
+  padding-bottom: var(--space-16);
+  border-bottom: 1px solid var(--color-line);
+  margin-bottom: var(--space-16);
+}
+
+.ex-index-eyebrow {
+  font-family: var(--font-recursive, var(--font-body-stack));
+  font-variation-settings: 'MONO' 1, 'CASL' 0;
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.ex-index-title {
+  font-family: var(--font-display-stack);
+  font-size: clamp(2.5rem, 6.5vw, 5.5rem);
+  line-height: 0.96;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  font-weight: 400;
+}
+
+.ex-index-blurb {
+  max-width: 62ch;
+  font-size: var(--text-lg);
+  line-height: 1.55;
+  color: var(--color-text-muted);
+}
+
+.ex-index-blurb a {
+  color: var(--color-primary-light);
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 1px;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.ex-index-blurb a:hover { color: var(--color-accent-vivid); }
+
+/* ── 2×2 card grid */
+.ex-index-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-6);
+  list-style: none;
+}
+@media (max-width: 760px) {
+  .ex-index-grid { grid-template-columns: 1fr; }
+}
+
+.ex-card {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: rgb(212 170 238 / 0.04);
+  border: 1px solid var(--color-line);
+  transition: transform var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out);
+}
+
+.ex-card:hover {
+  transform: translateY(-4px);
+  border-color: rgb(196 126 232 / 0.4);
+  background: rgb(212 170 238 / 0.06);
+}
+
+.ex-card-link {
+  display: grid;
+  grid-template-rows: 220px 1fr;
+  height: 100%;
+  color: inherit;
+}
+
+.ex-card-preview {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--color-surface-deeper) 0%, var(--color-primary-dark) 100%);
+}
+
+.ex-card-body {
+  padding: var(--space-8) var(--space-6) var(--space-8);
+  display: grid;
+  gap: var(--space-3);
+}
+
+.ex-card-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.ex-card-n {
+  font-family: var(--font-recursive, monospace);
+  font-variation-settings: 'MONO' 1;
+  font-size: var(--text-sm);
+  color: var(--color-text-faint);
+  letter-spacing: 0.1em;
+}
+
+.ex-card-title {
+  font-family: var(--font-display-stack);
+  font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.ex-card-blurb {
+  color: var(--color-text-muted);
+  font-size: var(--text-base);
+  line-height: 1.5;
+}
+
+.ex-card-tags {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  list-style: none;
+}
+
+.ex-card-tags li {
+  font-family: var(--font-recursive, monospace);
+  font-variation-settings: 'MONO' 1;
+  font-size: var(--text-xs);
+  padding: 4px 10px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+}
+
+.ex-card-cta {
+  color: var(--color-primary-light);
+  font-size: var(--text-sm);
+  margin-top: var(--space-2);
+  transition: color var(--dur-fast) var(--ease-out), transform var(--dur-base) var(--ease-out);
+}
+.ex-card:hover .ex-card-cta {
+  color: var(--color-accent-vivid);
+  transform: translateX(4px);
+}
+
+/* ── Card previews — CSS-only hints at the live prototype */
+.ex-prev { width: 100%; height: 100%; display: grid; place-items: center; position: relative; }
+
+.ex-prev-gp,
+.ex-prev-gpt {
+  font-family: var(--font-recursive, ui-monospace, monospace);
+  font-variation-settings: 'MONO' 1;
+  font-size: 0.86rem;
+  line-height: 1.05;
+  color: var(--color-primary-light);
+  letter-spacing: 0.02em;
+  margin: 0;
+  text-align: center;
+}
+
+.ex-prev-ha {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--color-line);
+}
+.ex-prev-ha-half {
+  background: var(--color-surface-deeper);
+  display: grid;
+  place-items: center;
+  padding: var(--space-2);
+}
+.ex-prev-ha pre {
+  margin: 0;
+  font-family: ui-monospace, monospace;
+  font-size: 0.6rem;
+  line-height: 0.95;
+  color: var(--color-primary-light);
+  white-space: pre;
+  text-align: center;
+}
+.ex-prev-ha-strip pre { font-size: 0.5rem; color: var(--color-accent-vivid); }
+
+/* ── Index footer */
+.ex-index-footer {
+  margin-top: var(--space-24);
+  padding-top: var(--space-12);
+  border-top: 1px solid var(--color-line);
+  display: grid;
+  gap: var(--space-3);
+  max-width: 70ch;
+}
+.ex-index-footer-label {
+  font-family: var(--font-recursive, monospace);
+  font-variation-settings: 'MONO' 1;
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.ex-index-footer p {
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+.ex-index-footer code {
+  font-family: var(--font-recursive, ui-monospace, monospace);
+  font-variation-settings: 'MONO' 1;
+  background: rgb(212 170 238 / 0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.92em;
+}
+.ex-index-footer-link {
+  color: var(--color-primary-light);
+  font-size: var(--text-sm);
+  margin-top: var(--space-2);
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Shared prototype stage (.ex-stage / used by every /explore/<slug> route)
+   ─────────────────────────────────────────────────────────────────────────── */
+.ex-stage {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 0;
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.ex-stage-head {
+  padding: var(--space-6) clamp(20px, 4vw, 56px) var(--space-4);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap: var(--space-2) var(--space-6);
+  align-items: baseline;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.ex-stage-back {
+  grid-column: 1;
+  grid-row: 1;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  letter-spacing: 0.05em;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.ex-stage-back:hover { color: var(--color-primary-light); }
+
+.ex-stage-meta {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.ex-stage-title {
+  font-family: var(--font-display-stack);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.ex-stage-tags {
+  display: flex;
+  gap: var(--space-2);
+  list-style: none;
+}
+.ex-stage-tags li {
+  font-family: var(--font-recursive, monospace);
+  font-variation-settings: 'MONO' 1;
+  font-size: var(--text-xs);
+  padding: 2px 8px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-full);
+  color: var(--color-text-faint);
+  letter-spacing: 0.05em;
+}
+
+.ex-stage-blurb {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  max-width: 80ch;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+.ex-stage-canvas {
+  position: relative;
+  overflow: hidden;
+}
+
+.ex-stage-controls {
+  padding: var(--space-4) clamp(20px, 4vw, 56px) var(--space-6);
+  border-top: 1px solid var(--color-line);
+  display: flex;
+  justify-content: center;
+}
+
+.ex-press-play {
+  font-family: var(--font-display-stack);
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  padding: var(--space-3) var(--space-8);
+  border: 1px solid var(--color-primary-light);
+  border-radius: var(--radius-full);
+  color: var(--color-text);
+  background: rgb(196 126 232 / 0.08);
+  transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
+}
+.ex-press-play:hover:not(:disabled) {
+  background: rgb(196 126 232 / 0.18);
+  border-color: var(--color-accent-vivid);
+}
+.ex-press-play:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   01 · Glyph plot
+   ─────────────────────────────────────────────────────────────────────────── */
+.gp-stage {
+  height: 100%;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  padding: clamp(20px, 3vh, 40px) clamp(20px, 4vw, 56px);
+}
+
+.gp-plot {
+  margin: 0 auto;
+  font-family: var(--font-recursive, ui-monospace, 'JetBrains Mono', Menlo, monospace);
+  font-variation-settings: 'MONO' 1;
+  font-size: clamp(0.55rem, 1.2vw, 1rem);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  color: var(--color-primary-light);
+  text-align: center;
+  white-space: pre;
+  user-select: none;
+  filter: drop-shadow(0 0 14px rgb(196 126 232 / 0.18));
+}
+
+.gp-legend {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-6);
+  list-style: none;
+  font-family: var(--font-recursive, monospace);
+  font-variation-settings: 'MONO' 1;
+  font-size: var(--text-xs);
+  padding-top: var(--space-4);
+}
+.gp-legend li { display: flex; gap: var(--space-2); align-items: baseline; }
+.gp-legend b { color: var(--color-primary-light); letter-spacing: 0.1em; }
+.gp-legend span { color: var(--color-text-faint); }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   02 · Home (ASCII variant) — /explore/home-ascii
+   Bypasses ExploreShell — this prototype IS a full home composition. The
+   shared ex-stage chrome would just get in the way. Layout:
+     .ha-page   — fixed full-viewport grid, two columns
+     .ha-left   — ASCII portrait + cover overlay (hover-reveal)
+     .ha-right  — hero stack on top, visualiser zone on bottom (50vh)
+                  inside which a slim ASCII strip sits above the terrain.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.ha-page {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.ha-back {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 110;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  background: rgb(26 13 46 / 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--color-line);
+  font-family: ui-monospace, monospace;
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.ha-back:hover { color: var(--color-primary-light); border-color: rgb(196 126 232 / 0.4); }
+
+/* ── Left column ────────────────────────────────────────────────────────── */
+.ha-left {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface-deeper);
+  border-right: 1px solid var(--color-line);
+}
+
+/* .ha-face fills the whole left column. font-size is set imperatively by
+   the component (ResizeObserver) so the grid always fits both dimensions
+   perfectly — no manual clamp tuning. */
+/* .ha-face is now a <canvas> — actual character animation lives inside
+   the canvas (sparkles + drum-kick bursts). The wrapper-level transform
+   is still applied for an extra micro-pulse on each kick.
+   CSS vars driven by useFaceMotion on .ha-left:
+     --face-scale  → 1.0 → ~1.022 → 1.0 on each kick
+     --face-shift  → ±3px X-axis sway with bass */
+.ha-face {
+  position: absolute;
+  inset: 0;
+  display: block;
+  margin: auto;
+  user-select: none;
+  transform: translateX(var(--face-shift, 0)) scale(var(--face-scale, 1));
+  transform-origin: center;
+  will-change: transform;
+}
+
+.ha-cover {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.28;
+  mix-blend-mode: overlay;
+  filter: saturate(1.35);
+  transition: opacity var(--dur-slow) var(--ease-out), filter var(--dur-slow) var(--ease-out);
+  z-index: 2;
+}
+.ha-left:hover .ha-cover {
+  opacity: 0.7;
+  filter: saturate(1.5);
+}
+.ha-cover-img { object-fit: cover; }
+
+/* ── Right column ──────────────────────────────────────────────────────── */
+.ha-right {
+  position: relative;
+  overflow: hidden;
+}
+
+.ha-hero {
+  padding: clamp(20px, 4vh, 56px) clamp(20px, 4vw, 56px);
+  display: grid;
+  align-content: center;
+  gap: var(--space-6);
+  height: 50vh;             /* hero lives in top half, terrain owns bottom 50vh */
+  position: relative;
+  z-index: 3;
+}
+
+.ha-cta { display: grid; }
+
+/* ── Visualiser zone ────────────────────────────────────────────────────
+   Bottom 50vh of the viewport, FULL WIDTH (spans both columns).
+   Terrain + strip occupy the same space — strip overlaid on terrain. */
+.ha-vis {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50vh;
+  z-index: 4;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Override the global .terrain class so it fills the .ha-vis container
+   instead of pinning to its own 50vh of the nearest positioned ancestor. */
+.ha-vis .terrain {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+}
+
+.ha-strip {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  font-family: ui-monospace, 'JetBrains Mono', var(--font-recursive), Menlo, monospace;
+  font-variation-settings: 'MONO' 1;
+  font-size: clamp(0.75rem, 1.4vw, 1.35rem);
+  line-height: 1.05;
+  letter-spacing: 0.04em;
+  color: var(--color-accent-vivid);
+  text-align: center;
+  white-space: pre;
+  user-select: none;
+  z-index: 5;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px rgb(204 46 144 / 0.45));
+}
+
+/* ── Typography refresh — scoped to .ha-page so the live home is untouched.
+   The ASCII work calls for a terminal-leaning UI: monospace, square edges,
+   bracket affordances. Wordmark + track-title stay editorial as the brand
+   anchor. */
+
+.ha-page .cta-press-play {
+  font-family: ui-monospace, 'JetBrains Mono', var(--font-recursive), Menlo, monospace;
+  font-variation-settings: 'MONO' 1;
+  font-size: clamp(0.95rem, 1.2vw, 1.15rem);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 14px 32px;
+  border: 1px solid var(--color-primary-light);
+  border-radius: 0;
+  background: rgb(196 126 232 / 0.05);
+  color: var(--color-text);
+  transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
+}
+.ha-page .cta-press-play::before { content: '[ '; color: var(--color-primary-light); margin-right: 2px; }
+.ha-page .cta-press-play::after  { content: ' ]'; color: var(--color-primary-light); margin-left: 2px; }
+.ha-page .cta-press-play:hover:not(:disabled) {
+  background: rgb(204 46 144 / 0.12);
+  border-color: var(--color-accent-vivid);
+}
+.ha-page .cta-press-play:hover:not(:disabled)::before,
+.ha-page .cta-press-play:hover:not(:disabled)::after { color: var(--color-accent-vivid); }
+.ha-page .cta-press-play:disabled { opacity: 0.55; cursor: progress; }
+
+/* Listen-on row — terminal-style platform list. */
+.ha-page .listen-block { gap: var(--space-3); }
+.ha-page .listen-eyebrow {
+  font-family: ui-monospace, monospace;
+  font-variation-settings: 'MONO' 1;
+  font-size: var(--text-xs);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.ha-page .listen-pill {
+  font-family: ui-monospace, 'JetBrains Mono', var(--font-recursive), Menlo, monospace;
+  font-variation-settings: 'MONO' 1;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 7px 12px;
+  border-radius: 0;
+  border: 1px solid var(--color-line);
+  background: transparent;
+  color: var(--color-text-muted);
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.ha-page .listen-pill:hover {
+  color: var(--color-primary-light);
+  border-color: rgb(196 126 232 / 0.45);
+}
+
+/* Track title — eyebrow + meta as mono, keep the title editorial. */
+.ha-page .track-title-block { gap: 4px; }
+.ha-page .track-meta {
+  font-family: ui-monospace, monospace;
+  font-variation-settings: 'MONO' 1;
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+/* Stem stamps — tighten the existing brutalist look to align with the
+   terminal aesthetic. Square corners, mono labels. */
+.ha-page .stem-stamp {
+  border-radius: 0;
+  font-family: ui-monospace, 'JetBrains Mono', var(--font-recursive), Menlo, monospace;
+  font-variation-settings: 'MONO' 1;
+  letter-spacing: 0.18em;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   03 · ASCII zoo — /explore/ascii-zoo
+   Grid of 8 ASCII visualisations, no WebGL anywhere on the page.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+body:has(.az-page) { overflow: auto; }
+
+.az-page {
+  min-height: 100vh;
+  padding: clamp(20px, 4vh, 56px) clamp(20px, 4vw, 56px) 140px;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.az-head {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0 auto var(--space-12);
+  max-width: 78ch;
+  padding-bottom: var(--space-8);
+  border-bottom: 1px solid var(--color-line);
+}
+.az-eyebrow {
+  font-family: ui-monospace, monospace;
+  font-size: var(--text-xs);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.az-title {
+  font-family: var(--font-display-stack);
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.az-blurb {
+  color: var(--color-text-muted);
+  font-size: var(--text-base);
+  line-height: 1.55;
+}
+
+.az-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+  list-style: none;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+@media (max-width: 1100px) { .az-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px)  { .az-grid { grid-template-columns: 1fr; } }
+
+.az-card {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: rgb(18 8 36 / 0.6);
+}
+
+.az-card-meta {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.az-card-n {
+  font-family: ui-monospace, monospace;
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  letter-spacing: 0.12em;
+}
+.az-card-title {
+  font-family: ui-monospace, monospace;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--color-primary-light);
+}
+.az-card-source {
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--color-text-faint);
+  text-align: right;
+}
+
+/* Each panel is the canvas's container. Aspect ratio kept loose; the canvas
+   centres itself inside via auto margins. */
+.az-panel {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  background: #120824;
+  border-radius: 4px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.az-canvas {
+  display: block;
+  margin: auto;
+}
+
+.az-card-tech {
+  font-family: ui-monospace, monospace;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+  letter-spacing: 0.03em;
+}
+
+/* Footer: play CTA / stem toggles, fixed across bottom */
+.az-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: rgb(26 13 46 / 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.az-press-play {
+  font-family: ui-monospace, monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 12px 28px;
+  border: 1px solid var(--color-primary-light);
+  border-radius: 0;
+  background: rgb(196 126 232 / 0.05);
+  color: var(--color-text);
+  transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
+}
+.az-press-play:hover:not(:disabled) {
+  background: rgb(204 46 144 / 0.12);
+  border-color: var(--color-accent-vivid);
+}
+.az-press-play:disabled { opacity: 0.55; cursor: progress; }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   04 · ASCII overlay — /explore/ascii-overlay
+   Four canvases stacked, each in its own brand colour, combined via
+   mix-blend-mode: screen on the GPU. Single visualiser, no WebGL.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+body:has(.ao-page) { overflow: auto; }
+
+.ao-page {
+  min-height: 100vh;
+  padding: clamp(20px, 4vh, 56px) clamp(20px, 4vw, 56px) 140px;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.ao-head {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0 auto var(--space-12);
+  max-width: 78ch;
+  padding-bottom: var(--space-8);
+  border-bottom: 1px solid var(--color-line);
+}
+.ao-eyebrow {
+  font-family: ui-monospace, monospace;
+  font-size: var(--text-xs);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.ao-title {
+  font-family: var(--font-display-stack);
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.ao-blurb {
+  color: var(--color-text-muted);
+  font-size: var(--text-base);
+  line-height: 1.55;
+}
+.ao-blurb code {
+  font-family: ui-monospace, monospace;
+  background: rgb(212 170 238 / 0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.92em;
+  color: var(--color-primary-light);
+}
+
+.ao-legend {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-3);
+  list-style: none;
+  margin-top: var(--space-4);
+}
+@media (max-width: 760px) { .ao-legend { grid-template-columns: 1fr 1fr; } }
+.ao-legend li {
+  display: grid;
+  grid-template-rows: auto auto auto;
+  gap: 2px;
+  padding: var(--space-3);
+  border-left: 3px solid currentColor;
+  background: rgb(255 255 255 / 0.02);
+}
+.ao-legend b {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+}
+.ao-legend span:first-of-type {
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.ao-legend span:last-of-type {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+/* The stage holds all four canvases stacked in the same position. */
+.ao-stage {
+  position: relative;
+  margin: 0 auto;
+  max-width: 1100px;
+  aspect-ratio: 16 / 10;
+  background: var(--color-surface-deeper);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.ao-layer {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  display: block;
+  pointer-events: none;
+  /* lighten preserves per-channel contrast better than screen on a dark bg —
+     each layer "wins" where its colour is brightest, less wash-out. */
+  mix-blend-mode: lighten;
+  will-change: transform;
+}
+
+/* Different blend per layer if useful — keeping them all on screen for now
+   produces an additive look. lighten is an alternative that's sharper. */
+
+.ao-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: rgb(26 13 46 / 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.ao-press-play {
+  font-family: ui-monospace, monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 12px 28px;
+  border: 1px solid var(--color-primary-light);
+  border-radius: 0;
+  background: rgb(196 126 232 / 0.05);
+  color: var(--color-text);
+}
+.ao-press-play:hover:not(:disabled) {
+  background: rgb(204 46 144 / 0.12);
+  border-color: var(--color-accent-vivid);
+}
+.ao-press-play:disabled { opacity: 0.55; cursor: progress; }
