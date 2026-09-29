@@ -238,7 +238,7 @@ a {
   font-weight: 500;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--color-text-faint);
+  color: var(--color-text-muted);
   margin-bottom: var(--space-3);
 }
 
@@ -970,17 +970,24 @@ a {
    Layering: terrain z-0 → content z-1 → grain z-100 (fixed, set above).
    `body` is `overflow: hidden`, so the content column owns its own scroll
    on short viewports rather than the document.                             */
+/* The landing owns its own scroll: `body` is overflow:hidden, and the link
+   list is now tall enough to pass the fold on a laptop. */
 .landing {
   position: relative;
-  min-height: 100dvh;
+  height: 100dvh;
   width: 100%;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
 }
 
 /* Taller than the mixer's 50vh: this page has less content stacked above it,
    so the horizon can sit higher and the wireframe gets room to read. */
+/* Fixed, not absolute: the terrain is the ground, so it stays put while the
+   content scrolls over it rather than sliding away with the list. */
 .terrain--landing {
-  height: 68vh;
+  position: fixed;
+  height: 62vh;
 }
 
 .landing-content {
@@ -992,9 +999,9 @@ a {
   align-items: flex-start;
   /* Varied, not uniform: tight inside groups, generous between them. The
      gap here is the between-group rhythm; groups set their own internal gaps. */
-  gap: var(--space-8);
+  gap: var(--space-6);
   padding:
-    clamp(var(--space-8), 7vh, var(--space-24))
+    clamp(var(--space-6), 4.5vh, var(--space-16))
     clamp(var(--space-6), 6vw, var(--space-24));
   /* Content stops well short of the right edge so the terrain reads as
      landscape rather than as a backdrop behind a full-width slab. */
@@ -1003,10 +1010,19 @@ a {
 
 /* The wordmark is centered by default for the mixer's hero; the landing
    left-aligns it with everything else in the column. */
+/* Lilac at full opacity rather than a dimmed bone: this is the one line that
+   tells a first-touch visitor what they're about to hear, and at 0.30 alpha it
+   read as decoration. ~8.7:1 on the surface colour. */
+.landing-content .wordmark-eyebrow {
+  color: var(--color-primary-pale);
+  font-weight: 500;
+  letter-spacing: 0.2em;
+}
+
 .landing-content .wordmark {
   text-align: left;
   /* Smaller than the mixer hero: this page is a signpost, not a stage. */
-  font-size: clamp(2.75rem, 8vw, 5.5rem);
+  font-size: clamp(2.5rem, 7vw, 4.75rem);
 }
 
 /* ─── Landing: play control in the content flow ─────────────────────────── */
@@ -1053,70 +1069,118 @@ a {
   width: 100%;
 }
 
+@media (min-width: 720px) {
+  .linkgroups {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6) var(--space-8);
+  }
+
+  /* Listen is the conversion group — full width, above the pair. */
+  .linkgroup:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
 .linkgroup {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-}
-
-.linkgroup-label {
-  font-family: var(--font-body-stack);
-  font-size: 0.625rem;
-  font-weight: 500;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--color-text-faint);
-}
-
-.linkgroup-row {
-  display: flex;
-  flex-wrap: wrap;
   gap: var(--space-2);
-  list-style: none;
 }
 
-/* Pills carry their own surface rather than sitting as bare type over the
-   wireframe — the terrain is the page's only variable-luminance background
-   and text over it would fail contrast at the bright moments. */
-.linkgroup-pill {
-  display: inline-flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1px;
-  padding: 9px 18px;
-  min-height: var(--touch-target-min);
-  border-radius: var(--radius-full);
-  background: rgb(139 58 196 / 0.14);
-  border: 1px solid rgb(196 126 232 / 0.25);
-  backdrop-filter: blur(6px);
-  color: var(--color-ground-light);
+/* Display face here, body face on the rows below — the heading is the voice,
+   the links are information. Caprasimo is a heavy display cut, so it gets
+   sentence case and no tracking; letter-spacing a fat display face on small
+   text closes the counters and turns it to mush. */
+.linkgroup-label {
   font-family: var(--font-display-stack);
-  font-size: 1rem;
-  letter-spacing: 0.01em;
-  transition:
-    background var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: var(--color-primary-light);
 }
 
-.linkgroup-pill:hover {
-  background: rgb(204 46 144 / 0.18);
-  border-color: rgb(204 46 144 / 0.45);
-  transform: translateY(-1px);
+.linkgroup-list {
+  list-style: none;
+  /* The rules belong to the rows; this closes the bottom of the last one. */
+  border-bottom: 1px solid var(--color-line);
 }
 
-/* A quiet acknowledgement they've already been there (DESIGN.md). */
-.linkgroup-pill:visited {
-  border-color: rgb(122 138 26 / 0.40);
-}
-
-.linkgroup-note {
+/* Rule-separated rows, not pills. Full-bleed within the content column so the
+   list reads as a set of lines rather than a scatter of tags. */
+.linkrow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--touch-target-min);
+  padding: 10px var(--space-3) 10px var(--space-2);
+  border-top: 1px solid var(--color-line);
+  /* Body face: these are information, not headings. */
   font-family: var(--font-body-stack);
-  font-size: 0.5625rem;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: rgb(240 235 224 / 0.92);
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    padding-left var(--dur-fast) var(--ease-out);
+}
+
+/* High-contrast hover: the row fills and the text goes to full bone white,
+   rather than a timid tint. Deliberately NOT a left-edge accent stripe. */
+.linkrow:hover,
+.linkrow:focus-visible {
+  background-color: var(--color-primary-mid);
+  color: var(--color-ground-light);
+  padding-left: var(--space-4);
+}
+
+.linkrow-name {
+  grid-column: 1;
+  color: inherit;
+}
+
+.linkrow-note {
+  grid-column: 2;
+  justify-self: start;
+  font-size: 0.6875rem;
   font-weight: 500;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
+  /* Was --color-text-faint: measured 2.41:1, well under AA. This is a
+     publication credit, not decoration. */
+  color: rgb(240 235 224 / 0.62);
+}
+
+.linkrow:hover .linkrow-note,
+.linkrow:focus-visible .linkrow-note {
+  color: rgb(240 235 224 / 0.75);
+}
+
+.linkrow-arrow {
+  grid-column: 3;
+  font-size: 0.875rem;
   color: var(--color-text-faint);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.linkrow:hover .linkrow-arrow,
+.linkrow:focus-visible .linkrow-arrow {
+  color: var(--color-ground-light);
+  transform: translate(2px, -2px);
+}
+
+/* A quiet acknowledgement they've already been there (DESIGN.md). Must sit on
+   the anchor itself and use an allowlisted property: browsers refuse :visited
+   styling on descendants, so targeting .linkrow-arrow here would do nothing. */
+.linkrow:visited {
+  border-top-color: rgb(122 138 26 / 0.45);
 }
 
 /* ─── Landing: foot (mixer doorway + contact) ───────────────────────────── */
@@ -1124,10 +1188,10 @@ a {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-4);
+  gap: var(--space-3);
   width: 100%;
   margin-top: auto;
-  padding-top: var(--space-6);
+  padding-top: var(--space-4);
   border-top: 1px solid var(--color-line);
 }
 
@@ -1138,7 +1202,7 @@ a {
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: var(--space-1) var(--space-4);
-  padding: var(--space-4) var(--space-6);
+  padding: var(--space-3) var(--space-6);
   border-radius: var(--radius-md);
   background: rgb(59 26 110 / 0.55);
   border: 1px solid rgb(196 126 232 / 0.22);
@@ -1185,11 +1249,15 @@ a {
 }
 
 .landing-contact {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target-min);
   font-family: var(--font-body-stack);
-  font-size: var(--text-sm);
-  letter-spacing: 0.04em;
-  color: var(--color-text-muted);
-  border-bottom: 1px solid var(--color-line);
+  font-size: var(--text-base);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgb(240 235 224 / 0.88);
+  border-bottom: 1px solid rgb(196 126 232 / 0.45);
   padding-bottom: 2px;
   transition: color var(--dur-fast) var(--ease-out),
               border-color var(--dur-fast) var(--ease-out);
@@ -1223,11 +1291,10 @@ a {
     gap: var(--space-4);
   }
 
-  /* Terrain shrinks so the horizon sits below the link groups rather than
-     cutting through them — the wireframe is brightest right at the horizon
-     and faint labels stop reading against it. */
+  /* Lower horizon on short screens so the wireframe stays a ground line
+     rather than rising into the list. */
   .terrain--landing {
-    height: 42vh;
+    height: 46vh;
   }
 
   .landing-foot {
@@ -1236,6 +1303,19 @@ a {
 }
 
 @media (max-width: 720px) {
+  /* Single column here, so the text spans the full width and the horizontal
+     scrim has nowhere to fade to. Vertical instead. */
+  .landing-scrim {
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 20%,
+      rgb(26 13 46 / 0.82) 42%,
+      rgb(26 13 46 / 0.90) 70%,
+      rgb(26 13 46 / 0.95) 100%
+    );
+  }
+
   .play-control--inline {
     gap: var(--space-3);
   }
@@ -1288,17 +1368,29 @@ a {
    and under the content column. Bottom-weighted: the horizon is the brightest,
    busiest part of the mesh and the foot content sits right on it. */
 .landing-scrim {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    transparent 30%,
-    rgb(26 13 46 / 0.55) 52%,
-    rgb(26 13 46 / 0.45) 68%,
-    rgb(26 13 46 / 0.78) 88%,
-    rgb(26 13 46 / 0.92) 100%
-  );
+  /* Two axes doing different jobs. The horizontal pass is the important one:
+     it beds the text column without touching the right side, so the wireframe
+     stays fully visible exactly where there's nothing written over it. A
+     uniform top-to-bottom scrim strong enough for the text erased the terrain
+     entirely. The vertical pass only softens the very bottom, where the mesh
+     is densest and the foot content sits. */
+  background:
+    linear-gradient(
+      to right,
+      rgb(26 13 46 / 0.92) 0%,
+      rgb(26 13 46 / 0.86) 38%,
+      rgb(26 13 46 / 0.45) 58%,
+      transparent 76%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 58%,
+      rgb(26 13 46 / 0.30) 82%,
+      rgb(26 13 46 / 0.55) 100%
+    );
 }

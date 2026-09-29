@@ -65,10 +65,10 @@ export default function Landing() {
         <div className="landing-content" id="landing-content">
           {/* Not the artist name — that's the wordmark immediately below, and
               repeating it makes the <h1> announce "DJ 9cups 9cups". First-touch
-              visitors get genre + place instead, which is the one thing the
-              page can't convey through the music alone. */}
+              visitors get the genres instead, which is the one thing the page
+              can't convey before they press play. */}
           <Wordmark
-            eyebrow="House &amp; UK garage · Wellington"
+            eyebrow="UKG, Bassline, 140 &amp; House"
             kickAnalyser={kickAnalyser}
             playing={isPlaying}
           />
@@ -93,7 +93,7 @@ export default function Landing() {
             </Link>
 
             <a className="landing-contact" href={`mailto:${CONTACT_EMAIL}`}>
-              Get in touch
+              Bookings
             </a>
           </div>
         </div>
