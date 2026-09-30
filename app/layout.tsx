@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from 'next'
-import { Caprasimo, DM_Sans } from 'next/font/google'
+import { Bungee, DM_Sans } from 'next/font/google'
 import './globals.css'
 
-const display = Caprasimo({
+// Bungee: signage display, single weight, uppercase-leaning. Replaced
+// Caprasimo on 2026-10-01 — see docs/STATE.md.
+const display = Bungee({
   subsets: ['latin'],
   weight: '400',
   display: 'swap',

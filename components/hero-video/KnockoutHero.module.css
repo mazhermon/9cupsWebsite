@@ -46,24 +46,50 @@
   }
 }
 
-.title {
+/* Heading and its supporting line stack together, so the block is positioned
+   once rather than each line being pinned separately. */
+.titleBlock {
   position: absolute;
   left: 0;
   right: 0;
   bottom: clamp(16px, 4vw, 48px);
   z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-inline: clamp(16px, 4vw, 48px);
+}
+
+.title {
   margin: 0;
   text-align: center;
+  text-wrap: balance;
   font-size: 13px;
   font-weight: 600;
   line-height: 1.2;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
 }
 
-/* Keep the title clear of the bottom-right "Pause motion" button on phones. */
+/* Supporting detail: same family, a step down in size, weight and presence. */
+.subtitle {
+  margin: 0;
+  text-align: center;
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  /* 0.62 measured 5.05:1 on the hero ground, which is the *best* case — this
+     sits over video with bright magenta passages where light text loses
+     contrast. 0.78 keeps headroom over those frames. */
+  color: rgb(246 238 254 / 0.78);
+}
+
+/* Keep the title block clear of the bottom-right "Pause motion" button on phones. */
 @media (max-width: 640px) {
-  .title {
+  .titleBlock {
     bottom: 80px;
   }
 }

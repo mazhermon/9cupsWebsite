@@ -12,6 +12,9 @@ type Props = {
   /** Optional call to action rendered above the title. 9cups uses this for the
    *  "press play to enter" control. */
   cta?: ReactNode;
+  /** Secondary line under the heading. Deliberately outside the <h1> — it is
+   *  supporting detail, not part of the page's heading. */
+  subtitle?: ReactNode;
 };
 
 /**
@@ -19,7 +22,7 @@ type Props = {
  * How: a layer of dark field + white text is multiplied over the video —
  * white × video = video, dark × video ≈ dark.
  */
-export default function KnockoutHero({ lines = ['IX', 'CUPS'], title = '9cups · live', className, cta }: Props) {
+export default function KnockoutHero({ lines = ['IX', 'CUPS'], title = '9cups · live', className, cta, subtitle }: Props) {
   return (
     <section className={[styles.hero, heroFontVariables, className].filter(Boolean).join(' ')}>
       <BackgroundVideo name="knockout" />
@@ -31,7 +34,10 @@ export default function KnockoutHero({ lines = ['IX', 'CUPS'], title = '9cups ·
         </p>
       </div>
       {cta && <div className={styles.cta}>{cta}</div>}
-      <h1 className={styles.title}>{title}</h1>
+      <div className={styles.titleBlock}>
+        <h1 className={styles.title}>{title}</h1>
+        {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+      </div>
     </section>
   );
 }
