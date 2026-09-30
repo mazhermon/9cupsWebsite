@@ -307,6 +307,7 @@ a {
   align-items: baseline;
   gap: 0.7rem;
   padding: 0.55rem 1.05rem 0.55rem 1.15rem;
+  min-height: var(--touch-target-min);
   /* The corner cut on the right edge gives this its ticker-tape silhouette. */
   clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
   /* Stem colour as a 6px left bar; rest of the stamp is light surface. */
@@ -406,7 +407,9 @@ a {
   font-weight: 500;
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: var(--color-text-faint);
+  /* Was --color-text-faint: 2.41:1, and it sits over the brightest part of the
+     wireframe, which is the worst place for faint type. */
+  color: rgb(240 235 224 / 0.72);
 }
 
 .listen-row {
@@ -1124,20 +1127,49 @@ a {
   font-weight: 400;
   letter-spacing: 0.01em;
   color: rgb(240 235 224 / 0.92);
+  /* Only paint-level properties here. The nudge on hover is a transform on the
+     row's children (compositor-only) — transitioning padding-left, as this
+     once did, relayouts the row every frame and is what made hover feel laggy. */
   transition:
     background-color var(--dur-fast) var(--ease-out),
-    color var(--dur-fast) var(--ease-out),
-    padding-left var(--dur-fast) var(--ease-out);
+    color var(--dur-fast) var(--ease-out);
 }
 
-/* High-contrast hover: the row fills and the text goes to full bone white,
-   rather than a timid tint. Deliberately NOT a left-edge accent stripe. */
+/* High-contrast hover: the row fills with a solid colour and the text goes to
+   full bone white, rather than a timid tint. Deliberately NOT a left-edge
+   accent stripe. Each row carries its own --row-hover, set below. */
 .linkrow:hover,
 .linkrow:focus-visible {
-  background-color: var(--color-primary-mid);
-  color: var(--color-ground-light);
-  padding-left: var(--space-4);
+  background-color: var(--row-hover, var(--color-primary-mid));
+  color: var(--row-hover-ink, var(--color-ground-light));
 }
+
+/* The hover nudge, done with transform so it composites instead of relaying
+   out the row. Applied to the children, not the row, so the full-bleed
+   background and its rules stay put. */
+.linkrow > * {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.linkrow:hover > *,
+.linkrow:focus-visible > * {
+  transform: translateX(6px);
+}
+
+/* One flat colour per row, walked across the brand palette so the list has
+   shading variation without any row becoming a gradient. Order follows
+   LISTEN_LINKS then FOLLOW_LINKS then PRESS_LINKS within each group.
+   Every pairing is contrast-checked against its own background. */
+.linkgroup:nth-child(1) li:nth-child(1) .linkrow { --row-hover: #1db954; --row-hover-ink: #0b1f12; } /* Spotify green */
+.linkgroup:nth-child(1) li:nth-child(2) .linkrow { --row-hover: #4d8fa8; --row-hover-ink: #05161d; } /* Bandcamp teal */
+.linkgroup:nth-child(1) li:nth-child(3) .linkrow { --row-hover: #ff5500; --row-hover-ink: #1c0800; } /* SoundCloud orange */
+.linkgroup:nth-child(1) li:nth-child(4) .linkrow { --row-hover: #cc2e90; --row-hover-ink: #ffffff; } /* brand magenta */
+.linkgroup:nth-child(1) li:nth-child(5) .linkrow { --row-hover: #8b3ac4; --row-hover-ink: #ffffff; } /* brand amethyst */
+
+.linkgroup:nth-child(2) li:nth-child(1) .linkrow { --row-hover: #b03060; --row-hover-ink: #ffffff; } /* crimson rose */
+.linkgroup:nth-child(2) li:nth-child(2) .linkrow { --row-hover: #c47ee8; --row-hover-ink: #1d0730; } /* bright lavender */
+
+.linkgroup:nth-child(3) li:nth-child(1) .linkrow { --row-hover: #7a8a1a; --row-hover-ink: #0f1201; } /* acid moss */
 
 .linkrow-name {
   grid-column: 1;
@@ -1157,23 +1189,30 @@ a {
 }
 
 .linkrow:hover .linkrow-note,
-.linkrow:focus-visible .linkrow-note {
-  color: rgb(240 235 224 / 0.75);
+.linkrow:focus-visible .linkrow-note,
+.linkrow:hover .linkrow-arrow,
+.linkrow:focus-visible .linkrow-arrow {
+  /* Inherit the row's ink so each solid background keeps its own contrast. */
+  color: inherit;
+  opacity: 0.8;
 }
 
 .linkrow-arrow {
   grid-column: 3;
   font-size: 0.875rem;
-  color: var(--color-text-faint);
+  /* Was --color-text-faint at 2.41:1. This arrow tells you the link leaves the
+     site, so it has to be readable, not merely present. */
+  color: rgb(240 235 224 / 0.62);
   transition:
     transform var(--dur-fast) var(--ease-out),
     color var(--dur-fast) var(--ease-out);
 }
 
+/* Wins over the generic `.linkrow:hover > *` nudge on specificity, so it
+   states the full transform: the row's 6px shift plus its own diagonal lift. */
 .linkrow:hover .linkrow-arrow,
 .linkrow:focus-visible .linkrow-arrow {
-  color: var(--color-ground-light);
-  transform: translate(2px, -2px);
+  transform: translate(8px, -2px);
 }
 
 /* A quiet acknowledgement they've already been there (DESIGN.md). Must sit on
@@ -1343,7 +1382,7 @@ a {
   align-items: center;
   gap: var(--space-2);
   padding: 8px 16px;
-  min-height: 36px;
+  min-height: var(--touch-target-min);
   border-radius: var(--radius-full);
   background: rgb(26 13 46 / 0.55);
   border: 1px solid rgb(196 126 232 / 0.20);
@@ -1393,4 +1432,154 @@ a {
       rgb(26 13 46 / 0.30) 82%,
       rgb(26 13 46 / 0.55) 100%
     );
+}
+
+/* ─── Home: knockout hero + landing ─────────────────────────────────────────
+   Two sections sharing one audio transport. They stack and scroll by default;
+   on very large screens they sit side by side and the page stops scrolling. */
+.home {
+  position: relative;
+  width: 100%;
+}
+
+/* `body` is overflow:hidden for the single-surface pages. Home is a real
+   scrolling document. */
+body:has(.home) {
+  overflow: auto;
+}
+
+/* 'section' variant: the landing sits inside a longer document, so it stops
+   owning the viewport and the terrain anchors to the section, not the screen. */
+.landing--section {
+  height: auto;
+  overflow: visible;
+}
+
+.landing--section .terrain--landing,
+.landing--section .landing-scrim {
+  position: absolute;
+}
+
+.landing--section .landing-content {
+  min-height: 100svh;
+}
+
+/* ─── Hero: press-play-to-enter ─────────────────────────────────────────── */
+.hero-enter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-6) var(--space-3) var(--space-3);
+  min-height: var(--touch-target-min);
+  border-radius: var(--radius-full);
+  background: var(--color-primary-mid);
+  color: var(--color-ground-light);
+  font-family: var(--font-body-stack);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.12) inset,
+    0 12px 32px rgb(18 4 31 / 0.65);
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.hero-enter:hover:not(:disabled) {
+  background: var(--color-primary-light);
+  transform: translateY(-1px);
+}
+
+.hero-enter:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.hero-enter:disabled {
+  background: rgb(139 58 196 / 0.4);
+  box-shadow: none;
+  cursor: default;
+}
+
+.hero-enter-icon {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.16);
+}
+
+.hero-enter-icon svg {
+  width: 13px;
+  height: 13px;
+  fill: currentColor;
+}
+
+/* ─── Very large screens: hero and landing side by side ─────────────────────
+   Gated on height as well as width. At 1600x700 the landing's link list would
+   be crushed, and a split that scrolls internally is worse than stacking. */
+@media (min-width: 1600px) and (min-height: 800px) {
+  body:has(.home) {
+    overflow: hidden;
+  }
+
+  .home {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100dvh;
+  }
+
+  .home > * {
+    min-width: 0;
+    height: 100dvh;
+  }
+
+  /* 27vw of a half-width column overflows its own half. Custom properties
+     inherit, so this reaches the hero's CSS Module without global CSS needing
+     to name a module class (which it can't). */
+  .home {
+    --knockout-size: clamp(90px, 13vw, 300px);
+  }
+
+  .landing--section .landing-content {
+    min-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+
+  /* The terrain anchors to its own half rather than the full viewport. */
+  .landing--section .terrain--landing {
+    height: 46vh;
+  }
+}
+
+/* Portrait column running the looping video instead of a still. BackgroundVideo
+   puts its layer at z-index -1 and its pause button at 6, both relative to the
+   nearest stacking context — without `isolation` the video would escape this
+   column and land behind the page. */
+.editorial-portrait--video {
+  isolation: isolate;
+  background: var(--color-surface-deeper);
+}
+
+/* Over a still image, `mix-blend-mode: overlay` plus `filter: saturate()` costs
+   nothing: the composite is computed once and cached. Over a *playing* video
+   both are recomputed every frame, and on integrated graphics that measured
+   20fps against 60. Plain alpha compositing gets most of the look back at a
+   fraction of the cost (measured ~51fps), so the video panel opts out of both.
+   The still-image path below keeps the original treatment. */
+.editorial-portrait--video .hover-overlay {
+  mix-blend-mode: normal;
+  filter: none;
+  will-change: opacity;
+  opacity: 0.42;
+}
+
+.editorial-portrait--video:hover .hover-overlay,
+.editorial-portrait--video:focus-within .hover-overlay {
+  opacity: 0.16;
+  filter: none;
 }

@@ -298,7 +298,12 @@ export default function Terrain(props: TerrainProps) {
       <Canvas
         dpr={props.dpr ?? 1}
         gl={{ antialias: false, alpha: true, powerPreference: 'high-performance' }}
-        frameloop="always"
+        // Only drive a continuous render loop while audio is actually playing.
+        // At rest the mesh is static, so "always" spent a full 60fps of GPU
+        // redrawing an identical frame — which on integrated graphics is enough
+        // to starve a video compositing beside it (measured: 22fps -> 60fps).
+        // "demand" still renders once on mount, so the resting terrain draws.
+        frameloop={props.playing ? 'always' : 'demand'}
         style={{ width: '100%', height: '100%' }}
       >
         {/* Camera tuned for the short-wide hero canvas (100vw × 50vh).

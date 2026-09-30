@@ -1,33 +1,46 @@
 'use client'
 
-// The landing page: 9cups' front door.
+// The landing surface: play button, links out to every platform, a doorway
+// into the mixer, bookings.
 //
-// Deliberately lighter than the mixer at /mixer. One play button on a single
-// summed mixdown (660KB, streamed) drives the wireframe terrain; everything
-// else is links out to the platforms. The mixer is one click away for anyone
-// who wants to pull the track apart.
+// Composition: terrain as the ground, content left-aligned above it —
+// asymmetric rather than a centered stack (see DESIGN.md).
 //
-// Composition: terrain as the ground across the bottom, content left-aligned
-// above it — asymmetric rather than a centered stack (see DESIGN.md).
+// The audio transport comes from <PlayerProvider>, not from a hook here, so the
+// knockout hero's CTA and this page's play button drive the same <audio>.
 
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { useTrackPlayer } from '@/hooks/useTrackPlayer'
-import {
-  RELEASE,
-  LINK_GROUPS,
-  CONTACT_EMAIL,
-  LANDING_TRACK_URL,
-} from '@/lib/track-config'
+import { usePlayer } from '@/components/Landing/PlayerProvider'
+import { RELEASE, LINK_GROUPS, CONTACT_EMAIL } from '@/lib/track-config'
 import Wordmark from '@/components/Wordmark/Wordmark'
 import PlayControl from '@/components/PlayControl/PlayControl'
-import GrainOverlay from '@/components/GrainOverlay/GrainOverlay'
 import LinkGroups from '@/components/Landing/LinkGroups'
 
 const Terrain = dynamic(() => import('@/components/Terrain/Terrain'), { ssr: false })
 
-export default function Landing() {
-  const { ready, isPlaying, error, analyser, toggle } = useTrackPlayer(LANDING_TRACK_URL)
+export type LandingVariant =
+  /** The whole page: owns the viewport and its own scroll, terrain fixed. */
+  | 'standalone'
+  /** A section inside a longer document, beneath the video hero. Normal block
+   *  flow; the terrain is absolute within the section. This is what / uses. */
+  | 'section'
+
+export interface LandingProps {
+  variant?: LandingVariant
+  /** Renders as <main> by default. A page that already has a <main> hosting a
+   *  hero above this should pass 'section', so there's only one. */
+  as?: 'main' | 'section'
+  /** DOM id for the hero CTA to scroll to. */
+  id?: string
+}
+
+export default function Landing({
+  variant = 'standalone',
+  as = 'main',
+  id = 'landing',
+}: LandingProps) {
+  const { ready, isPlaying, error, analyser, toggle } = usePlayer()
 
   // The mix's low end carries the kick, so the wordmark's transient detector
   // still finds hits — the same glitch the mixer gets from its drums stem.
@@ -42,64 +55,61 @@ export default function Landing() {
         ? RELEASE.title
         : `Play ${RELEASE.title}`
 
-  return (
-    <>
-      <a href="#landing-content" className="skip-link">Skip to links</a>
+  const Root = as
 
-      <main className="landing" aria-label={`${RELEASE.artist} · ${RELEASE.title}`}>
-        <Terrain
-          className="terrain--landing"
+  return (
+    <Root
+      id={id}
+      className={`landing landing--${variant}`}
+      aria-label={`${RELEASE.artist} · ${RELEASE.title}`}
+    >
+      <Terrain
+        className="terrain--landing"
+        playing={isPlaying}
+        singleAnalyser={analyser}
+        // Full-bleed here, unlike the mixer's half-width column, so the plane
+        // needs to be wider than the frame or its edges read as diagonal seams.
+        planeScale={2.2}
+      />
+
+      {/* Softens the terrain under the foot content. The wireframe is at its
+          densest and brightest right at the horizon, which is exactly where the
+          mixer CTA and contact link sit. */}
+      <div className="landing-scrim" aria-hidden="true" />
+
+      <div className="landing-content" id="landing-content">
+        <Wordmark
+          eyebrow="UKG, Bassline, 140 &amp; House"
+          // Under the hero, which already owns the page's single <h1>.
+          level={variant === 'section' ? 2 : 1}
+          kickAnalyser={kickAnalyser}
           playing={isPlaying}
-          singleAnalyser={analyser}
-          // Full-bleed here, unlike the mixer's half-width column, so the
-          // plane needs to be wider than the frame or its edges read as
-          // diagonal seams at the sides.
-          planeScale={2.2}
         />
 
-        {/* Softens the terrain under the foot content. The wireframe is at its
-            densest and brightest right at the horizon, which is exactly where
-            the mixer CTA and contact link sit. */}
-        <div className="landing-scrim" aria-hidden="true" />
+        <PlayControl
+          className="play-control--inline"
+          isPlaying={isPlaying}
+          onToggle={toggle}
+          disabled={!ready || !!error}
+          hint={hint}
+        />
 
-        <div className="landing-content" id="landing-content">
-          {/* Not the artist name — that's the wordmark immediately below, and
-              repeating it makes the <h1> announce "DJ 9cups 9cups". First-touch
-              visitors get the genres instead, which is the one thing the page
-              can't convey before they press play. */}
-          <Wordmark
-            eyebrow="UKG, Bassline, 140 &amp; House"
-            kickAnalyser={kickAnalyser}
-            playing={isPlaying}
-          />
+        <LinkGroups groups={LINK_GROUPS} />
 
-          <PlayControl
-            className="play-control--inline"
-            isPlaying={isPlaying}
-            onToggle={toggle}
-            disabled={!ready || !!error}
-            hint={hint}
-          />
+        <div className="landing-foot">
+          <Link href="/mixer" className="landing-mixer-cta">
+            <span className="landing-mixer-label">Play with the stems</span>
+            <span className="landing-mixer-sub">
+              Pull {RELEASE.title} apart, one stem at a time
+            </span>
+            <span className="landing-mixer-arrow" aria-hidden="true">&rarr;</span>
+          </Link>
 
-          <LinkGroups groups={LINK_GROUPS} />
-
-          <div className="landing-foot">
-            <Link href="/mixer" className="landing-mixer-cta">
-              <span className="landing-mixer-label">Play with the stems</span>
-              <span className="landing-mixer-sub">
-                Pull {RELEASE.title} apart, one stem at a time
-              </span>
-              <span className="landing-mixer-arrow" aria-hidden="true">&rarr;</span>
-            </Link>
-
-            <a className="landing-contact" href={`mailto:${CONTACT_EMAIL}`}>
-              Bookings
-            </a>
-          </div>
+          <a className="landing-contact" href={`mailto:${CONTACT_EMAIL}`}>
+            Bookings
+          </a>
         </div>
-      </main>
-
-      <GrainOverlay />
-    </>
+      </div>
+    </Root>
   )
 }

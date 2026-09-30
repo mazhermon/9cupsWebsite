@@ -6,7 +6,7 @@
 // a different renderer. Goal: decide whether dropping the 3D mesh in favour
 // of multiple ASCII surfaces is the right direction for the live home.
 
-import { useMemo, useRef } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useAudioEngine } from '@/hooks/useAudioEngine'
 import { RELEASE } from '@/lib/track-config'
@@ -45,15 +45,18 @@ export default function AsciiZoo() {
     toggleMute, startPlaybackOnboarded, togglePlayback,
   } = useAudioEngine(STEM_URLS)
 
-  // Build renderers once. They're stateful closures.
-  const renderers = useRef([
+  // Build renderers once. They're stateful closures, so their identity has to
+  // survive re-renders. useState with a lazy initialiser guarantees that and,
+  // unlike reading a ref during render, is legal — useMemo is not a guarantee,
+  // it's allowed to recompute.
+  const [renderers] = useState(() => [
     createClassic(PORTRAIT),
     createBlock(COVER),
     createEdge(PORTRAIT),
     createHalftone(FAMILY),
     createParticles(PORTRAIT),
     createMatrix('9CUPS'),
-  ]).current
+  ])
 
   const panels: PanelConfig[] = useMemo(() => [
     { n: '01', title: 'CLASSIC',   source: 'maz-bw-wide',     technique: '9-step density ramp + drum-sparkle',     cols: 60, rows: 40 },

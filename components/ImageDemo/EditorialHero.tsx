@@ -18,6 +18,7 @@ import ListenOn from '@/components/ListenOn/ListenOn'
 import PlayControl from '@/components/PlayControl/PlayControl'
 import GrainOverlay from '@/components/GrainOverlay/GrainOverlay'
 import InlineCover from '@/components/ImageDemo/InlineCover'
+import BackgroundVideo from '@/components/hero-video/BackgroundVideo'
 
 const Terrain = dynamic(() => import('@/components/Terrain/Terrain'), { ssr: false })
 
@@ -32,6 +33,13 @@ const ONBOARDING_ORDER = [
 const ONBOARDING_STEP_MS = 4000
 
 export interface EditorialHeroProps {
+  /** Looping video for the portrait column, e.g. "haze". When set it replaces
+   *  the still image entirely — any overlaySlot still renders on top, so the
+   *  album-cover blend survives the swap. No CSS filter is applied: the colour
+   *  grading is baked into the files and filtering a playing video is the one
+   *  thing the hero-video package asks callers not to do. */
+  videoName?: string
+  /** Ignored when videoName is set. */
   imageSrc: string
   imageAlt: string
   /** CSS object-position for the image inside its column. */
@@ -63,6 +71,7 @@ export interface EditorialHeroProps {
 }
 
 export default function EditorialHero({
+  videoName,
   imageSrc,
   imageAlt,
   imageObjectPosition = 'center 35%',
@@ -98,19 +107,23 @@ export default function EditorialHero({
       {svgFilters}
 
       <main className="hero hero--editorial" aria-label="9cups · Catching A Feeling">
-        <div className="editorial-portrait">
-          <Image
-            src={imageSrc}
-            alt={imageAlt}
-            fill
-            sizes="50vw"
-            className="editorial-portrait-img"
-            style={{
-              objectPosition: imageObjectPosition,
-              ...(imageFilter ? { filter: imageFilter } : {}),
-            }}
-            priority
-          />
+        <div className={`editorial-portrait${videoName ? ' editorial-portrait--video' : ''}`}>
+          {videoName ? (
+            <BackgroundVideo name={videoName} pauseLabel="background" />
+          ) : (
+            <Image
+              src={imageSrc}
+              alt={imageAlt}
+              fill
+              sizes="50vw"
+              className="editorial-portrait-img"
+              style={{
+                objectPosition: imageObjectPosition,
+                ...(imageFilter ? { filter: imageFilter } : {}),
+              }}
+              priority
+            />
+          )}
           {overlayImageSrc && (
             <Image
               src={overlayImageSrc}

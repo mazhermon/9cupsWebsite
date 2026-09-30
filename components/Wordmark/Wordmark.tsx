@@ -16,6 +16,9 @@ import { TransientDetector } from '@/lib/transient-detect'
 
 interface WordmarkProps {
   eyebrow?: string
+  /** Heading level. Defaults to 1. Pass 2 when the wordmark sits beneath a
+   *  hero that already owns the page's single <h1>. */
+  level?: 1 | 2
   /** Drums analyser — drives the ghost pulse on kick transients. */
   kickAnalyser?: AnalyserNode | null
   /** When true, the kick channel is silent — ghosts stop pulsing. */
@@ -48,7 +51,7 @@ const GHOST_BASES: GhostBase[] = [
   { baseX:   0, baseY:  6, baseScale: 1.24, baseSkew:  0.8, pushX:  10, pushY: -2, pushScale: 0.22, glitchX: 4, glitchSkew: 1.0 },
 ]
 
-export default function Wordmark({ eyebrow, kickAnalyser, kickMuted = false, playing = false }: WordmarkProps) {
+export default function Wordmark({ eyebrow, level = 1, kickAnalyser, kickMuted = false, playing = false }: WordmarkProps) {
   const ghostRefs = useRef<(HTMLSpanElement | null)[]>([null, null, null])
   const reducedMotion = useReducedMotion()
   const dataRef = useRef<Uint8Array | null>(null)
@@ -130,8 +133,10 @@ export default function Wordmark({ eyebrow, kickAnalyser, kickMuted = false, pla
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current) }
   }, [reducedMotion])
 
+  const Heading = level === 2 ? 'h2' : 'h1'
+
   return (
-    <h1 className="wordmark">
+    <Heading className="wordmark">
       {eyebrow && <span className="wordmark-eyebrow">{eyebrow}</span>}
       <span className="wordmark-frame">
         <span
@@ -151,6 +156,6 @@ export default function Wordmark({ eyebrow, kickAnalyser, kickMuted = false, pla
         >9cups</span>
         <span className="wordmark-main">9cups</span>
       </span>
-    </h1>
+    </Heading>
   )
 }
