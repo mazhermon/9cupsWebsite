@@ -26,7 +26,7 @@
      next/font owns `--font-display` and `--font-body` (set on <html> via className).
      We expose explicit fallback stacks under different names so we don't shadow
      them with self-referential values (which silently invalidate the variable). */
-  --font-display-stack: var(--font-display), 'IM Fell English', Georgia, serif;
+  --font-display-stack: var(--font-display), 'Bungee', Impact, sans-serif;
   --font-body-stack:    var(--font-body),    'DM Sans', system-ui, sans-serif;
 
   --text-xs:    0.75rem;
@@ -60,6 +60,13 @@
   --dur-fast:   150ms;
   --dur-base:   300ms;
   --dur-slow:   600ms;
+
+  /* Hero ground. The knockout is a field of this colour multiplied over the
+     video, so this value controls the effect, not just the backdrop: lighter
+     darkens less, and the footage creeps into the space around the letters.
+     Picked 2026-10-01 as a deliberate trade of knockout crispness for a warmer,
+     less black hero. */
+  --hero-bg: #4A2270;
 
   /* Focus */
   --focus-ring-width: 3px;
@@ -429,7 +436,7 @@ a {
   background: rgb(139 58 196 / 0.10);
   border: 1px solid rgb(196 126 232 / 0.25);
   color: var(--color-ground-light);
-  font-family: var(--font-display-stack);
+  font-family: var(--font-body-stack);
   font-size: 0.9375rem;
   letter-spacing: 0.01em;
   min-height: var(--touch-target-min);
@@ -1045,7 +1052,10 @@ a {
    carries more weight than the mixer's vertical micro-label. */
 .play-control--inline .play-hint {
   writing-mode: horizontal-tb;
-  font-family: var(--font-display-stack);
+  /* Body face on purpose. Bungee is a signage display cut: it carries the
+     wordmark and the section headings, but a whole phrase set in it shouts.
+     Same rule as the link rows — destinations and status are information. */
+  font-family: var(--font-body-stack);
   font-size: var(--text-lg);
   font-weight: 400;
   letter-spacing: 0.01em;
@@ -1448,6 +1458,20 @@ a {
 .home {
   position: relative;
   width: 100%;
+}
+
+/* The hero ground sits well above the landing's surface colour, so the two
+   sections met at a hard horizontal band. This fades the last slice of the
+   hero into the surface below it. Pointer-events off so the pause button and
+   the CTA underneath stay clickable. */
+.home > section:first-child::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: clamp(80px, 12vh, 160px);
+  z-index: 5;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgb(26 13 46 / 0) 0%, var(--color-surface) 100%);
 }
 
 /* `body` is overflow:hidden for the single-surface pages. Home is a real

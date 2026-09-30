@@ -27,7 +27,7 @@ app/
   page.tsx              → <PlayerProvider>: <KnockoutHero cta={<HeroEnter/>}/> + <Landing variant="section"/>
   mixer/page.tsx        → <EditorialHero videoName="haze" /> + back link
   review/page.tsx       → route index + <DevDock />
-  layout.tsx            → next/font: Caprasimo (display) + DM Sans (body)
+  layout.tsx            → next/font: Bungee (display) + DM Sans (body)
   globals.css           → all CSS, token-led (~1400 lines)
 
 components/
@@ -208,9 +208,23 @@ requires no code change. This is still outstanding.
 
 Don't re-litigate these without a reason:
 
-- **Caprasimo + DM Sans.** Won multiple font-picker rounds. DM Sans is on
-  impeccable's reflex-reject list; `DESIGN.md` explicitly overrides that, and
-  the skill's own rule is that identity-preservation beats the greenfield list.
+- **Bungee + DM Sans** (display + body), replacing Caprasimo on 2026-10-01
+  after a specimen comparison of eight faces. Bungee is a signage cut: it
+  carries the wordmark, the section headings and CTA labels, but anything
+  longer than a label goes in the body face — a whole phrase set in it shouts.
+  The rule the codebase follows: **headings and the wordmark are voice
+  (display face); destinations and status are information (body face)**.
+  Anton remains hero-only, for the knockout letters.
+  DM Sans is on impeccable's reflex-reject list; `DESIGN.md` overrides that,
+  and the skill's own rule is that identity-preservation beats the greenfield
+  list.
+- **`--hero-bg: #4A2270`** ("lifted violet"), replacing the near-black
+  `#12041f` on 2026-10-01. This is not a neutral backdrop value: the knockout
+  is a field of this colour multiplied over the video, so a lighter ground
+  darkens less and the footage bleeds into the space around the letters. The
+  softer knockout was chosen deliberately in exchange for a warmer, less black
+  hero. Going much lighter than this breaks the effect; a genuinely pale hero
+  needs a different technique (inverted letters on `screen`, or no knockout).
 - **The mixer composition** is variant "C4-hover": cover at 90% opacity by
   default, pulling back to 35% on hover to reveal the portrait underneath.
   Reversed from the original spec on purpose.
