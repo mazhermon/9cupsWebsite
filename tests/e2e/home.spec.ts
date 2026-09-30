@@ -137,6 +137,21 @@ test.describe('home', () => {
     expect(aborted, `aborted audio fetches: ${aborted.join(', ')}`).toEqual([])
   })
 
+  test('hero CTA is hidden once both halves share the screen', async ({ page }) => {
+    // Below the split breakpoint the CTA is what scrolls you to the landing.
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+    await expect(page.locator('.hero-enter')).toBeVisible()
+
+    // At or above it, the landing's play control is already on screen, so a
+    // second control for the same action would be a duplicate — including in
+    // the tab order.
+    await page.setViewportSize({ width: 1700, height: 1000 })
+    await page.waitForTimeout(400)
+    await expect(page.locator('.hero-enter')).toBeHidden()
+    await expect(page.locator('.play-btn')).toBeVisible()
+  })
+
   test('mixer doorway navigates to /mixer', async ({ page }) => {
     await page.goto('/')
     await page.locator('.landing-mixer-cta').click()
