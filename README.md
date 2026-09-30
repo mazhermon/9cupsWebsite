@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 9cups
 
-## Getting Started
+Brand site for DJ 9cups. House, UK garage, bassline and 140, out of Wellington.
 
-First, run the development server:
+A landing page with a single play button wired to a WebGL wireframe terrain,
+and a four-stem mixer that lets visitors pull a release apart in real time.
+
+## Running it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Production, which is the only build worth judging performance on:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+npm start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Routes
 
-## Learn More
+| Route | |
+|---|---|
+| `/` | Landing: wordmark, play button, platform links, mixer CTA |
+| `/mixer` | Four-stem mixer |
+| `/review` | Dev route index (not linked publicly) |
+| `/explore/*` | Unfinished ASCII-visualiser experiments |
 
-To learn more about Next.js, take a look at the following resources:
+## Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Next 16 (App Router, Turbopack), React 19, Three.js via React Three Fiber,
+Web Audio API, plain CSS with design tokens.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Where things are documented
 
-## Deploy on Vercel
+- **`docs/STATE.md`** — start here. Architecture, settled decisions, measured
+  performance, deploy steps.
+- **`PRODUCT.md`** — audience, purpose, brand personality, anti-references.
+- **`DESIGN.md`** — colour, type, spacing, motion, component rules.
+- **`.claude/skills/9cups-brand/`** — the visual identity canon. Wins on conflict.
+- **`docs/superpowers/specs/`** — design specs, newest first.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Notes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The landing page loops a 28-second mixdown, not the full record. Replacing
+`public/audio/9cupsCatchingAFeelingWeb_mix.mp3` with a mastered full-length
+file needs no code change. The ffmpeg recipe that built it is in
+`docs/STATE.md`.
