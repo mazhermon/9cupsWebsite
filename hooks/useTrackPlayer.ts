@@ -48,6 +48,15 @@ export function useTrackPlayer(url: string): TrackPlayerReturn {
   // Create the element on mount so buffering starts immediately, but do NOT
   // create an AudioContext here — see the comment in ensureGraph below.
   useEffect(() => {
+    // A new url means a brand-new, paused element. Without this the UI would
+    // keep the previous track's state — isPlaying could read true for audio
+    // that isn't playing, which is exactly what this hook promises not to do.
+    setReady(false)
+    setIsPlaying(false)
+    setHasStarted(false)
+    setError(null)
+    setAnalyser(null)
+
     const el = new Audio()
     el.loop = true
     el.preload = 'auto'

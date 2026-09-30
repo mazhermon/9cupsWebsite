@@ -11,17 +11,18 @@
 
 import Link from 'next/link'
 import EditorialHero from '@/components/ImageDemo/EditorialHero'
-import DuotoneFilter from '@/components/ImageDemo/Duotone'
 import HoverOverlay from '@/components/ImageDemo/HoverOverlay'
 
 export default function MixerPage() {
   return (
     <>
       <EditorialHero
+        // The portrait column is the looping haze video now — 9cups is in the
+        // footage, so the still photo would be saying the same thing twice.
+        // The album-cover blend (the dappled light) stays on top of it.
+        videoName="haze"
         imageSrc="/artist/maz-bw-wide.webp"
         imageAlt="DJ 9cups · catching a feeling"
-        imageFilter="url(#duotone-9cups) contrast(1.05)"
-        svgFilters={<DuotoneFilter id="duotone-9cups" dark="#1F0F35" light="#A56AC9" />}
         overlaySlot={() => <HoverOverlay />}
       />
       <Link href="/" className="mixer-back">

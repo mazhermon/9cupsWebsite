@@ -1,11 +1,32 @@
-// 9cups — landing page.
+// 9cups — home.
 //
-// The front door: wordmark, one play button on a single summed mixdown wired
-// to the wireframe terrain, links out to every platform, and a doorway into
-// the four-stem mixer at /mixer.
+// Two sections sharing one audio transport: the knockout video hero, then the
+// landing (play button, links, mixer doorway). On very large screens they sit
+// side by side instead of stacking.
 
+import { KnockoutHero } from '@/components/hero-video'
+import { PlayerProvider } from '@/components/Landing/PlayerProvider'
+import HeroEnter from '@/components/Landing/HeroEnter'
 import Landing from '@/components/Landing/Landing'
+import GrainOverlay from '@/components/GrainOverlay/GrainOverlay'
+
+const LANDING_ID = 'landing'
 
 export default function Home() {
-  return <Landing />
+  return (
+    <PlayerProvider>
+      <a href="#landing-content" className="skip-link">Skip to links</a>
+
+      <div className="home">
+        <KnockoutHero
+          lines={['IX', 'CUPS']}
+          title="9cups · live"
+          cta={<HeroEnter targetId={LANDING_ID} />}
+        />
+        <Landing variant="section" as="section" id={LANDING_ID} />
+      </div>
+
+      <GrainOverlay />
+    </PlayerProvider>
+  )
 }

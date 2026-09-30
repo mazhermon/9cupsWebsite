@@ -1,0 +1,87 @@
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  height: 100svh;
+  min-height: 520px;
+  display: grid;
+  place-items: center;
+  background: var(--hero-bg, #12041f);
+  color: var(--hero-ink, #f6eefe);
+  font-family: var(--hero-body-font, var(--font-space-grotesk)), system-ui, sans-serif;
+}
+
+/* Dark field with white letters, multiplied over the video. */
+.mask {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  background: var(--hero-bg, #12041f);
+  mix-blend-mode: multiply;
+}
+
+.word {
+  margin: 0;
+  color: #fff;
+  font-family: var(--hero-display-font, var(--font-anton)), Impact, 'Arial Narrow', sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  text-align: center;
+  /* Overridable by a host layout (the side-by-side home sets a smaller value,
+     since 27vw of a half-width column overflows its own half). */
+  font-size: var(--knockout-size, clamp(90px, 27vw, 520px));
+  line-height: 0.8;
+  letter-spacing: -0.02em;
+  user-select: none;
+}
+.word span {
+  display: block;
+}
+
+@media (orientation: portrait) {
+  .word {
+    font-size: var(--knockout-size-portrait, 48vw);
+  }
+}
+
+.title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(16px, 4vw, 48px);
+  z-index: 3;
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+/* Keep the title clear of the bottom-right "Pause motion" button on phones. */
+@media (max-width: 640px) {
+  .title {
+    bottom: 80px;
+  }
+}
+
+/* 9cups addition: call-to-action slot above the title. */
+.cta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(56px, 10vw, 112px);
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  padding-inline: clamp(16px, 4vw, 48px);
+}
+
+@media (max-width: 640px) {
+  .cta {
+    bottom: 124px;
+  }
+}

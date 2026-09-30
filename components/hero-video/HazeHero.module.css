@@ -1,0 +1,55 @@
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  height: 100svh;
+  min-height: 420px;
+  display: grid;
+  align-items: end;
+  padding: clamp(16px, 4vw, 56px);
+  background: var(--hero-bg, #12041f);
+  color: var(--hero-ink, #f6eefe);
+  font-family: var(--hero-body-font, var(--font-space-grotesk)), system-ui, sans-serif;
+}
+
+/* Gradient scrim over the video: darkest where the text sits. */
+.scrim::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(18 4 31 / 0.2) 0%,
+    rgb(18 4 31 / 0.15) 45%,
+    rgb(18 4 31 / 0.92) 100%
+  );
+}
+
+.content {
+  position: relative;
+  max-width: 44rem;
+}
+
+/* Headline style from the design: Anton, uppercase, very tight leading. */
+.content > :is(h1, h2) {
+  margin: 0;
+  font-family: var(--hero-display-font, var(--font-anton)), Impact, 'Arial Narrow', sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: clamp(56px, 11vw, 180px);
+  line-height: 0.86;
+}
+
+.content > p {
+  font-size: clamp(15px, 1.4vw, 18px);
+  line-height: 1.5;
+  max-width: 30rem;
+  opacity: 0.9;
+}
+
+/* Keep text clear of the bottom-right "Pause motion" button on phones. */
+@media (max-width: 640px) {
+  .content {
+    padding-bottom: 56px;
+  }
+}

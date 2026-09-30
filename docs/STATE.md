@@ -1,7 +1,7 @@
 # 9cups · project state
 
 **Authoritative context-restoration doc.** Read this first in a fresh session.
-Last updated: 2026-09-30.
+Last updated: 2026-09-30 (video home + test suite).
 
 Supersedes `docs/progress/2026-05-07-state.md` (deleted; recoverable from git
 history and the `backup/2026-09-30-pre-cleanup` branch).
@@ -12,7 +12,7 @@ A brand site for DJ 9cups. Two surfaces:
 
 | Route | What it is |
 |---|---|
-| `/` | Landing page. Wordmark, one play button on a single mixdown wired to a WebGL wireframe terrain, grouped links out to every platform, a doorway into the mixer, bookings contact. |
+| `/` | Knockout video hero (the loop plays through giant "IX CUPS" type) above the landing: wordmark, play button, grouped links, mixer doorway, bookings. Both sections share ONE audio transport. Side by side instead of stacked above 1600x800. |
 | `/mixer` | The four-stem mixer. Editorial split: duotone'd portrait with the album cover blended over it on the left, wordmark + stem toggles + terrain + listen row on the right. |
 | `/review` | Dev-only route index. Carries the DevDock nav overlay. Not linked from the public site. |
 | `/explore/*` | Unfinished ASCII-visualiser experiments. Kept deliberately, not linked. |
@@ -24,14 +24,17 @@ Register is **brand**, declared in `PRODUCT.md`. Design canon lives in
 
 ```
 app/
-  page.tsx              → <Landing />
-  mixer/page.tsx        → <EditorialHero /> + back link
+  page.tsx              → <PlayerProvider>: <KnockoutHero cta={<HeroEnter/>}/> + <Landing variant="section"/>
+  mixer/page.tsx        → <EditorialHero videoName="haze" /> + back link
   review/page.tsx       → route index + <DevDock />
   layout.tsx            → next/font: Caprasimo (display) + DM Sans (body)
-  globals.css           → all CSS, token-led (~1300 lines)
+  globals.css           → all CSS, token-led (~1400 lines)
 
 components/
-  Landing/Landing.tsx      landing composition
+  hero-video/              KnockoutHero, HazeHero, BackgroundVideo, fonts (Anton + Space Grotesk)
+  Landing/PlayerProvider   owns useTrackPlayer, publishes it over context
+  Landing/HeroEnter.tsx    hero CTA: starts audio, scrolls to the landing
+  Landing/Landing.tsx      landing composition ('standalone' | 'section')
   Landing/LinkGroups.tsx   rule-separated link rows
   Terrain/Terrain.tsx      the WebGL wireframe ground (both routes)
   Wordmark/Wordmark.tsx    kick-driven ghost glitch
@@ -85,6 +88,30 @@ Props worth knowing:
   seams. The landing passes `2.2`.
 - `activeKeys`, `segments`, `dpr`, `className` — escape hatches for perf/layout.
 
+## The shared audio transport
+
+The hero CTA and the landing's play button must be the same transport —
+pressing either has to leave the other showing the same state. `useTrackPlayer`
+therefore lives in `components/Landing/PlayerProvider.tsx` and is published over
+context; calling the hook in both places would create two `<audio>` elements
+playing over each other. `usePlayer()` throws outside the provider on purpose:
+a silent no-op play button is much harder to diagnose than a boot error.
+
+Covered by `tests/e2e/home.spec.ts` in both directions.
+
+## Video heroes
+
+`components/hero-video/` came from a self-contained package (its brief is in
+`9cups-hero-video/CLAUDE_INTEGRATION.md`). Do not change `BackgroundVideo`'s
+loading strategy or the AV1 -> HEVC -> H.264 source order; both are deliberate.
+
+Adapted deliberately:
+- `KnockoutHero` gained a `cta` slot.
+- `.word` font-size reads `--knockout-size` so a host layout can shrink it
+  (the side-by-side home does; 27vw of a half-width column overflows).
+- The pause button got `min-height: 44px` — it shipped at ~33px, under the
+  minimum target size. Box only; behaviour untouched.
+
 ## Performance: measured, not assumed
 
 Measured 2026-09-30 on Intel UHD 630 integrated graphics (the mid-tier class
@@ -93,6 +120,25 @@ Measured 2026-09-30 on Intel UHD 630 integrated graphics (the mid-tier class
 **60fps flat. p95 17.4ms, worst frame 17.7ms, zero frames over 20ms.**
 Identical with the wordmark ghost animation on and off, across three paired
 runs in separate browser processes.
+
+### The two costs found on 2026-09-30, and their fixes
+
+**1. `frameloop="always"` on a static terrain.** R3F re-rendered the terrain 60
+times a second to draw an identical frame whenever audio wasn't playing. Alone
+that was survivable; composited alongside a playing video on integrated
+graphics it dropped the home page to 22fps. `Terrain` now uses
+`frameloop={playing ? 'always' : 'demand'}` — "demand" still renders once on
+mount, so the resting mesh draws. **22fps -> 60fps.**
+
+**2. `mix-blend-mode` + `filter` over a playing video.** The mixer's dappled
+cover overlay was free over a still image (composited once, cached) and
+expensive over video (recomputed every frame). The video panel now uses plain
+alpha compositing. **~20fps -> ~50fps.** Not 60: a large playing video plus any
+compositing on top still costs on this GPU. Accepted for a secondary page.
+
+General rule this implies: **check what a CSS effect costs once it sits over
+moving pixels.** Blend modes and filters are nearly free over static content
+and expensive over video.
 
 **The dev server is janky and production is not.** Turbopack instrumentation
 and React dev-mode cost roughly 20fps and produce visible stutter. Never judge
@@ -163,6 +209,29 @@ Verified 2026-09-30; keep them true:
   property (colour, background-colour, border-colour, outline-colour).
   Browsers silently ignore `:visited` on descendants — that bug has been
   written here once already.
+
+## Tests
+
+First test suite landed 2026-09-30. `npm test` (Vitest, 64) and
+`npm run test:e2e` (Playwright, 48 across desktop + mobile projects).
+
+- Unit: `tests/unit/` — lib logic, `useTrackPlayer`, and the components with
+  contracts worth pinning (`LinkGroups`, `PlayControl`, `Wordmark`).
+- E2E: `tests/e2e/` — runs against a PRODUCTION build (`playwright.config.ts`
+  builds and starts it). Covers the shared-transport contract, link safety,
+  reduced motion, heading structure, contrast, focus order, touch targets and
+  horizontal overflow.
+
+Known gaps, stated rather than implied:
+- **No real Safari coverage.** The `mobile` project is Chromium at an iPhone
+  viewport, so the HEVC video path and Safari audio quirks are untested.
+- **WebGL terrain rendering** is not asserted (needs a GPU; flaky in CI).
+- **Audio output** is not asserted (no audio device in headless).
+- The contrast check cannot read elements sitting on gradient/image
+  backgrounds; it reports them as unverifiable rather than silently passing.
+
+CI is `.github/workflows/ci.yml`: typecheck, lint, unit, build, then e2e
+against the artifact from the build job.
 
 ## Deploying
 

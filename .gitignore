@@ -47,3 +47,9 @@ skills-lock.json
 /*.jpg
 !public/**/*.png
 !public/**/*.jpg
+
+# tests
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
