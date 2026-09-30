@@ -26,6 +26,16 @@ export interface LinkGroup {
   items: LinkItem[]
 }
 
+/** Shape every audio-reactive visualiser consumes. Lives here with the stem
+ *  and track data it describes, rather than in a page component. */
+export interface VisualiserProps {
+  stems: Stem[]
+  trackStates: { id: number; muted: boolean }[]
+  analysers: (AnalyserNode | null)[]
+  playing: boolean
+  onToggle: (id: number) => void
+}
+
 export interface ReleaseConfig {
   title: string
   artist: string
@@ -81,12 +91,14 @@ export const RELEASE: ReleaseConfig = {
 // The Spotify URL is the clean artist link: the spreadsheet's copy carried a
 // `?si=` share-tracking param from one old share, which is stripped here.
 
+// Order is deliberate: the platforms 9cups would rather you used come first.
+// Bandcamp and SoundCloud lead, Tidal next, Spotify last.
 export const LISTEN_LINKS: LinkItem[] = [
-  { name: 'Spotify',    href: 'https://open.spotify.com/artist/1VExMsPShzwuXk7zMDHbDJ' },
   { name: 'Bandcamp',   href: 'https://9cups.bandcamp.com/' },
   { name: 'SoundCloud', href: 'https://soundcloud.com/dj9cups' },
   { name: 'YouTube',    href: 'https://www.youtube.com/@DJ9Cups' },
   { name: 'Tidal',      href: 'https://tidal.com/artist/55881504' },
+  { name: 'Spotify',    href: 'https://open.spotify.com/artist/1VExMsPShzwuXk7zMDHbDJ' },
 ]
 
 export const FOLLOW_LINKS: LinkItem[] = [

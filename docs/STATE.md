@@ -149,6 +149,34 @@ Methodology note: measuring several configs sequentially in one browser session
 is invalid. The first config absorbs audio decode and JIT warmup and looks
 worse than it is. One process per config, discard the first ~60 frames.
 
+## The audio loader
+
+Two bugs lived here; both are pinned by tests now.
+
+**Stuck on "Loading…", never plays.** `el.src = url` ran before the `canplay`
+listener was attached. With a warm HTTP cache the element reached
+HAVE_ENOUGH_DATA and fired `canplay` in that gap, nothing was listening,
+`ready` never flipped, and the button stayed disabled forever. Intermittent
+because it depended on cache state. Listeners now attach first, `loadeddata`
+and `playing` also count as ready signals, and `readyState` is checked
+directly as a fallback.
+
+**Three requests for one file, two aborted.** Assigning `src` starts a fetch
+even at `preload="none"`, so a later `load()` aborted it and started another.
+`src` is now assigned exactly once, at the moment the download should begin.
+
+**The button is never gated on buffering.** It is enabled unless there is an
+error, because calling `play()` is itself what starts the download. A separate
+`buffering` flag (from `waiting`/`stalled`, cleared on `playing`) drives the
+"Loading…" label, so the label is honest and the control is always usable.
+
+**Preload timing.** The track downloads on the first idle slot after paint —
+deliberately NOT on `window.load`, which waits for the hero video. Pressing
+play is the expected first action, so the audio outranks the decorative
+background. Measured on a production build: a visitor who dwells 3s or more
+gets playback in **~200ms**; clicking the instant the page appears takes
+2-6s because the click itself is what starts the fetch.
+
 ## Audio assets
 
 `public/audio/` holds the four stems (1.1MB each, 320kbps) and
@@ -172,8 +200,9 @@ ffmpeg -y \
 at +0.7 dBFS, hence the 1.5dB trim. Result: −10.9 LUFS, −0.6 dBFS true peak.
 
 **Known limitation: the stems are a 28-second loop, not the full record.** The
-landing page loops 28 seconds. Dropping a mastered full-length mp3 at the same
-path requires no code change.
+landing page loops 28 seconds. Dropping a mastered full-length mp3 at
+`public/audio/9cupsCatchingAFeelingWeb_mix.mp3` (same filename, overwrite)
+requires no code change. This is still outstanding.
 
 ## Settled decisions
 
@@ -191,6 +220,12 @@ Don't re-litigate these without a reason:
   replaces. Linking it would send visitors in a circle.
 - **Spotify URL is stripped of its `?si=` param** (share-tracking from one old
   share).
+- **Link hover is one tint, not per-platform brand colours.** Borrowing each
+  destination's own colour put eight unrelated palettes on one screen and read
+  as a logo parade. One Electric Amethyst fill instead; the swap to a
+  contrasting yellow is two values, noted in `globals.css`.
+- **Listen order is deliberate**: Bandcamp, SoundCloud, YouTube, Tidal,
+  Spotify. The platforms 9cups would rather you used come first.
 - **Bookings is a `mailto:`**, not an embedded form. No backend anywhere in
   this project; keep it that way unless there's a reason.
 - **Landing links sit above the mixer CTA.** User's call. `PRODUCT.md` argues

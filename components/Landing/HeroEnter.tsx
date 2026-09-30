@@ -20,7 +20,7 @@ interface HeroEnterProps {
 }
 
 export default function HeroEnter({ targetId }: HeroEnterProps) {
-  const { ready, isPlaying, error, toggle } = usePlayer()
+  const { buffering, isPlaying, error, toggle } = usePlayer()
 
   const onClick = useCallback(() => {
     // Start audio first: this runs inside the user gesture, which is what the
@@ -41,7 +41,7 @@ export default function HeroEnter({ targetId }: HeroEnterProps) {
 
   const label = error
     ? 'Audio unavailable'
-    : !ready
+    : buffering
       ? 'Loading…'
       : isPlaying
         ? `Playing · ${RELEASE.title}`
@@ -52,7 +52,7 @@ export default function HeroEnter({ targetId }: HeroEnterProps) {
       type="button"
       className="hero-enter"
       onClick={onClick}
-      disabled={!ready || !!error}
+      disabled={!!error}
       // Not aria-pressed: this is an entry action, not a toggle. The landing's
       // PlayControl is the transport toggle and carries that state.
       aria-describedby="hero-enter-state"

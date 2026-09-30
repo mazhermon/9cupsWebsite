@@ -39,9 +39,9 @@ export interface EditorialHeroProps {
    *  grading is baked into the files and filtering a playing video is the one
    *  thing the hero-video package asks callers not to do. */
   videoName?: string
-  /** Ignored when videoName is set. */
-  imageSrc: string
-  imageAlt: string
+  /** Required unless videoName is set. */
+  imageSrc?: string
+  imageAlt?: string
   /** CSS object-position for the image inside its column. */
   imageObjectPosition?: string
   /** Optional CSS filter string applied to the image (e.g. `url(#duotone)`). */
@@ -112,8 +112,8 @@ export default function EditorialHero({
             <BackgroundVideo name={videoName} pauseLabel="background" />
           ) : (
             <Image
-              src={imageSrc}
-              alt={imageAlt}
+              src={imageSrc ?? ''}
+              alt={imageAlt ?? ''}
               fill
               sizes="50vw"
               className="editorial-portrait-img"

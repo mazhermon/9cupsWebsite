@@ -21,8 +21,6 @@ export default function MixerPage() {
         // footage, so the still photo would be saying the same thing twice.
         // The album-cover blend (the dappled light) stays on top of it.
         videoName="haze"
-        imageSrc="/artist/maz-bw-wide.webp"
-        imageAlt="DJ 9cups · catching a feeling"
         overlaySlot={() => <HoverOverlay />}
       />
       <Link href="/" className="mixer-back">

@@ -94,6 +94,49 @@ test.describe('home', () => {
     }
   })
 
+  test('play control is never gated on buffering', async ({ page }) => {
+    // Regression: the button used to stay disabled until a `canplay` event that
+    // could be missed entirely with a warm cache, stranding the visitor on
+    // "Loading…" forever. It must be pressable as soon as the page is up.
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
+    await expect(page.locator('.hero-enter')).toBeEnabled({ timeout: 10_000 })
+    await expect(page.locator('.play-btn')).toBeEnabled({ timeout: 10_000 })
+  })
+
+  test('starts playing when pressed immediately after load', async ({ page }) => {
+    // Worst case: nothing buffered yet, so the click itself starts the
+    // download. It still has to end in playback.
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
+    const hero = page.locator('.hero-enter')
+    const landing = page.locator('.play-btn')
+
+    // The button is server-rendered enabled, so a click can land before React
+    // has hydrated and attached the handler. A real visitor would click again;
+    // poll rather than assume the first press takes.
+    await expect
+      .poll(
+        async () => {
+          if ((await landing.getAttribute('aria-pressed')) === 'true') return true
+          await hero.click({ timeout: 5_000 }).catch(() => {})
+          return (await landing.getAttribute('aria-pressed')) === 'true'
+        },
+        { timeout: 25_000, intervals: [500, 1000, 1000, 2000] },
+      )
+      .toBe(true)
+  })
+
+  test('requests the track exactly once, with no aborted fetches', async ({ page }) => {
+    // Regression: assigning src and then calling load() produced three requests
+    // for the same file, two of them aborted.
+    const aborted: string[] = []
+    page.on('requestfailed', r => {
+      if (r.url().includes('.mp3')) aborted.push(`${r.url().split('/').pop()} ${r.failure()?.errorText}`)
+    })
+    await page.goto('/')
+    await page.waitForTimeout(8_000)
+    expect(aborted, `aborted audio fetches: ${aborted.join(', ')}`).toEqual([])
+  })
+
   test('mixer doorway navigates to /mixer', async ({ page }) => {
     await page.goto('/')
     await page.locator('.landing-mixer-cta').click()
