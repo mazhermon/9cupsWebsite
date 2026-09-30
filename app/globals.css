@@ -61,6 +61,22 @@
   --dur-base:   300ms;
   --dur-slow:   600ms;
 
+  /* ── Accent · primary call to action ────────────────────────────────────
+     Marigold. Sits at hue 78, a split complement to Electric Amethyst (308),
+     so it draws the eye without leaving the relationship the brand already
+     has with its own Acid Moss complement.
+
+     USE IT SPARINGLY. The rule, deliberately strict:
+       - primary call-to-action controls only
+       - at most once or twice in any one section
+       - never for decoration, headings, borders or hover states
+     The moment it appears twice in a row it stops being an accent and the
+     page loses its only high-attention colour.
+     Measured: 10.49:1 on --color-surface, 6.83:1 on --hero-bg,
+     and --color-accent-cta-ink is 10.21:1 on the fill itself. */
+  --color-accent-cta:     #FFB627;
+  --color-accent-cta-ink: #1F1600;
+
   /* Hero ground. The knockout is a field of this colour multiplied over the
      video, so this value controls the effect, not just the backdrop: lighter
      darkens less, and the footage creeps into the space around the letters.
@@ -1063,6 +1079,21 @@ a {
   color: var(--color-text-muted);
 }
 
+/* The one primary call to action on this section, so it takes the accent.
+   The hero's own CTA deliberately does not: two accent controls on one screen
+   would cancel each other out. */
+.play-control--inline .play-btn {
+  background: var(--color-accent-cta);
+  color: var(--color-accent-cta-ink);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.22) inset,
+    0 8px 24px rgb(255 182 39 / 0.22);
+}
+
+.play-control--inline .play-btn:hover:not(:disabled) {
+  background: #FFC75A;
+}
+
 .play-control--inline .play-btn:disabled {
   background: rgb(139 58 196 / 0.35);
   box-shadow: none;
@@ -1154,6 +1185,13 @@ a {
   color: var(--row-hover-ink, var(--color-ground-light));
 }
 
+/* The press moment only. Hover stays amethyst — the accent marks the instant a
+   visitor commits to a link, which is the one frame where it earns attention. */
+.linkrow:active {
+  background-color: var(--color-accent-cta);
+  color: var(--color-accent-cta-ink);
+}
+
 /* The hover nudge, done with transform so it composites instead of relaying
    out the row. Applied to the children, not the row, so the full-bleed
    background and its rules stay put. */
@@ -1175,6 +1213,13 @@ a {
 .linkrow {
   --row-hover: var(--color-primary-mid);
   --row-hover-ink: var(--color-ground-light);
+}
+
+/* The press moment only. Hover stays amethyst — the accent marks the instant a
+   visitor commits to a link, which is the one frame where it earns attention. */
+.linkrow:active {
+  background-color: var(--color-accent-cta);
+  color: var(--color-accent-cta-ink);
 }
 
 /* The hover nudge, done with transform so it composites instead of relaying
@@ -1614,4 +1659,19 @@ body:has(.home) {
 .editorial-portrait--video:focus-within .hover-overlay {
   opacity: 0.16;
   filter: none;
+}
+
+/* Separator in the hero heading. A round bullet rather than the middle dot,
+   sized and spaced so it reads as a mark between two phrases rather than as
+   punctuation inside one. */
+.hero-title-dot {
+  display: inline-block;
+  margin-inline: 0.7em;
+  font-size: 0.8em;
+  line-height: 1;
+  vertical-align: middle;
+  /* Lilac Mist, not Bright Lavender: the latter measured 4.27:1 on the hero
+     ground, just under AA. It's a decorative separator but it is still a
+     visible glyph, so it holds to the same floor as the type beside it. */
+  color: var(--color-primary-pale);
 }

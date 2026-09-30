@@ -10,7 +10,7 @@ Light theme is not used for this surface.
 
 ## Colour
 
-**Strategy: Committed.** Electric Amethyst and Deep Violet carry the surface. Warm magenta and crimson accents punctuate. Bone White only where type must read clearly. Acid Moss only as occasional organic surprise.
+**Strategy: Committed.** Electric Amethyst and Deep Violet carry the surface. Warm magenta and crimson accents punctuate. Bone White only where type must read clearly. Acid Moss only as occasional organic surprise. Marigold is the single high-attention colour and is reserved for primary calls to action (see below).
 
 Tinted neutrals only. Pure `#000` and `#fff` are never used.
 
@@ -26,6 +26,31 @@ Tinted neutrals only. Pure `#000` and `#fff` are never used.
 | `--color-ground-mid`      | `#3A3530` | oklch(28% 0.01 60)  | Warm Asphalt — neutral ground |
 | `--color-ground-light`    | `#F0EBE0` | oklch(94% 0.02 80)  | Bone White — type, sketch lines |
 | `--color-accent-organic`  | `#7A8A1A` | oklch(56% 0.16 120) | Acid Moss — sparingly, ≤5% |
+| `--color-accent-cta`      | `#FFB627` | oklch(81% 0.16 78)  | Marigold — primary call to action ONLY |
+| `--color-accent-cta-ink`  | `#1F1600` | oklch(16% 0.03 78)  | Ink on a Marigold fill |
+
+### Marigold: the one high-attention colour
+
+Added 2026-10-01 after a nine-way comparison. Electric Amethyst is
+`oklch(53% 0.207 308)`; Marigold sits at hue 78, a **split complement**, close
+enough to the existing warm accents to belong and far enough to pull the eye.
+The exact complement (hue ~120) is already owned by Acid Moss.
+
+**The rule is restrictive on purpose:**
+
+- Primary call-to-action controls only.
+- **At most once or twice in any one section.** The moment it appears twice in
+  a row it stops reading as an accent and the page loses its only
+  high-attention colour.
+- Never for decoration, headings, borders, or hover states. Hover stays
+  Electric Amethyst; Marigold marks the press.
+
+Currently used in exactly two places: the landing's circular play control, and
+`.linkrow:active`. The hero's own CTA deliberately stays amethyst — two accent
+controls on one screen cancel each other out.
+
+Measured: 10.49:1 on `--color-surface`, 6.83:1 on `--hero-bg`, and the ink is
+10.21:1 on the fill.
 
 Proportional rules: 60% purple family, 20% warm accents, 15% neutral grounds, 5% Acid Moss.
 

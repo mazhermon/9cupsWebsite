@@ -20,7 +20,20 @@ export default function Home() {
       <div className="home">
         <KnockoutHero
           lines={['IX', 'CUPS']}
-          title="9cups · live"
+          title={
+            <>
+              9cups
+              {/* Decorative separator. The explicit spaces matter: JSX drops the
+                  whitespace around a newline-separated element, and with the dot
+                  aria-hidden the heading would otherwise be announced as one
+                  run-on word, "9cupsBeat maker and DJ". */}
+              {' '}
+              <span className="hero-title-dot" aria-hidden="true">&bull;</span>
+              {' '}
+              Beat maker &amp; DJ
+            </>
+          }
+          subtitle="Wellington Aotearoa"
           cta={<HeroEnter targetId={LANDING_ID} />}
         />
         <Landing variant="section" as="section" id={LANDING_ID} />
