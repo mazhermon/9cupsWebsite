@@ -31,7 +31,10 @@ export default function HeroEnter({ targetId }: HeroEnterProps) {
     if (!target) return
 
     // Side-by-side layout: both halves are already visible, so a scroll would
-    // do nothing but look broken.
+    // do nothing but look broken. CSS also hides this button at that size, so
+    // this branch is normally unreachable — it still matters if the viewport
+    // crosses the breakpoint between render and click (a resize, or rotating
+    // a tablet).
     const splitLayout = window.matchMedia('(min-width: 1600px) and (min-height: 800px)').matches
     if (splitLayout) return
 

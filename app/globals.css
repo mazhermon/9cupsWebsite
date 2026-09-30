@@ -1603,6 +1603,16 @@ body:has(.home) {
     overflow: hidden;
   }
 
+  /* Both halves are on screen together at this size, so the landing's yellow
+     play control is already visible and the hero's CTA would be a second
+     control for the same action. display:none rather than opacity, so it
+     leaves the tab order too — a hidden duplicate is worse for keyboard users
+     than for sighted ones. Below this breakpoint the page stacks and the CTA
+     is the thing that scrolls you down, so it stays. */
+  .hero-enter {
+    display: none;
+  }
+
   .home {
     display: grid;
     grid-template-columns: 1fr 1fr;
