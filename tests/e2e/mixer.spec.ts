@@ -35,12 +35,6 @@ test.describe('mixer', () => {
     await expect(page.locator('.play-btn')).toBeVisible()
   })
 
-  test('back link returns to home', async ({ page }) => {
-    await page.goto('/mixer')
-    await page.locator('.mixer-back').click()
-    await expect(page).toHaveURL(/\/$/)
-  })
-
   test('listen row links are https and open safely', async ({ page }) => {
     await page.goto('/mixer')
     const pills = page.locator('.listen-pill')

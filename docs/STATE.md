@@ -14,6 +14,9 @@ A brand site for DJ 9cups. Two surfaces:
 |---|---|
 | `/` | Knockout video hero (the loop plays through giant "IX CUPS" type) above the landing: wordmark, play button, grouped links, mixer doorway, bookings. Both sections share ONE audio transport. Side by side instead of stacked above 1600x800. |
 | `/mixer` | The four-stem mixer. Editorial split: duotone'd portrait with the album cover blended over it on the left, wordmark + stem toggles + terrain + listen row on the right. |
+| `/mixes` | DJ mixes. List of facade players driven by `MIXES` in `lib/releases.ts`. Empty until entries are added. |
+| `/originals` | Original tracks, same component and shape, driven by `ORIGINALS`. |
+| `/about` | Text-heavy. Hero image, drafted copy, press links, bookings mailto, optional press-pack download. |
 | `/review` | Dev-only route index. Carries the DevDock nav overlay. Not linked from the public site. |
 | `/explore/*` | Unfinished ASCII-visualiser experiments. Kept deliberately, not linked. |
 
@@ -87,6 +90,40 @@ Props worth knowing:
   A full-bleed host needs it wider or the plane's own edges show as diagonal
   seams. The landing passes `2.2`.
 - `activeKeys`, `segments`, `dpr`, `className` — escape hatches for perf/layout.
+
+## Navigation
+
+`components/Nav/Nav.tsx`, mounted once in `app/layout.tsx`. Links come from
+`NAV_LINKS` in `lib/site-config.ts`.
+
+It has two jobs that pull against each other: stay legible over the home
+page's full-bleed video, and not dim that video. So it is transparent on `/`
+and fades in a scrim past 24px of scroll (`data-solid`); every other route
+carries the scrim from the start. Type over the transparent state carries its
+own text-shadow rather than relying on whichever video frame is behind it.
+
+Narrow screens collapse to a toggle. The panel animates on
+`grid-template-rows` rather than height, so it needs no measured pixel value,
+and it closes on route change, Escape, and outside click.
+
+The mixer's bespoke back link was removed when this landed — the nav does
+that job on every page now.
+
+## Embedded players
+
+`/mixes` and `/originals` share `ReleaseList` and differ only by data.
+
+**Players are facades.** Each card is our own markup — artwork, title, date,
+source — and the real third-party iframe is only mounted on click. A page of
+ten live embeds pulls in three platforms' JavaScript, sets their cookies and
+hands every visitor's IP to them before anyone has pressed anything. One
+iframe at a time, no third-party contact until it is asked for. There is an
+e2e test asserting exactly that: no soundcloud/bandcamp/mixcloud request fires
+on page load.
+
+`embedUrl` stores the `src` from the platform's own embed snippet verbatim, so
+adding a new platform needs no code — Mixcloud will work the moment an entry
+appears.
 
 ## The shared audio transport
 
@@ -261,8 +298,8 @@ Verified 2026-09-30; keep them true:
 
 ## Tests
 
-First test suite landed 2026-09-30. `npm test` (Vitest, 64) and
-`npm run test:e2e` (Playwright, 48 across desktop + mobile projects).
+`npm test` (Vitest, 69) and `npm run test:e2e` (Playwright, 118 across desktop
+and mobile projects).
 
 - Unit: `tests/unit/` — lib logic, `useTrackPlayer`, and the components with
   contracts worth pinning (`LinkGroups`, `PlayControl`, `Wordmark`).

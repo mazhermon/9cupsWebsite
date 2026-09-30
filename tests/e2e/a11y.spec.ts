@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
 
-const ROUTES = ['/', '/mixer'] as const
+const ROUTES = ['/', '/mixer', '/mixes', '/originals', '/about'] as const
 
 // WCAG AA: 4.5:1 for normal text, 3:1 for large (>=24px, or >=18.66px bold).
 const AA_NORMAL = 4.5
@@ -170,17 +170,33 @@ for (const route of ROUTES) {
       await page.goto(route)
       await page.waitForLoadState('load')
       await page.waitForTimeout(1200)
-      const small = await page.evaluate(() =>
-        Array.from(document.querySelectorAll<HTMLElement>('a[href], button'))
+      const small = await page.evaluate(() => {
+        // WCAG 2.5.8 exempts targets "in a sentence or block of text" — an
+        // inline link inside a paragraph is allowed to be line-height tall,
+        // and padding it to 44px would wreck the reading rhythm. Everything
+        // that stands alone as a control still has to meet the minimum.
+        const inlineInProse = (el: HTMLElement) => {
+          const parent = el.parentElement
+          if (!parent) return false
+          if (getComputedStyle(el).display !== 'inline') return false
+          if (!/^(P|LI|SPAN|EM|STRONG|TD|DD|BLOCKQUOTE|H[1-6])$/.test(parent.tagName)) return false
+          // Only a genuine exception when there is other text around it.
+          const own = (el.textContent ?? '').trim().length
+          const all = (parent.textContent ?? '').trim().length
+          return all > own
+        }
+
+        return Array.from(document.querySelectorAll<HTMLElement>('a[href], button'))
           .filter(el => {
             const r = el.getBoundingClientRect()
             if (r.width === 0 || r.height === 0) return false
             // The skip link is parked off-screen until focused.
             if (el.classList.contains('skip-link')) return false
+            if (inlineInProse(el)) return false
             return r.height < 44
           })
-          .map(el => `${el.tagName.toLowerCase()}.${String(el.className).split(' ')[0]}`),
-      )
+          .map(el => `${el.tagName.toLowerCase()}.${String(el.className).split(' ')[0]}`)
+      })
       expect(small, `targets under 44px: ${small.join(', ')}`).toEqual([])
     })
   })

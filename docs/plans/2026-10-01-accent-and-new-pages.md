@@ -1,7 +1,7 @@
 # Plan · accent colour, then the content pages
 
 **Date:** 2026-10-01
-**Status:** approved sequencing, accent colour in progress
+**Status:** chunks 1 and 2 shipped. Chunk 3 in progress on `content-pages`.
 
 Three chunks, in this order, so the design work can go live before the larger
 content build starts.

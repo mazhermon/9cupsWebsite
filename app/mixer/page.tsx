@@ -9,7 +9,6 @@
 // sits at full blend by default; hovering the portrait pulls it back to
 // reveal the artist underneath.
 
-import Link from 'next/link'
 import EditorialHero from '@/components/ImageDemo/EditorialHero'
 import HoverOverlay from '@/components/ImageDemo/HoverOverlay'
 
@@ -23,9 +22,6 @@ export default function MixerPage() {
         videoName="haze"
         overlaySlot={() => <HoverOverlay />}
       />
-      <Link href="/" className="mixer-back">
-        <span aria-hidden="true">&larr;</span> 9cups
-      </Link>
     </>
   )
 }

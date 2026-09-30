@@ -1433,38 +1433,6 @@ a {
   }
 }
 
-/* ─── Mixer: back-to-landing link ───────────────────────────────────────── */
-/* The mixer is a full-bleed hero with no chrome, so the way home is a single
-   quiet fixed link rather than a nav bar. */
-.mixer-back {
-  position: fixed;
-  top: clamp(var(--space-4), 3vh, var(--space-8));
-  left: clamp(var(--space-4), 3vw, var(--space-8));
-  z-index: 20;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: 8px 16px;
-  min-height: var(--touch-target-min);
-  border-radius: var(--radius-full);
-  background: rgb(26 13 46 / 0.55);
-  border: 1px solid rgb(196 126 232 / 0.20);
-  backdrop-filter: blur(8px);
-  font-family: var(--font-display-stack);
-  font-size: 0.9375rem;
-  color: var(--color-text-muted);
-  transition:
-    color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out),
-    background var(--dur-fast) var(--ease-out);
-}
-
-.mixer-back:hover {
-  color: var(--color-ground-light);
-  background: rgb(59 26 110 / 0.65);
-  border-color: rgb(204 46 144 / 0.45);
-}
-
 /* Scrim between the terrain and the landing content. Sits in the same stacking
    level as the terrain but later in the DOM, so it paints over the wireframe
    and under the content column. Bottom-weighted: the horizon is the brightest,
@@ -1684,4 +1652,465 @@ body:has(.home) {
      ground, just under AA. It's a decorative separator but it is still a
      visible glyph, so it holds to the same floor as the type beside it. */
   color: var(--color-primary-pale);
+}
+
+/* ─── Site navigation ───────────────────────────────────────────────────────
+   Two competing jobs: stay legible over the home page's full-bleed video, and
+   not dim that video while doing it. So it starts transparent on the home
+   page and fades in a scrim once scrolled; every other route carries the
+   scrim from the start. */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 56px;
+  padding-inline: clamp(var(--space-4), 4vw, var(--space-12));
+  background: transparent;
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    backdrop-filter var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
+  border-bottom: 1px solid transparent;
+}
+
+.nav[data-solid='true'] {
+  background: rgb(23 16 32 / 0.82);
+  backdrop-filter: blur(12px);
+  border-bottom-color: var(--color-line);
+}
+
+.nav-brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target-min);
+  font-family: var(--font-display-stack);
+  font-size: 1.0625rem;
+  letter-spacing: 0.01em;
+  color: var(--color-ground-light);
+  /* Sits over video before the scrim arrives, so it carries its own shadow
+     rather than relying on whatever frame happens to be behind it. */
+  text-shadow: 0 1px 12px rgb(18 4 31 / 0.85);
+}
+
+.nav-list {
+  display: flex;
+  align-items: center;
+  gap: clamp(var(--space-3), 2vw, var(--space-6));
+  list-style: none;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target-min);
+  font-family: var(--font-body-stack);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(240 235 224 / 0.78);
+  text-shadow: 0 1px 12px rgb(18 4 31 / 0.85);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.nav-link:hover {
+  color: var(--color-ground-light);
+}
+
+/* The current page is marked in text weight and colour, not by a coloured bar
+   — Marigold is reserved for calls to action. */
+.nav-link[aria-current='page'] {
+  color: var(--color-ground-light);
+  font-weight: 700;
+}
+
+.nav-toggle {
+  display: none;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target-min);
+  padding-inline: var(--space-3);
+  font-family: var(--font-body-stack);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ground-light);
+  text-shadow: 0 1px 12px rgb(18 4 31 / 0.85);
+}
+
+.nav-toggle-bars {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  width: 17px;
+}
+
+.nav-toggle-bars i {
+  display: block;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+}
+
+/* ─── Nav: narrow screens ───────────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .nav-toggle {
+    display: inline-flex;
+  }
+
+  .nav-panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    display: grid;
+    grid-template-rows: 0fr;
+    overflow: hidden;
+    background: rgb(23 16 32 / 0.97);
+    border-bottom: 1px solid transparent;
+    /* grid-template-rows rather than height: it animates without needing a
+       measured pixel value, and collapses to nothing when closed. */
+    transition: grid-template-rows var(--dur-base) var(--ease-out),
+                border-color var(--dur-base) var(--ease-out);
+  }
+
+  .nav[data-open='true'] .nav-panel {
+    grid-template-rows: 1fr;
+    backdrop-filter: blur(12px);
+    border-bottom-color: var(--color-line);
+  }
+
+  .nav-panel > nav {
+    min-height: 0;
+  }
+
+  .nav-list {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: var(--space-2) clamp(var(--space-4), 4vw, var(--space-12)) var(--space-4);
+  }
+
+  .nav-list li + li {
+    border-top: 1px solid var(--color-line);
+  }
+
+  .nav-link {
+    width: 100%;
+    text-shadow: none;
+  }
+}
+
+/* The nav overlays the hero rather than displacing it, so only the pages
+   whose content starts at the very top need clearance. */
+.landing--section .landing-content,
+.page-shell {
+  padding-top: max(var(--space-16), 72px);
+}
+
+/* ─── Content pages (mixes, originals, about) ───────────────────────────────
+   These are read rather than operated, so the craft here is typographic
+   rather than in controls. `body` is overflow:hidden for the single-surface
+   pages; these scroll. */
+body:has(.page-shell) {
+  overflow: auto;
+}
+
+.page-shell {
+  position: relative;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: clamp(var(--space-4), 5vw, var(--space-16));
+  padding-bottom: clamp(var(--space-16), 10vh, var(--space-24));
+  display: flex;
+  flex-direction: column;
+  gap: clamp(var(--space-8), 5vh, var(--space-16));
+}
+
+.page-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 52ch;
+}
+
+.page-title {
+  font-family: var(--font-display-stack);
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+  color: var(--color-ground-light);
+  /* Without this "Beat maker & DJ" breaks after the ampersand and leaves
+     "DJ" alone on line two. */
+  text-wrap: balance;
+}
+
+/* The head's measure is set for the lede; the title can use the full width. */
+.page-head .page-title {
+  max-width: none;
+}
+
+.page-lede {
+  font-family: var(--font-body-stack);
+  font-size: var(--text-lg);
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.page-empty {
+  padding: var(--space-12) 0;
+  border-top: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+  max-width: 52ch;
+}
+
+.page-aside {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: clamp(var(--space-4), 5vw, var(--space-16));
+  padding-bottom: clamp(var(--space-16), 10vh, var(--space-24));
+}
+
+/* ─── Release cards ─────────────────────────────────────────────────────── */
+.rel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: clamp(var(--space-4), 2vw, var(--space-8));
+}
+
+.rel {
+  display: flex;
+  flex-direction: column;
+  background: rgb(139 58 196 / 0.07);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* Fixed ratio so swapping the facade for the iframe doesn't shift the page. */
+.rel-media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: var(--color-surface-deeper);
+}
+
+.rel-frame,
+.rel-facade {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.rel-facade {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: var(--color-surface-deeper);
+  cursor: pointer;
+}
+
+.rel-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rel-art--blank {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display-stack);
+  font-size: 4rem;
+  color: rgb(212 170 238 / 0.18);
+  background: linear-gradient(140deg, rgb(59 26 110 / 0.7), rgb(26 13 46 / 0.9));
+}
+
+/* The one call to action on a release card, so it takes the accent. */
+.rel-play {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-accent-cta);
+  color: var(--color-accent-cta-ink);
+  box-shadow: 0 8px 28px rgb(18 4 31 / 0.55);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.rel-facade:hover .rel-play {
+  transform: scale(1.06);
+}
+
+.rel-play svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.rel-src {
+  position: absolute;
+  left: var(--space-3);
+  bottom: var(--space-3);
+  padding: 5px 10px;
+  border-radius: var(--radius-full);
+  background: rgb(18 4 31 / 0.72);
+  backdrop-filter: blur(6px);
+  font-family: var(--font-body-stack);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgb(240 235 224 / 0.86);
+}
+
+.rel-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-4) var(--space-6);
+}
+
+.rel-title {
+  font-family: var(--font-display-stack);
+  font-size: 1.125rem;
+  line-height: 1.2;
+  color: var(--color-ground-light);
+}
+
+.rel-meta {
+  font-family: var(--font-body-stack);
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.rel-blurb {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--color-text-muted);
+  max-width: 46ch;
+}
+
+.rel-out {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-body-stack);
+  font-size: 0.875rem;
+  color: rgb(240 235 224 / 0.9);
+  border-bottom: 1px solid rgb(196 126 232 / 0.4);
+  padding-bottom: 2px;
+}
+
+.rel-out:hover {
+  border-bottom-color: var(--color-accent-vivid);
+}
+
+/* ─── Long-form prose (about) ───────────────────────────────────────────── */
+.about-eyebrow {
+  font-family: var(--font-body-stack);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-primary-pale);
+}
+
+.about-figure {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+}
+
+.about-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: center 35%;
+}
+
+/* Measure capped for reading, not for layout — this is the only surface on
+   the site with real body copy. */
+.prose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 68ch;
+  font-family: var(--font-body-stack);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: rgb(240 235 224 / 0.84);
+}
+
+.prose-lead {
+  font-size: 1.25rem;
+  line-height: 1.55;
+  color: var(--color-ground-light);
+}
+
+.prose h2 {
+  margin-top: var(--space-6);
+  font-family: var(--font-display-stack);
+  font-size: 1.0625rem;
+  letter-spacing: 0.02em;
+  color: var(--color-primary-light);
+}
+
+.prose a {
+  color: var(--color-ground-light);
+  border-bottom: 1px solid rgb(196 126 232 / 0.45);
+  padding-bottom: 1px;
+}
+
+.prose a:hover {
+  border-bottom-color: var(--color-accent-vivid);
+}
+
+.prose-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+}
+
+.prose-note {
+  color: var(--color-text-muted);
+}
+
+.about-download {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target-min);
+  padding: 12px 20px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-cta);
+  color: var(--color-accent-cta-ink);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.about-download:hover {
+  background: #FFC75A;
+  border: 0;
 }

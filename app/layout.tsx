@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Bungee, DM_Sans } from 'next/font/google'
 import './globals.css'
+import Nav from '@/components/Nav/Nav'
 
 // Bungee: signage display, single weight, uppercase-leaning. Replaced
 // Caprasimo on 2026-10-01 — see docs/STATE.md.
@@ -31,7 +32,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
-      <body>{children}</body>
+      <body>
+        <Nav />
+        {children}
+      </body>
     </html>
   )
 }
