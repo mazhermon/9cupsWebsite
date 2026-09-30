@@ -40,16 +40,18 @@ export default function Landing({
   as = 'main',
   id = 'landing',
 }: LandingProps) {
-  const { ready, isPlaying, error, analyser, toggle } = usePlayer()
+  const { buffering, isPlaying, error, analyser, toggle } = usePlayer()
 
   // The mix's low end carries the kick, so the wordmark's transient detector
   // still finds hits — the same glitch the mixer gets from its drums stem.
   // Passed only while playing so the ghosts settle when paused.
   const kickAnalyser = isPlaying ? analyser : null
 
+  // "Loading…" only while genuinely waiting on data. Previously this showed
+  // until `canplay` fired, which could be never — see useTrackPlayer.
   const hint = error
     ? 'Audio unavailable'
-    : !ready
+    : buffering
       ? 'Loading…'
       : isPlaying
         ? RELEASE.title
@@ -90,7 +92,9 @@ export default function Landing({
           className="play-control--inline"
           isPlaying={isPlaying}
           onToggle={toggle}
-          disabled={!ready || !!error}
+          // Enabled as soon as there's no error: calling play() is what
+          // starts the download, so blocking until buffered strands the user.
+          disabled={!!error}
           hint={hint}
         />
 

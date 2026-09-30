@@ -1156,20 +1156,28 @@ a {
   transform: translateX(6px);
 }
 
-/* One flat colour per row, walked across the brand palette so the list has
-   shading variation without any row becoming a gradient. Order follows
-   LISTEN_LINKS then FOLLOW_LINKS then PRESS_LINKS within each group.
-   Every pairing is contrast-checked against its own background. */
-.linkgroup:nth-child(1) li:nth-child(1) .linkrow { --row-hover: #1db954; --row-hover-ink: #0b1f12; } /* Spotify green */
-.linkgroup:nth-child(1) li:nth-child(2) .linkrow { --row-hover: #4d8fa8; --row-hover-ink: #05161d; } /* Bandcamp teal */
-.linkgroup:nth-child(1) li:nth-child(3) .linkrow { --row-hover: #ff5500; --row-hover-ink: #1c0800; } /* SoundCloud orange */
-.linkgroup:nth-child(1) li:nth-child(4) .linkrow { --row-hover: #cc2e90; --row-hover-ink: #ffffff; } /* brand magenta */
-.linkgroup:nth-child(1) li:nth-child(5) .linkrow { --row-hover: #8b3ac4; --row-hover-ink: #ffffff; } /* brand amethyst */
+/* One tint for every row. Borrowing each destination's own brand colour put
+   eight unrelated palettes on one screen and made the list read as a logo
+   parade rather than as 9cups. Electric Amethyst, the identity colour, does
+   the job with less noise.
+   To try the contrasting yellow instead, change these two values only:
+     --row-hover: #E8C547;  --row-hover-ink: #1F1600;  (measured 10.4:1) */
+.linkrow {
+  --row-hover: var(--color-primary-mid);
+  --row-hover-ink: var(--color-ground-light);
+}
 
-.linkgroup:nth-child(2) li:nth-child(1) .linkrow { --row-hover: #b03060; --row-hover-ink: #ffffff; } /* crimson rose */
-.linkgroup:nth-child(2) li:nth-child(2) .linkrow { --row-hover: #c47ee8; --row-hover-ink: #1d0730; } /* bright lavender */
+/* The hover nudge, done with transform so it composites instead of relaying
+   out the row. Applied to the children, not the row, so the full-bleed
+   background and its rules stay put. */
+.linkrow > * {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
 
-.linkgroup:nth-child(3) li:nth-child(1) .linkrow { --row-hover: #7a8a1a; --row-hover-ink: #0f1201; } /* acid moss */
+.linkrow:hover > *,
+.linkrow:focus-visible > * {
+  transform: translateX(6px);
+}
 
 .linkrow-name {
   grid-column: 1;
