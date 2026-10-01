@@ -1393,10 +1393,12 @@ a {
     gap: var(--space-4);
   }
 
-  /* Lower horizon on short screens so the wireframe stays a ground line
-     rather than rising into the list. */
+  /* Raised from 46vh on 2026-10-01. On a phone the mesh was a thin strip at
+     the very bottom — barely visible for something this expensive to run. It
+     now occupies most of the second section, with the vertical scrim keeping
+     the links legible over it. */
   .terrain--landing {
-    height: 46vh;
+    height: 78vh;
   }
 
   .landing-foot {
@@ -1408,13 +1410,15 @@ a {
   /* Single column here, so the text spans the full width and the horizontal
      scrim has nowhere to fade to. Vertical instead. */
   .landing-scrim {
+    /* Reaches higher and holds more weight than before: the mesh now runs up
+       behind most of the link list rather than sitting under it. */
     background: linear-gradient(
       to bottom,
       transparent 0%,
-      transparent 20%,
-      rgb(26 13 46 / 0.82) 42%,
-      rgb(26 13 46 / 0.90) 70%,
-      rgb(26 13 46 / 0.95) 100%
+      rgb(26 13 46 / 0.62) 15%,
+      rgb(26 13 46 / 0.88) 34%,
+      rgb(26 13 46 / 0.86) 62%,
+      rgb(26 13 46 / 0.90) 100%
     );
   }
 

@@ -75,6 +75,16 @@ scoped out of the MVP.
 
 ## Terrain
 
+Colour responds to audio as well as shape. The vertex shader passes a `vGlow`
+varying to the fragment stage and the fragment mixes the base purple toward
+Marigold. It is driven mostly by the high band, secondarily by vertex height,
+and raised to a power — a linear mapping pushed the *entire* mesh to the accent
+because a full mix carries high content almost constantly. The curve keeps the
+body of the mesh in brand colour and lets only genuine peaks reach the accent.
+
+Displacement amplitudes were raised ~1.3x on 2026-10-01. Past roughly 1.5x the
+peaks break the horizon line and poke into the content above.
+
 One `PlaneGeometry(180×90)` (~16k verts), vertex displacement only, trivial
 fragment shader emitting a solid colour. `antialias: false`, `dpr = 1`, no
 transparent overdraw.
@@ -114,12 +124,35 @@ Adapted deliberately:
 
 ## Performance: measured, not assumed
 
-Measured 2026-09-30 on Intel UHD 630 integrated graphics (the mid-tier class
-`PRODUCT.md` targets), production build, 1440×900, during playback:
+Measured on Intel UHD 630 integrated graphics (the mid-tier class `PRODUCT.md`
+targets), production build.
 
-**60fps flat. p95 17.4ms, worst frame 17.7ms, zero frames over 20ms.**
-Identical with the wordmark ghost animation on and off, across three paired
-runs in separate browser processes.
+**Idle (audio not playing): 60fps flat**, p95 17.9ms, zero frames over 20ms,
+on both desktop and a 390x844 phone viewport.
+
+**During playback: ~25fps**, p95 ~80ms. This is the honest number and it has
+been true since the video hero landed.
+
+CORRECTION to an earlier entry here. This file previously claimed "60fps flat
+during playback". That measurement was taken on the *old* landing page, before
+the video hero existed, and it does not reproduce on the current page. The
+`frameloop: demand` fix below genuinely solved the idle case — it stops the
+mesh re-rendering a static frame — but when audio plays the mesh renders
+continuously again and the figure falls to ~25fps.
+
+**What the playing-state cost is NOT.** Measured 2026-10-01, one browser
+process per config:
+- *Not geometry.* 180x90, 128x64, 90x45 and 64x32 segments all land between
+  18 and 25fps, within each other's run-to-run variance.
+- *Not the hero video.* Pausing it, removing the element, and hiding the whole
+  hero section each move it by about 1fps.
+- *Not the wordmark ghosts.* 24.9fps with them, 24.2 without.
+
+So it is dominated by something not yet isolated, and fixing it is its own
+piece of work rather than a tweak. Recorded here rather than left as a vague
+"it feels slow", and explicitly NOT attributed to the 2026-10-01 terrain
+changes: baseline on main before those changes measured 25.5fps mobile and
+25.4 desktop, against 26.9 and 29.1 after.
 
 ### The two costs found on 2026-09-30, and their fixes
 
