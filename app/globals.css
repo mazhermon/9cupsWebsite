@@ -2114,3 +2114,113 @@ body:has(.page-shell) {
   background: #FFC75A;
   border: 0;
 }
+
+/* ─── Private todo (local only) ─────────────────────────────────────────────
+   Reachable only when NINECUPS_PRIVATE=1, which lives in gitignored
+   .env.local and never reaches the deployed build. Styled plainly on purpose:
+   it is a tool, not a surface anyone else sees. */
+.todo-flag {
+  align-self: flex-start;
+  padding: 5px 12px;
+  border: 1px dashed var(--color-accent-cta);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body-stack);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-accent-cta);
+}
+
+.todo-bar {
+  width: 100%;
+  max-width: 320px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: rgb(212 170 238 / 0.14);
+  overflow: hidden;
+}
+
+.todo-bar span {
+  display: block;
+  height: 100%;
+  background: var(--color-accent-cta);
+  transition: width var(--dur-base) var(--ease-out);
+}
+
+.todo-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.todo-heading {
+  font-family: var(--font-display-stack);
+  font-size: 0.9375rem;
+  letter-spacing: 0.03em;
+  color: var(--color-primary-light);
+}
+
+.todo-list {
+  list-style: none;
+  border-bottom: 1px solid var(--color-line);
+  max-width: 76ch;
+}
+
+.todo-form {
+  display: contents;
+}
+
+.todo-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--touch-target-min);
+  padding: var(--space-3) var(--space-2);
+  border-top: 1px solid var(--color-line);
+  text-align: left;
+  font-family: var(--font-body-stack);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: rgb(240 235 224 / 0.92);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.todo-item:hover {
+  background: rgb(139 58 196 / 0.16);
+}
+
+.todo-box {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  border: 1.5px solid rgb(212 170 238 / 0.45);
+  border-radius: 5px;
+  color: var(--color-accent-cta-ink);
+}
+
+.todo-item[data-done='true'] .todo-box {
+  background: var(--color-accent-cta);
+  border-color: var(--color-accent-cta);
+}
+
+.todo-box svg {
+  width: 13px;
+  height: 13px;
+}
+
+.todo-item[data-done='true'] .todo-text {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+  text-decoration-color: rgb(212 170 238 / 0.45);
+}
+
+.todo-item code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.875em;
+  color: var(--color-primary-pale);
+}

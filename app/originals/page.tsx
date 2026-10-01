@@ -18,7 +18,7 @@ export default function OriginalsPage() {
         emptyNote="No originals up here yet. Catching A Feeling is playable on the home page, and you can pull it apart in the mixer."
       />
       <aside className="page-aside">
-        <Link href="/mixer" className="landing-mixer-cta">
+        <Link href="/stems" className="landing-mixer-cta">
           <span className="landing-mixer-label">Play with the stems</span>
           <span className="landing-mixer-sub">
             Take Catching A Feeling apart, one stem at a time

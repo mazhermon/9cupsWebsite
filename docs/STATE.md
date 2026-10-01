@@ -13,10 +13,11 @@ A brand site for DJ 9cups. Two surfaces:
 | Route | What it is |
 |---|---|
 | `/` | Knockout video hero (the loop plays through giant "IX CUPS" type) above the landing: wordmark, play button, grouped links, mixer doorway, bookings. Both sections share ONE audio transport. Side by side instead of stacked above 1600x800. |
-| `/mixer` | The four-stem mixer. Editorial split: duotone'd portrait with the album cover blended over it on the left, wordmark + stem toggles + terrain + listen row on the right. |
+| `/stems` | The four-stem player (was `/mixer`; renamed because "Mixer" read too close to "Mixes". `/mixer` permanently redirects). Editorial split: duotone'd portrait with the album cover blended over it on the left, wordmark + stem toggles + terrain + listen row on the right. |
 | `/mixes` | DJ mixes. List of facade players driven by `MIXES` in `lib/releases.ts`. Empty until entries are added. |
 | `/originals` | Original tracks, same component and shape, driven by `ORIGINALS`. |
 | `/about` | Text-heavy. Hero image, drafted copy, press links, bookings mailto, optional press-pack download. |
+| `/todo` | **Local only.** Checklist backed by `TODO.md`. 404s unless `NINECUPS_PRIVATE=1`, which lives in gitignored `.env.local` and so never reaches the deployed build. |
 | `/review` | Dev-only route index. Carries the DevDock nav overlay. Not linked from the public site. |
 | `/explore/*` | Unfinished ASCII-visualiser experiments. Kept deliberately, not linked. |
 
@@ -90,6 +91,31 @@ Props worth knowing:
   A full-bleed host needs it wider or the plane's own edges show as diagonal
   seams. The landing passes `2.2`.
 - `activeKeys`, `segments`, `dpr`, `className` — escape hatches for perf/layout.
+
+## Private surfaces
+
+`/todo` renders `TODO.md` as tickable checkboxes and writes the file back. It
+exists only where `NINECUPS_PRIVATE=1` is set, which happens in `.env.local`
+— gitignored, so Vercel never sees it. Absence is the default, meaning
+forgetting to configure production is the *safe* outcome.
+
+Both the page and the server action check the flag. Gating only the page would
+leave the write reachable, since a server action is a POST endpoint.
+
+Verified by moving `.env.local` aside and rebuilding: `/todo` returns 404, the
+other routes are unaffected, and `TODO.md`'s checksum is unchanged after a
+POST. That check can't live in the e2e suite — Playwright's server loads
+`.env.local` like any local run — so the suite instead asserts `/todo` is
+never linked from a public page, and unit tests cover the gate and the file
+logic.
+
+`toggleTodo` takes the expected item text as well as the line number and
+refuses to write if they disagree, so hand-editing the file between render and
+submit can't tick the wrong box. Every other line is left byte-identical,
+which there is a test for: the file has to stay as usable in an editor as it
+is through the page.
+
+To enable locally: `echo 'NINECUPS_PRIVATE=1' >> .env.local`
 
 ## Navigation
 
@@ -298,7 +324,7 @@ Verified 2026-09-30; keep them true:
 
 ## Tests
 
-`npm test` (Vitest, 69) and `npm run test:e2e` (Playwright, 118 across desktop
+`npm test` (Vitest, 85) and `npm run test:e2e` (Playwright, 122 across desktop
 and mobile projects).
 
 - Unit: `tests/unit/` — lib logic, `useTrackPlayer`, and the components with

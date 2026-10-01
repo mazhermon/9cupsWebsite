@@ -152,10 +152,10 @@ test.describe('home', () => {
     await expect(page.locator('.play-btn')).toBeVisible()
   })
 
-  test('mixer doorway navigates to /mixer', async ({ page }) => {
+  test('stems doorway navigates to /stems', async ({ page }) => {
     await page.goto('/')
     await page.locator('.landing-mixer-cta').click()
-    await expect(page).toHaveURL(/\/mixer$/)
+    await expect(page).toHaveURL(/\/stems$/)
   })
 })
 

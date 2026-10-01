@@ -1,9 +1,11 @@
 'use client'
 
-// 9cups · Catching A Feeling — the stem mixer.
+// 9cups · Catching A Feeling — the stem player.
 //
 // This was the home page until 2026-09-29, when / became a lighter landing
-// page and the mixer moved here. The composition is unchanged: the picked
+// page and this moved here (and from /mixer to /stems on 2026-10-01,
+// because 'Mixer' read too close to 'Mixes' in the nav). The composition is
+// unchanged: the picked
 // editorial split (left = duotone'd portrait with the album cover blended
 // over it, right = wordmark + stem toggles + terrain + listen-on). The cover
 // sits at full blend by default; hovering the portrait pulls it back to
@@ -12,7 +14,7 @@
 import EditorialHero from '@/components/ImageDemo/EditorialHero'
 import HoverOverlay from '@/components/ImageDemo/HoverOverlay'
 
-export default function MixerPage() {
+export default function StemsPage() {
   return (
     <>
       <EditorialHero

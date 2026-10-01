@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
-const ROUTES = ['/', '/mixes', '/originals', '/mixer', '/about'] as const
-const LABELS = ['Home', 'Mixes', 'Originals', 'Mixer', 'About']
+const ROUTES = ['/', '/mixes', '/originals', '/stems', '/about'] as const
+const LABELS = ['Home', 'Mixes', 'Originals', 'Stems', 'About']
 
 test.describe('navigation', () => {
   for (const route of ROUTES) {
@@ -48,6 +48,19 @@ test.describe('navigation', () => {
   test('carries its scrim from the start on pages without a hero', async ({ page }) => {
     await page.goto('/about')
     await expect(page.locator('.nav')).toHaveAttribute('data-solid', 'true')
+  })
+})
+
+test.describe('private surfaces', () => {
+  test('/todo is never linked from a public page', async ({ page }) => {
+    // The route is gated by NINECUPS_PRIVATE, which lives in gitignored
+    // .env.local and so is absent on the deployed build. Belt and braces: it
+    // must also never be advertised. (The 404 itself can't be asserted here —
+    // Playwright's server loads .env.local like any local run.)
+    for (const route of ROUTES) {
+      await page.goto(route)
+      await expect(page.locator('a[href^="/todo"]')).toHaveCount(0)
+    }
   })
 })
 

@@ -101,7 +101,7 @@ export default function Landing({
         <LinkGroups groups={LINK_GROUPS} />
 
         <div className="landing-foot">
-          <Link href="/mixer" className="landing-mixer-cta">
+          <Link href="/stems" className="landing-mixer-cta">
             <span className="landing-mixer-label">Play with the stems</span>
             <span className="landing-mixer-sub">
               Pull {RELEASE.title} apart, one stem at a time

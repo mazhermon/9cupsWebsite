@@ -10,7 +10,7 @@ export const NAV_LINKS: NavLink[] = [
   { href: '/',          label: 'Home' },
   { href: '/mixes',     label: 'Mixes' },
   { href: '/originals', label: 'Originals' },
-  { href: '/mixer',     label: 'Mixer' },
+  { href: '/stems',     label: 'Stems' },
   { href: '/about',     label: 'About' },
 ]
 

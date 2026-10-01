@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
 
-const ROUTES = ['/', '/mixer', '/mixes', '/originals', '/about'] as const
+const ROUTES = ['/', '/stems', '/mixes', '/originals', '/about'] as const
 
 // WCAG AA: 4.5:1 for normal text, 3:1 for large (>=24px, or >=18.66px bold).
 const AA_NORMAL = 4.5

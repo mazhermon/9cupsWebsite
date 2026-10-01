@@ -1,6 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        // /mixer shipped before the nav existed; "Mixer" read too close to
+        // "Mixes" so it became /stems. Permanent, because the old URL has
+        // been public.
+        source: '/mixer',
+        destination: '/stems',
+        permanent: true,
+      },
+    ]
+  },
+
   async headers() {
     return [
       {
