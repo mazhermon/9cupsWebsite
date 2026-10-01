@@ -29,6 +29,39 @@ import type { VisualiserProps, StemKey } from '@/lib/track-config'
 import { bandEnergy, lerpToward, useReducedMotion } from '@/lib/audio-reactive'
 import { TransientDetector } from '@/lib/transient-detect'
 
+/**
+ * Drives rendering at a fixed rate instead of as fast as the display allows.
+ *
+ * Why: this is an ambient background, and asking an integrated GPU for 60fps
+ * of wireframe rasterisation indefinitely makes it throttle. Measured over 40
+ * seconds of playback at 60fps the median frame gap degraded to 43ms with no
+ * long tasks at all — the main thread idle, waiting on the GPU. Half the draw
+ * calls is a far better trade than a mesh that starts smooth and gets worse
+ * the longer anyone listens.
+ *
+ * The vertex shader advances on `delta`, so a lower rate changes how often the
+ * terrain is drawn, not how fast it moves.
+ */
+function FrameLimiter({ fps, active }: { fps: number; active: boolean }) {
+  const invalidate = useThree((s) => s.invalidate)
+  useEffect(() => {
+    if (!active) return
+    const interval = 1000 / fps
+    let raf = 0
+    let last = performance.now()
+    const tick = (now: number) => {
+      raf = requestAnimationFrame(tick)
+      if (now - last < interval) return
+      // Keep the cadence honest across a missed deadline rather than drifting.
+      last = now - ((now - last) % interval)
+      invalidate()
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [fps, active, invalidate])
+  return null
+}
+
 // Force the active camera to look at a fixed world target — drei's
 // PerspectiveCamera doesn't expose a lookAt prop, so we apply it via R3F's
 // camera object once on mount and on target change.
@@ -78,6 +111,10 @@ export interface TerrainProps extends Partial<Omit<VisualiserProps, 'playing'>> 
   /** Colour the mesh shifts toward on high-frequency content. Defaults to the
    *  brand's Marigold. Passing the same value as `color` disables the shift. */
   accentColor?: string
+  /** Frames per second to draw at while playing. Default 30: this is ambient
+   *  background motion, and 60 makes integrated GPUs throttle under sustained
+   *  load. Raise only with a measurement to justify it. */
+  renderFps?: number
 }
 
 const PLANE_W = 22
@@ -309,6 +346,11 @@ function TerrainMesh({
   const segD = segments?.d ?? 90
   const scale = planeScale ?? 1
 
+  // Kept as wireframe on a triangulated plane rather than an explicit line
+  // grid. The grid draws ~32,700 primitives against wireframe's ~97,000 and
+  // was tried for exactly that reason, but it measured no faster (37.6fps
+  // against 39.9) — the bottleneck is sustained draw rate, not primitive
+  // count. It also loses the diagonals, so it changed the look for nothing.
   return (
     <mesh
       material={material}
@@ -329,18 +371,18 @@ export default function Terrain(props: TerrainProps) {
       <Canvas
         dpr={props.dpr ?? 1}
         gl={{ antialias: false, alpha: true, powerPreference: 'high-performance' }}
-        // Only drive a continuous render loop while audio is actually playing.
-        // At rest the mesh is static, so "always" spent a full 60fps of GPU
-        // redrawing an identical frame — which on integrated graphics is enough
-        // to starve a video compositing beside it (measured: 22fps -> 60fps).
-        // "demand" still renders once on mount, so the resting terrain draws.
-        frameloop={props.playing ? 'always' : 'demand'}
+        // Always demand-driven. At rest nothing invalidates, so the static
+        // mesh costs nothing; while playing, FrameLimiter invalidates at a
+        // fixed rate. "demand" also renders once on mount, so the resting
+        // terrain still draws.
+        frameloop="demand"
         style={{ width: '100%', height: '100%' }}
       >
         {/* Camera tuned for the short-wide hero canvas (100vw × 50vh).
             Lower Y + wider fov keeps the wireframe filling the viewport. */}
         <PerspectiveCamera makeDefault position={[0, 2.2, 5.8]} fov={52} near={0.1} far={60} />
         <CameraLookAt target={[0, -0.6, 0]} />
+        <FrameLimiter fps={props.renderFps ?? 30} active={props.playing} />
         <TerrainMesh {...props} />
       </Canvas>
     </section>

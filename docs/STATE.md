@@ -130,8 +130,11 @@ targets), production build.
 **Idle (audio not playing): 60fps flat**, p95 17.9ms, zero frames over 20ms,
 on both desktop and a 390x844 phone viewport.
 
-**During playback: ~25fps**, p95 ~80ms. This is the honest number and it has
-been true since the video hero landed.
+**During playback: median 17ms (60fps), mean ~42fps.** Over a 40-second
+sample: 170 of 840 frames above 33ms, 4 above 100ms, zero long tasks.
+
+Before the 2026-10-01 fix this was mean ~21fps, median 43ms, with 541 frames
+above 33ms and 43 above 100ms.
 
 CORRECTION to an earlier entry here. This file previously claimed "60fps flat
 during playback". That measurement was taken on the *old* landing page, before
@@ -148,11 +151,28 @@ process per config:
   hero section each move it by about 1fps.
 - *Not the wordmark ghosts.* 24.9fps with them, 24.2 without.
 
-So it is dominated by something not yet isolated, and fixing it is its own
-piece of work rather than a tweak. Recorded here rather than left as a vague
-"it feels slow", and explicitly NOT attributed to the 2026-10-01 terrain
-changes: baseline on main before those changes measured 25.5fps mobile and
-25.4 desktop, against 26.9 and 29.1 after.
+**What it actually was: sustained draw rate.** The clue was in the shape of
+the data rather than any one config — zero long tasks (so the main thread was
+idle, waiting on the GPU) and a first three seconds at a clean 60fps that then
+degraded. That is thermal throttling on integrated graphics, not a hot path.
+
+The fix is `FrameLimiter`: the Canvas is always `frameloop="demand"` and a
+fixed-rate loop invalidates it at 30fps while playing. Halving the sustained
+draw rate stops the GPU throttling, and 30fps is ample for slow ambient
+motion. The vertex shader advances on `delta`, so this changes how often the
+terrain is drawn, not how fast it moves.
+
+**Measurement note.** The early readings here were taken as a *mean* over 200
+frames, which a handful of 300ms outliers drags from 60fps to 25 — that is how
+a page whose median frame is 16.7ms got recorded as "25fps". Always report the
+median alongside the mean, and sample for tens of seconds: the first three
+seconds of any run look fine because throttling has not started.
+
+**Also tried and reverted:** an explicit line-grid geometry in place of
+`wireframe: true`. It draws ~32,700 primitives against wireframe's ~97,000 and
+should have been a clear win, but measured no faster (37.6fps against 39.9) —
+the bottleneck is draw *rate*, not primitive count. It also removed the
+diagonals, so it changed an approved look for nothing.
 
 ### The two costs found on 2026-09-30, and their fixes
 
