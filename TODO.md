@@ -11,7 +11,7 @@ so it stays readable and diffable either way.
 - [ ] Press-pack share link (Drive or Dropbox) for `PRESS_PACK_URL` in `lib/site-config.ts`
 - [ ] Press/hero image for the About page
 - [ ] Real biography copy for the marked block on the About page
-- [ ] Decide what `mov/9cupsVid.MOV` is for, or delete it
+- [x] Decide what `mov/9cupsVid.MOV` is for, or delete it
 
 ## Decisions open
 
