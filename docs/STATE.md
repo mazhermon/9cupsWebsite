@@ -127,108 +127,48 @@ Adapted deliberately:
 Measured on Intel UHD 630 integrated graphics (the mid-tier class `PRODUCT.md`
 targets), production build.
 
-**Idle (audio not playing): 60fps flat**, p95 17.9ms, zero frames over 20ms,
-on both desktop and a 390x844 phone viewport.
+**60fps during playback and at idle.** Median frame gap 16.7ms, zero long
+tasks, sampled over 40 seconds on a cool machine.
 
-**During playback: median 17ms (60fps), mean ~42fps.** Over a 40-second
-sample: 170 of 840 frames above 33ms, 4 above 100ms, zero long tasks.
+### A long detour, and what it was actually worth
 
-Before the 2026-10-01 fix this was mean ~21fps, median 43ms, with 541 frames
-above 33ms and 43 above 100ms.
+Earlier entries here recorded "~25fps during playback" and then a fix claiming
+"21fps -> 42fps". **Both numbers were artefacts of a thermally saturated
+machine**, produced by running dozens of consecutive production builds and
+measurement passes. On a cool machine the page was always 60fps. Recorded
+rather than quietly deleted, because the mistake is more instructive than the
+result.
 
-CORRECTION to an earlier entry here. This file previously claimed "60fps flat
-during playback". That measurement was taken on the *old* landing page, before
-the video hero existed, and it does not reproduce on the current page. The
-`frameloop: demand` fix below genuinely solved the idle case — it stops the
-mesh re-rendering a static frame — but when audio plays the mesh renders
-continuously again and the figure falls to ~25fps.
+Two measurement rules this cost us:
 
-**What the playing-state cost is NOT.** Measured 2026-10-01, one browser
-process per config:
-- *Not geometry.* 180x90, 128x64, 90x45 and 64x32 segments all land between
-  18 and 25fps, within each other's run-to-run variance.
-- *Not the hero video.* Pausing it, removing the element, and hiding the whole
-  hero section each move it by about 1fps.
-- *Not the wordmark ghosts.* 24.9fps with them, 24.2 without.
+1. **Report the median, not just the mean.** A handful of 300ms outliers drags
+   a page whose median frame is 16.7ms to a reported "25fps".
+2. **Watch the thermal state.** Back-to-back builds and WebGL benchmarks heat
+   the machine; readings drift downward across a session and recover after an
+   idle period. Interleave A/B passes rather than measuring one config then the
+   other, and be suspicious of any result where *less* work measures slower.
 
-**What it actually was: sustained draw rate.** The clue was in the shape of
-the data rather than any one config — zero long tasks (so the main thread was
-idle, waiting on the GPU) and a first three seconds at a clean 60fps that then
-degraded. That is thermal throttling on integrated graphics, not a hot path.
+### What shipped from it
 
-The fix is `FrameLimiter`: the Canvas is always `frameloop="demand"` and a
-fixed-rate loop invalidates it at 30fps while playing. Halving the sustained
-draw rate stops the GPU throttling, and 30fps is ample for slow ambient
-motion. The vertex shader advances on `delta`, so this changes how often the
-terrain is drawn, not how fast it moves.
+- **`frameloop={playing ? 'always' : 'demand'}`.** Genuinely measured: at idle
+  the mesh was redrawing an identical static frame 60 times a second, 22fps ->
+  60fps. Kept.
+- **Edge-derived line geometry** instead of `wireframe: true`. Wireframe draws
+  three lines per triangle, so every interior edge — shared by two triangles —
+  is rasterised twice: 97,200 primitives for a picture made of 48,870 distinct
+  edges. The replacement derives its edges from a real PlaneGeometry index
+  buffer, so the output is provably the same triangulation, diagonals included,
+  and verified identical by screenshot. **Exactly half the per-frame GPU work
+  for the same picture.** It measures no faster here (both 60fps), so it is
+  kept as headroom for phones and battery, not as a fix.
+- **A 30fps draw-rate cap: tried and removed.** On a cool machine it changed
+  nothing, and it halves the temporal resolution of the kick pulse. If a real
+  phone throttles under sustained playback this is the first lever to reach
+  for — the mechanism is simple, it just is not justified today.
 
-**Measurement note.** The early readings here were taken as a *mean* over 200
-frames, which a handful of 300ms outliers drags from 60fps to 25 — that is how
-a page whose median frame is 16.7ms got recorded as "25fps". Always report the
-median alongside the mean, and sample for tens of seconds: the first three
-seconds of any run look fine because throttling has not started.
-
-**Also tried and reverted:** an explicit line-grid geometry in place of
-`wireframe: true`. It draws ~32,700 primitives against wireframe's ~97,000 and
-should have been a clear win, but measured no faster (37.6fps against 39.9) —
-the bottleneck is draw *rate*, not primitive count. It also removed the
-diagonals, so it changed an approved look for nothing.
-
-### The two costs found on 2026-09-30, and their fixes
-
-**1. `frameloop="always"` on a static terrain.** R3F re-rendered the terrain 60
-times a second to draw an identical frame whenever audio wasn't playing. Alone
-that was survivable; composited alongside a playing video on integrated
-graphics it dropped the home page to 22fps. `Terrain` now uses
-`frameloop={playing ? 'always' : 'demand'}` — "demand" still renders once on
-mount, so the resting mesh draws. **22fps -> 60fps.**
-
-**2. `mix-blend-mode` + `filter` over a playing video.** The mixer's dappled
-cover overlay was free over a still image (composited once, cached) and
-expensive over video (recomputed every frame). The video panel now uses plain
-alpha compositing. **~20fps -> ~50fps.** Not 60: a large playing video plus any
-compositing on top still costs on this GPU. Accepted for a secondary page.
-
-General rule this implies: **check what a CSS effect costs once it sits over
-moving pixels.** Blend modes and filters are nearly free over static content
-and expensive over video.
-
-**The dev server is janky and production is not.** Turbopack instrumentation
-and React dev-mode cost roughly 20fps and produce visible stutter. Never judge
-animation performance on `next dev` — build and `next start` first. This cost
-one full debugging cycle and a wrong conclusion; don't repeat it.
-
-Methodology note: measuring several configs sequentially in one browser session
-is invalid. The first config absorbs audio decode and JIT warmup and looks
-worse than it is. One process per config, discard the first ~60 frames.
-
-## The audio loader
-
-Two bugs lived here; both are pinned by tests now.
-
-**Stuck on "Loading…", never plays.** `el.src = url` ran before the `canplay`
-listener was attached. With a warm HTTP cache the element reached
-HAVE_ENOUGH_DATA and fired `canplay` in that gap, nothing was listening,
-`ready` never flipped, and the button stayed disabled forever. Intermittent
-because it depended on cache state. Listeners now attach first, `loadeddata`
-and `playing` also count as ready signals, and `readyState` is checked
-directly as a fallback.
-
-**Three requests for one file, two aborted.** Assigning `src` starts a fetch
-even at `preload="none"`, so a later `load()` aborted it and started another.
-`src` is now assigned exactly once, at the moment the download should begin.
-
-**The button is never gated on buffering.** It is enabled unless there is an
-error, because calling `play()` is itself what starts the download. A separate
-`buffering` flag (from `waiting`/`stalled`, cleared on `playing`) drives the
-"Loading…" label, so the label is honest and the control is always usable.
-
-**Preload timing.** The track downloads on the first idle slot after paint —
-deliberately NOT on `window.load`, which waits for the hero video. Pressing
-play is the expected first action, so the audio outranks the decorative
-background. Measured on a production build: a visitor who dwells 3s or more
-gets playback in **~200ms**; clicking the instant the page appears takes
-2-6s because the click itself is what starts the fetch.
+On `wireframe: true` itself: it is a normal documented Three.js material
+property, not a debug-only mode, and it is legitimate to ship. It is simply
+wasteful here, and the waste is avoidable at no visual cost.
 
 ## Audio assets
 
