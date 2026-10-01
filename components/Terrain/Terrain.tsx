@@ -75,6 +75,9 @@ export interface TerrainProps extends Partial<Omit<VisualiserProps, 'playing'>> 
    *  plane's own edges show as diagonals at the left and right of frame.
    *  Purely geometric — segment count, and therefore cost, is unchanged. */
   planeScale?: number
+  /** Colour the mesh shifts toward on high-frequency content. Defaults to the
+   *  brand's Marigold. Passing the same value as `color` disables the shift. */
+  accentColor?: string
 }
 
 const PLANE_W = 22
@@ -93,6 +96,12 @@ const vertexShader = /* glsl */ `
   uniform float uHighMute;
   uniform float uDrumSolo;   // 0..1: ramps to 1 when drums is the ONLY active stem
 
+  // How much accent colour this vertex earns. Driven by the high band (bright
+  // sound reads as bright colour) plus the vertex's own height, so peaks catch
+  // the accent as they rise. Interpolated across the line, which is what makes
+  // the mesh read as lit rather than tinted.
+  varying float vGlow;
+
   void main() {
     vec3 pos = position;
 
@@ -110,25 +119,45 @@ const vertexShader = /* glsl */ `
     // alive even without the other layers.
     float drumBoost = 1.0 + uDrumSolo * 1.6;
 
+    // Amplitudes raised ~1.3x on 2026-10-01: the mesh is expensive, so it has
+    // to be worth looking at. Deliberately not more — past about 1.5x the
+    // peaks break the horizon line and poke into the content above.
     float h =
-      bass   * uLow      * uLowMute  * 0.65 +
-      mid    * uMid      * uMidMute  * 0.42 +
-      ring   * uKick     * uKickMute * 1.55 * drumBoost +
-      drumWave * uDrumBody * uKickMute * 0.55 * drumBoost +
-      ripple * uHigh     * uHighMute * 0.18;
+      bass   * uLow      * uLowMute  * 0.85 +
+      mid    * uMid      * uMidMute  * 0.55 +
+      ring   * uKick     * uKickMute * 2.00 * drumBoost +
+      drumWave * uDrumBody * uKickMute * 0.72 * drumBoost +
+      ripple * uHigh     * uHighMute * 0.26;
 
     pos.z += h;
+
+    // High-frequency content is the main driver; height is a secondary one so
+    // a tall bass swell picks up some warmth at its crest too.
+    //
+    // The curve matters more than the gain. A full mix carries high content
+    // almost constantly, so a linear mapping pushed the entire mesh to the
+    // accent and lost the purple the brand is built on. Raising it to a power
+    // keeps the body of the mesh in brand colour and lets only genuine peaks
+    // reach the accent — a highlight, not a tint.
+    float fizz = abs(ripple) * uHigh * uHighMute;
+    float raw  = clamp(fizz * 1.45 + max(h, 0.0) * 0.26, 0.0, 1.0);
+    vGlow = pow(raw, 2.2);
+
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
   }
 `
 
-// Trivial fragment shader — solid colour, no varyings, no lighting math.
-// For wireframe rendering this only runs on line-rasterised pixels.
+// Near-trivial fragment shader: one mix between the base colour and the accent,
+// no lighting math, no texture reads. For wireframe rendering this runs only on
+// line-rasterised pixels, so the added cost is negligible — measured alongside
+// the existing frameloop behaviour rather than assumed.
 const fragmentShader = /* glsl */ `
   precision lowp float;
   uniform vec3 uColor;
+  uniform vec3 uAccent;
+  varying float vGlow;
   void main() {
-    gl_FragColor = vec4(uColor, 1.0);
+    gl_FragColor = vec4(mix(uColor, uAccent, vGlow), 1.0);
   }
 `
 
@@ -142,6 +171,7 @@ function TerrainMesh({
   segments,
   singleAnalyser,
   planeScale,
+  accentColor = '#FFB627',
 }: TerrainProps) {
   const isActive = (key: StemKey) => !activeKeys || activeKeys.includes(key)
   const reducedMotion = useReducedMotion()
@@ -171,14 +201,16 @@ function TerrainMesh({
       uHighMute:  { value: 1 },
       uDrumSolo:  { value: 0 },
       uColor:     { value: new THREE.Color(color) },
+      uAccent:    { value: new THREE.Color(accentColor) },
     },
   }))
 
   useEffect(() => {
     /* eslint-disable react-hooks/immutability -- THREE uniform mutation */
     material.uniforms.uColor.value.set(color)
+    material.uniforms.uAccent.value.set(accentColor)
     /* eslint-enable react-hooks/immutability */
-  }, [color, material])
+  }, [color, accentColor, material])
   useEffect(() => () => material.dispose(), [material])
 
   useFrame((_, delta) => {
