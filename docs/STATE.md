@@ -8,8 +8,9 @@ history and the `backup/2026-09-30-pre-cleanup` branch).
 
 ## Status, 2026-10-02
 
-**`main` is at `4dbd32f`, clean, pushed, and green.** 69 unit tests and 56 e2e
-tests pass; `npx next build` is clean. It is the design-complete single-surface
+**`main` is clean, pushed, and green.** 69 unit tests and 56 e2e tests pass;
+`npx next build` is clean. (Check `git log --oneline -1` for where it actually
+is — a SHA written here goes stale the moment anything lands.) It is the design-complete single-surface
 site: home, mixer, and the dev-only `/review` and `/explore`.
 
 **Nothing is deployed.** The GitHub repo exists and is current, but whether a
