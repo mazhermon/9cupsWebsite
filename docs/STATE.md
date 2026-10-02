@@ -1,10 +1,60 @@
 # 9cups · project state
 
 **Authoritative context-restoration doc.** Read this first in a fresh session.
-Last updated: 2026-09-30 (video home + test suite).
+Last updated: 2026-10-02.
 
 Supersedes `docs/progress/2026-05-07-state.md` (deleted; recoverable from git
 history and the `backup/2026-09-30-pre-cleanup` branch).
+
+## Status, 2026-10-02
+
+**`main` is clean, pushed, and green.** 69 unit tests and 56 e2e tests pass;
+`npx next build` is clean. (Check `git log --oneline -1` for where it actually
+is — a SHA written here goes stale the moment anything lands.) It is the design-complete single-surface
+site: home, mixer, and the dev-only `/review` and `/explore`.
+
+**Nothing is deployed.** The GitHub repo exists and is current, but whether a
+Vercel project has been connected to it is unconfirmed — treat "is it live?" as
+an open question, not a yes.
+
+### Work in flight: the `content-pages` branch
+
+`content-pages` holds a substantial chunk that is **not** on main:
+
+- Site navigation (`components/Nav`), mounted in the root layout
+- `/mixes` and `/originals` — facade-loaded embedded players, both empty
+- `/about` — drafted copy, press links, bookings
+- `/mixer` renamed to `/stems`, with a permanent redirect
+- `/todo` — a local-only checklist backed by `TODO.md`
+
+At the time of writing it is **3 commits ahead of main and 5 behind**, and the
+5 it is missing are not cosmetic: the Marigold accent, the new hero heading,
+the hero-CTA responsive rule, and all of the terrain work. There is also one
+local commit on it that has not been pushed.
+
+**Merge main into `content-pages` before doing anything else there.** Expect
+friction in `app/globals.css` and around the `/mixer` to `/stems` rename, since
+main has edited the mixer page since that branch was cut.
+
+### What the project is waiting on (all from the artist)
+
+1. A mastered full-length mp3 at `public/audio/9cupsCatchingAFeelingWeb_mix.mp3`
+   — the current file is a 28-second loop summed from the stems
+2. Embed URLs for `MIXES` and `ORIGINALS` in `lib/releases.ts` (on
+   `content-pages`); both lists are empty and ship an empty state
+3. A press-pack share link for `PRESS_PACK_URL` in `lib/site-config.ts`
+4. A press/hero image and real biography copy for `/about`
+5. A decision on what `mov/9cupsVid.MOV` is for — untracked, unused
+
+### Branch topology
+
+| Branch | State |
+|---|---|
+| `main` | Current. Everything below is merged into it except `content-pages`. |
+| `content-pages` | **Active work.** Ahead 3, behind 5. One unpushed commit. |
+| `backup/2026-09-30-pre-cleanup` | Snapshot before the 2026-09-30 cleanup. Keep. |
+| `design-tweeks-sept`, `new-design-video-bg` | Merged, pushed. Safe to delete. |
+| `cleanup-and-loader`, `hero-cta-responsive`, `terrain-presence`, `terrain-line-geometry` | Merged into main, never pushed. Safe to delete. |
 
 ## What this is
 
@@ -78,6 +128,16 @@ page owns its own context. Making it continuous needs a shared provider and was
 scoped out of the MVP.
 
 ## Terrain
+
+Colour responds to audio as well as shape. The vertex shader passes a `vGlow`
+varying to the fragment stage and the fragment mixes the base purple toward
+Marigold. It is driven mostly by the high band, secondarily by vertex height,
+and raised to a power — a linear mapping pushed the *entire* mesh to the accent
+because a full mix carries high content almost constantly. The curve keeps the
+body of the mesh in brand colour and lets only genuine peaks reach the accent.
+
+Displacement amplitudes were raised ~1.3x on 2026-10-01. Past roughly 1.5x the
+peaks break the horizon line and poke into the content above.
 
 One `PlaneGeometry(180×90)` (~16k verts), vertex displacement only, trivial
 fragment shader emitting a solid colour. `antialias: false`, `dpr = 1`, no
@@ -177,68 +237,51 @@ Adapted deliberately:
 
 ## Performance: measured, not assumed
 
-Measured 2026-09-30 on Intel UHD 630 integrated graphics (the mid-tier class
-`PRODUCT.md` targets), production build, 1440×900, during playback:
+Measured on Intel UHD 630 integrated graphics (the mid-tier class `PRODUCT.md`
+targets), production build.
 
-**60fps flat. p95 17.4ms, worst frame 17.7ms, zero frames over 20ms.**
-Identical with the wordmark ghost animation on and off, across three paired
-runs in separate browser processes.
+**60fps during playback and at idle.** Median frame gap 16.7ms, zero long
+tasks, sampled over 40 seconds on a cool machine.
 
-### The two costs found on 2026-09-30, and their fixes
+### A long detour, and what it was actually worth
 
-**1. `frameloop="always"` on a static terrain.** R3F re-rendered the terrain 60
-times a second to draw an identical frame whenever audio wasn't playing. Alone
-that was survivable; composited alongside a playing video on integrated
-graphics it dropped the home page to 22fps. `Terrain` now uses
-`frameloop={playing ? 'always' : 'demand'}` — "demand" still renders once on
-mount, so the resting mesh draws. **22fps -> 60fps.**
+Earlier entries here recorded "~25fps during playback" and then a fix claiming
+"21fps -> 42fps". **Both numbers were artefacts of a thermally saturated
+machine**, produced by running dozens of consecutive production builds and
+measurement passes. On a cool machine the page was always 60fps. Recorded
+rather than quietly deleted, because the mistake is more instructive than the
+result.
 
-**2. `mix-blend-mode` + `filter` over a playing video.** The mixer's dappled
-cover overlay was free over a still image (composited once, cached) and
-expensive over video (recomputed every frame). The video panel now uses plain
-alpha compositing. **~20fps -> ~50fps.** Not 60: a large playing video plus any
-compositing on top still costs on this GPU. Accepted for a secondary page.
+Two measurement rules this cost us:
 
-General rule this implies: **check what a CSS effect costs once it sits over
-moving pixels.** Blend modes and filters are nearly free over static content
-and expensive over video.
+1. **Report the median, not just the mean.** A handful of 300ms outliers drags
+   a page whose median frame is 16.7ms to a reported "25fps".
+2. **Watch the thermal state.** Back-to-back builds and WebGL benchmarks heat
+   the machine; readings drift downward across a session and recover after an
+   idle period. Interleave A/B passes rather than measuring one config then the
+   other, and be suspicious of any result where *less* work measures slower.
 
-**The dev server is janky and production is not.** Turbopack instrumentation
-and React dev-mode cost roughly 20fps and produce visible stutter. Never judge
-animation performance on `next dev` — build and `next start` first. This cost
-one full debugging cycle and a wrong conclusion; don't repeat it.
+### What shipped from it
 
-Methodology note: measuring several configs sequentially in one browser session
-is invalid. The first config absorbs audio decode and JIT warmup and looks
-worse than it is. One process per config, discard the first ~60 frames.
+- **`frameloop={playing ? 'always' : 'demand'}`.** Genuinely measured: at idle
+  the mesh was redrawing an identical static frame 60 times a second, 22fps ->
+  60fps. Kept.
+- **Edge-derived line geometry** instead of `wireframe: true`. Wireframe draws
+  three lines per triangle, so every interior edge — shared by two triangles —
+  is rasterised twice: 97,200 primitives for a picture made of 48,870 distinct
+  edges. The replacement derives its edges from a real PlaneGeometry index
+  buffer, so the output is provably the same triangulation, diagonals included,
+  and verified identical by screenshot. **Exactly half the per-frame GPU work
+  for the same picture.** It measures no faster here (both 60fps), so it is
+  kept as headroom for phones and battery, not as a fix.
+- **A 30fps draw-rate cap: tried and removed.** On a cool machine it changed
+  nothing, and it halves the temporal resolution of the kick pulse. If a real
+  phone throttles under sustained playback this is the first lever to reach
+  for — the mechanism is simple, it just is not justified today.
 
-## The audio loader
-
-Two bugs lived here; both are pinned by tests now.
-
-**Stuck on "Loading…", never plays.** `el.src = url` ran before the `canplay`
-listener was attached. With a warm HTTP cache the element reached
-HAVE_ENOUGH_DATA and fired `canplay` in that gap, nothing was listening,
-`ready` never flipped, and the button stayed disabled forever. Intermittent
-because it depended on cache state. Listeners now attach first, `loadeddata`
-and `playing` also count as ready signals, and `readyState` is checked
-directly as a fallback.
-
-**Three requests for one file, two aborted.** Assigning `src` starts a fetch
-even at `preload="none"`, so a later `load()` aborted it and started another.
-`src` is now assigned exactly once, at the moment the download should begin.
-
-**The button is never gated on buffering.** It is enabled unless there is an
-error, because calling `play()` is itself what starts the download. A separate
-`buffering` flag (from `waiting`/`stalled`, cleared on `playing`) drives the
-"Loading…" label, so the label is honest and the control is always usable.
-
-**Preload timing.** The track downloads on the first idle slot after paint —
-deliberately NOT on `window.load`, which waits for the hero video. Pressing
-play is the expected first action, so the audio outranks the decorative
-background. Measured on a production build: a visitor who dwells 3s or more
-gets playback in **~200ms**; clicking the instant the page appears takes
-2-6s because the click itself is what starts the fetch.
+On `wireframe: true` itself: it is a normal documented Three.js material
+property, not a debug-only mode, and it is legitimate to ship. It is simply
+wasteful here, and the waste is avoidable at no visual cost.
 
 ## Audio assets
 
@@ -345,10 +388,44 @@ Known gaps, stated rather than implied:
 CI is `.github/workflows/ci.yml`: typecheck, lint, unit, build, then e2e
 against the artifact from the build job.
 
+## How to work on this
+
+Conventions that are not obvious from the code, and that cost real time to
+rediscover:
+
+- **Judge nothing on `next dev`.** Turbopack and React dev-mode cost roughly
+  20fps and produce stutter that does not exist in production. Build and
+  `next start` before forming any opinion about smoothness.
+- **Measure perf with the median, not the mean**, over tens of seconds, and
+  interleave A/B passes. See the Performance section — getting this wrong cost
+  a full day and produced two confidently-stated wrong conclusions.
+- **Verify in a browser rather than asserting.** Every visual and behavioural
+  claim in this file was checked by loading the page; several "obvious" fixes
+  turned out to be wrong, and several passing-looking tests turned out to be
+  measuring the wrong thing.
+- **Accent colour is rationed.** Marigold is primary calls to action only, at
+  most once or twice per section. See DESIGN.md.
+- **Type roles:** display face (Bungee) for the wordmark, section headings and
+  CTA labels. Body face (DM Sans) for anything longer, and for destinations and
+  status. A whole phrase set in Bungee shouts.
+- **Third-party embeds are facades** on the content pages: our markup first,
+  their iframe only on click. There is a test asserting no third-party request
+  fires on page load. Do not "simplify" that away.
+- **The artist supplies content, not the assistant.** The About page
+  deliberately asserts no venue, label, year or collaborator, because none of
+  it is verifiable from this repo.
+
 ## Deploying
 
-Target is Vercel (zero-config for Next 16). Nothing has been deployed yet.
-Remote is `git@github.com:mazhermon/9cupsWebsite.git`.
+Target is Vercel (zero-config for Next 16). Remote is
+`git@github.com:mazhermon/9cupsWebsite.git`, which exists and is current.
+
+**Whether a Vercel project is connected is unconfirmed.** It was recommended
+and the artist was going to do it; there has been no confirmation either way.
+Check the Vercel dashboard before telling anyone the site is or is not live.
+
+The app needs no environment variables in production. `NINECUPS_PRIVATE` (on
+`content-pages`) must stay unset there — it gates the local-only `/todo`.
 
 ```bash
 npx tsc --noEmit

@@ -21,7 +21,7 @@
 //     vox   → fine high-frequency ripples
 //   Mute a stem → its multiplier lerps to 0 → its layer disappears.
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { PerspectiveCamera } from '@react-three/drei'
 import * as THREE from 'three'
@@ -75,10 +75,60 @@ export interface TerrainProps extends Partial<Omit<VisualiserProps, 'playing'>> 
    *  plane's own edges show as diagonals at the left and right of frame.
    *  Purely geometric — segment count, and therefore cost, is unchanged. */
   planeScale?: number
+  /** Colour the mesh shifts toward on high-frequency content. Defaults to the
+   *  brand's Marigold. Passing the same value as `color` disables the shift. */
+  accentColor?: string
 }
 
 const PLANE_W = 22
 const PLANE_D = 14
+
+/**
+ * The plane's edges as de-duplicated line segments.
+ *
+ * `wireframe: true` draws three lines per triangle, so every interior edge —
+ * shared by two triangles — is rasterised twice. At 180x90 that is 97,200 line
+ * primitives for a picture made of 48,870 distinct edges: exactly 2x the work
+ * for identical output.
+ *
+ * Edges are derived from a real PlaneGeometry index buffer rather than
+ * re-deriving the triangulation by hand, so the result provably matches what
+ * wireframe drew, diagonals included. Built once and memoised; the temporary
+ * geometry is disposed immediately.
+ */
+function edgeLinePositions(width: number, depth: number, segW: number, segD: number): Float32Array {
+  const geo = new THREE.PlaneGeometry(width, depth, segW, segD)
+  const pos = geo.attributes.position.array as ArrayLike<number>
+  const index = geo.index
+  if (!index) {
+    geo.dispose()
+    return new Float32Array(0)
+  }
+  const idx = index.array as ArrayLike<number>
+
+  const seen = new Set<number>()
+  const verts: number[] = []
+  // Vertex count is (segW+1)*(segD+1); at the default 180x90 that is 16,471,
+  // so a*20000+b stays well inside exact double-integer range.
+  const STRIDE = 20000
+  const addEdge = (a: number, b: number) => {
+    const key = a < b ? a * STRIDE + b : b * STRIDE + a
+    if (seen.has(key)) return
+    seen.add(key)
+    verts.push(pos[a * 3], pos[a * 3 + 1], pos[a * 3 + 2])
+    verts.push(pos[b * 3], pos[b * 3 + 1], pos[b * 3 + 2])
+  }
+
+  for (let i = 0; i < idx.length; i += 3) {
+    const a = idx[i], b = idx[i + 1], c = idx[i + 2]
+    addEdge(a, b)
+    addEdge(b, c)
+    addEdge(c, a)
+  }
+
+  geo.dispose()
+  return new Float32Array(verts)
+}
 
 const vertexShader = /* glsl */ `
   uniform float uTime;
@@ -92,6 +142,12 @@ const vertexShader = /* glsl */ `
   uniform float uKickMute;
   uniform float uHighMute;
   uniform float uDrumSolo;   // 0..1: ramps to 1 when drums is the ONLY active stem
+
+  // How much accent colour this vertex earns. Driven by the high band (bright
+  // sound reads as bright colour) plus the vertex's own height, so peaks catch
+  // the accent as they rise. Interpolated across the line, which is what makes
+  // the mesh read as lit rather than tinted.
+  varying float vGlow;
 
   void main() {
     vec3 pos = position;
@@ -110,25 +166,44 @@ const vertexShader = /* glsl */ `
     // alive even without the other layers.
     float drumBoost = 1.0 + uDrumSolo * 1.6;
 
+    // Amplitudes raised ~1.3x on 2026-10-01: the mesh is expensive, so it has
+    // to be worth looking at. Deliberately not more — past about 1.5x the
+    // peaks break the horizon line and poke into the content above.
     float h =
-      bass   * uLow      * uLowMute  * 0.65 +
-      mid    * uMid      * uMidMute  * 0.42 +
-      ring   * uKick     * uKickMute * 1.55 * drumBoost +
-      drumWave * uDrumBody * uKickMute * 0.55 * drumBoost +
-      ripple * uHigh     * uHighMute * 0.18;
+      bass   * uLow      * uLowMute  * 0.85 +
+      mid    * uMid      * uMidMute  * 0.55 +
+      ring   * uKick     * uKickMute * 2.00 * drumBoost +
+      drumWave * uDrumBody * uKickMute * 0.72 * drumBoost +
+      ripple * uHigh     * uHighMute * 0.26;
 
     pos.z += h;
+
+    // High-frequency content is the main driver; height is a secondary one so
+    // a tall bass swell picks up some warmth at its crest too.
+    //
+    // The curve matters more than the gain. A full mix carries high content
+    // almost constantly, so a linear mapping pushed the entire mesh to the
+    // accent and lost the purple the brand is built on. Raising it to a power
+    // keeps the body of the mesh in brand colour and lets only genuine peaks
+    // reach the accent — a highlight, not a tint.
+    float fizz = abs(ripple) * uHigh * uHighMute;
+    float raw  = clamp(fizz * 1.45 + max(h, 0.0) * 0.26, 0.0, 1.0);
+    vGlow = pow(raw, 2.2);
+
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
   }
 `
 
-// Trivial fragment shader — solid colour, no varyings, no lighting math.
-// For wireframe rendering this only runs on line-rasterised pixels.
+// Near-trivial fragment shader: one mix between the base colour and the accent,
+// no lighting math, no texture reads. It runs only on line-rasterised pixels,
+// so the added cost is negligible — measured rather than assumed.
 const fragmentShader = /* glsl */ `
   precision lowp float;
   uniform vec3 uColor;
+  uniform vec3 uAccent;
+  varying float vGlow;
   void main() {
-    gl_FragColor = vec4(uColor, 1.0);
+    gl_FragColor = vec4(mix(uColor, uAccent, vGlow), 1.0);
   }
 `
 
@@ -142,6 +217,7 @@ function TerrainMesh({
   segments,
   singleAnalyser,
   planeScale,
+  accentColor = '#FFB627',
 }: TerrainProps) {
   const isActive = (key: StemKey) => !activeKeys || activeKeys.includes(key)
   const reducedMotion = useReducedMotion()
@@ -156,7 +232,6 @@ function TerrainMesh({
   const [material] = useState(() => new THREE.ShaderMaterial({
     vertexShader,
     fragmentShader,
-    wireframe: true,
     transparent: false,
     uniforms: {
       uTime:      { value: 0 },
@@ -171,14 +246,16 @@ function TerrainMesh({
       uHighMute:  { value: 1 },
       uDrumSolo:  { value: 0 },
       uColor:     { value: new THREE.Color(color) },
+      uAccent:    { value: new THREE.Color(accentColor) },
     },
   }))
 
   useEffect(() => {
     /* eslint-disable react-hooks/immutability -- THREE uniform mutation */
     material.uniforms.uColor.value.set(color)
+    material.uniforms.uAccent.value.set(accentColor)
     /* eslint-enable react-hooks/immutability */
-  }, [color, material])
+  }, [color, accentColor, material])
   useEffect(() => () => material.dispose(), [material])
 
   useFrame((_, delta) => {
@@ -277,14 +354,24 @@ function TerrainMesh({
   const segD = segments?.d ?? 90
   const scale = planeScale ?? 1
 
+  // Half the primitives of `wireframe: true` for the same picture — see
+  // edgeLinePositions. Memoised: the buffer is ~1.2MB and must not be rebuilt
+  // per render.
+  const positions = useMemo(
+    () => edgeLinePositions(PLANE_W * scale, PLANE_D * scale, segW, segD),
+    [scale, segW, segD],
+  )
+
   return (
-    <mesh
+    <lineSegments
       material={material}
       rotation={[-Math.PI / 2 + 0.05, 0, 0]}
       position={[0, -0.4, 0]}
     >
-      <planeGeometry args={[PLANE_W * scale, PLANE_D * scale, segW, segD]} />
-    </mesh>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+    </lineSegments>
   )
 }
 
@@ -297,11 +384,15 @@ export default function Terrain(props: TerrainProps) {
       <Canvas
         dpr={props.dpr ?? 1}
         gl={{ antialias: false, alpha: true, powerPreference: 'high-performance' }}
-        // Only drive a continuous render loop while audio is actually playing.
-        // At rest the mesh is static, so "always" spent a full 60fps of GPU
-        // redrawing an identical frame — which on integrated graphics is enough
-        // to starve a video compositing beside it (measured: 22fps -> 60fps).
-        // "demand" still renders once on mount, so the resting terrain draws.
+        // Only run a continuous render loop while audio is playing. At rest the
+        // mesh is static, so "always" spent a full 60fps redrawing an identical
+        // frame; "demand" still renders once on mount, so the resting terrain
+        // draws. Measured: 22fps -> 60fps at idle.
+        //
+        // Capping the *playing* rate (invalidating at 30fps) was tried and
+        // removed: on a cool machine it changed nothing, and it halves the
+        // temporal resolution of the kick pulse. If a real phone is seen
+        // throttling under sustained playback, that is the first lever.
         frameloop={props.playing ? 'always' : 'demand'}
         style={{ width: '100%', height: '100%' }}
       >
