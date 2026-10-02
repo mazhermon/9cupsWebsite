@@ -1,10 +1,59 @@
 # 9cups · project state
 
 **Authoritative context-restoration doc.** Read this first in a fresh session.
-Last updated: 2026-09-30 (video home + test suite).
+Last updated: 2026-10-02.
 
 Supersedes `docs/progress/2026-05-07-state.md` (deleted; recoverable from git
 history and the `backup/2026-09-30-pre-cleanup` branch).
+
+## Status, 2026-10-02
+
+**`main` is at `4dbd32f`, clean, pushed, and green.** 69 unit tests and 56 e2e
+tests pass; `npx next build` is clean. It is the design-complete single-surface
+site: home, mixer, and the dev-only `/review` and `/explore`.
+
+**Nothing is deployed.** The GitHub repo exists and is current, but whether a
+Vercel project has been connected to it is unconfirmed — treat "is it live?" as
+an open question, not a yes.
+
+### Work in flight: the `content-pages` branch
+
+`content-pages` holds a substantial chunk that is **not** on main:
+
+- Site navigation (`components/Nav`), mounted in the root layout
+- `/mixes` and `/originals` — facade-loaded embedded players, both empty
+- `/about` — drafted copy, press links, bookings
+- `/mixer` renamed to `/stems`, with a permanent redirect
+- `/todo` — a local-only checklist backed by `TODO.md`
+
+At the time of writing it is **3 commits ahead of main and 5 behind**, and the
+5 it is missing are not cosmetic: the Marigold accent, the new hero heading,
+the hero-CTA responsive rule, and all of the terrain work. There is also one
+local commit on it that has not been pushed.
+
+**Merge main into `content-pages` before doing anything else there.** Expect
+friction in `app/globals.css` and around the `/mixer` to `/stems` rename, since
+main has edited the mixer page since that branch was cut.
+
+### What the project is waiting on (all from the artist)
+
+1. A mastered full-length mp3 at `public/audio/9cupsCatchingAFeelingWeb_mix.mp3`
+   — the current file is a 28-second loop summed from the stems
+2. Embed URLs for `MIXES` and `ORIGINALS` in `lib/releases.ts` (on
+   `content-pages`); both lists are empty and ship an empty state
+3. A press-pack share link for `PRESS_PACK_URL` in `lib/site-config.ts`
+4. A press/hero image and real biography copy for `/about`
+5. A decision on what `mov/9cupsVid.MOV` is for — untracked, unused
+
+### Branch topology
+
+| Branch | State |
+|---|---|
+| `main` | Current. Everything below is merged into it except `content-pages`. |
+| `content-pages` | **Active work.** Ahead 3, behind 5. One unpushed commit. |
+| `backup/2026-09-30-pre-cleanup` | Snapshot before the 2026-09-30 cleanup. Keep. |
+| `design-tweeks-sept`, `new-design-video-bg` | Merged, pushed. Safe to delete. |
+| `cleanup-and-loader`, `hero-cta-responsive`, `terrain-presence`, `terrain-line-geometry` | Merged into main, never pushed. Safe to delete. |
 
 ## What this is
 
@@ -254,8 +303,9 @@ Verified 2026-09-30; keep them true:
 
 ## Tests
 
-First test suite landed 2026-09-30. `npm test` (Vitest, 64) and
-`npm run test:e2e` (Playwright, 48 across desktop + mobile projects).
+On main: `npm test` (Vitest, 69) and `npm run test:e2e` (Playwright, 56 across
+desktop and mobile projects). `content-pages` adds nav, content-page and
+todo-file suites, taking those to 85 and 122.
 
 - Unit: `tests/unit/` — lib logic, `useTrackPlayer`, and the components with
   contracts worth pinning (`LinkGroups`, `PlayControl`, `Wordmark`).
@@ -275,10 +325,44 @@ Known gaps, stated rather than implied:
 CI is `.github/workflows/ci.yml`: typecheck, lint, unit, build, then e2e
 against the artifact from the build job.
 
+## How to work on this
+
+Conventions that are not obvious from the code, and that cost real time to
+rediscover:
+
+- **Judge nothing on `next dev`.** Turbopack and React dev-mode cost roughly
+  20fps and produce stutter that does not exist in production. Build and
+  `next start` before forming any opinion about smoothness.
+- **Measure perf with the median, not the mean**, over tens of seconds, and
+  interleave A/B passes. See the Performance section — getting this wrong cost
+  a full day and produced two confidently-stated wrong conclusions.
+- **Verify in a browser rather than asserting.** Every visual and behavioural
+  claim in this file was checked by loading the page; several "obvious" fixes
+  turned out to be wrong, and several passing-looking tests turned out to be
+  measuring the wrong thing.
+- **Accent colour is rationed.** Marigold is primary calls to action only, at
+  most once or twice per section. See DESIGN.md.
+- **Type roles:** display face (Bungee) for the wordmark, section headings and
+  CTA labels. Body face (DM Sans) for anything longer, and for destinations and
+  status. A whole phrase set in Bungee shouts.
+- **Third-party embeds are facades** on the content pages: our markup first,
+  their iframe only on click. There is a test asserting no third-party request
+  fires on page load. Do not "simplify" that away.
+- **The artist supplies content, not the assistant.** The About page
+  deliberately asserts no venue, label, year or collaborator, because none of
+  it is verifiable from this repo.
+
 ## Deploying
 
-Target is Vercel (zero-config for Next 16). Nothing has been deployed yet.
-Remote is `git@github.com:mazhermon/9cupsWebsite.git`.
+Target is Vercel (zero-config for Next 16). Remote is
+`git@github.com:mazhermon/9cupsWebsite.git`, which exists and is current.
+
+**Whether a Vercel project is connected is unconfirmed.** It was recommended
+and the artist was going to do it; there has been no confirmation either way.
+Check the Vercel dashboard before telling anyone the site is or is not live.
+
+The app needs no environment variables in production. `NINECUPS_PRIVATE` (on
+`content-pages`) must stay unset there — it gates the local-only `/todo`.
 
 ```bash
 npx tsc --noEmit
