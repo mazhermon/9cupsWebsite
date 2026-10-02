@@ -8,40 +8,57 @@ history and the `backup/2026-09-30-pre-cleanup` branch).
 
 ## Status, 2026-10-02
 
-**`main` is clean, pushed, and green.** 69 unit tests and 56 e2e tests pass;
-`npx next build` is clean. (Check `git log --oneline -1` for where it actually
-is — a SHA written here goes stale the moment anything lands.) It is the design-complete single-surface
-site: home, mixer, and the dev-only `/review` and `/explore`.
+**`content-pages` now contains everything on `main`.** `main` was merged in on
+2026-10-02 (the one unpushed commit was pushed first). This branch is the
+furthest-ahead state of the project; `main` is behind it.
+
+Verified on this branch after the merge, against a production build:
+
+| Check | Result |
+|---|---|
+| `npm run typecheck` | clean |
+| `npm test` (Vitest) | 85 passed |
+| `npm run test:e2e` (Playwright) | 122 passed, desktop + mobile |
+| `npm run build` | clean, 14 routes |
+| `npm run lint` | **3 errors** — see "Known broken" below |
 
 **Nothing is deployed.** The GitHub repo exists and is current, but whether a
 Vercel project has been connected to it is unconfirmed — treat "is it live?" as
 an open question, not a yes.
 
-### Work in flight: the `content-pages` branch
+### Known broken
 
-`content-pages` holds a substantial chunk that is **not** on main:
+Two things are wrong and **both pre-date the merge — they are equally broken on
+`main`.** Neither was introduced by merging.
 
-- Site navigation (`components/Nav`), mounted in the root layout
-- `/mixes` and `/originals` — facade-loaded embedded players, both empty
-- `/about` — drafted copy, press links, bookings
-- `/mixer` renamed to `/stems`, with a permanent redirect
-- `/todo` — a local-only checklist backed by `TODO.md`
+1. **`npm run lint` fails with 3 errors**, all in `hooks/useTrackPlayer.ts`:
+   two `react-hooks/set-state-in-effect` (lines 36 and 62) and one
+   `prefer-const` (line 128). CI runs `npm run lint`, so CI is red. The file is
+   byte-identical on the merge base, `main` and here, and `eslint.config.mjs`
+   is identical too, so this is not a branch difference. Earlier entries in
+   this doc called `main` "green"; that was true of typecheck, tests and build,
+   but not of lint.
 
-At the time of writing it is **3 commits ahead of main and 5 behind**, and the
-5 it is missing are not cosmetic: the Marigold accent, the new hero heading,
-the hero-CTA responsive rule, and all of the terrain work. There is also one
-local commit on it that has not been pushed.
+2. **The mobile `.landing-scrim` gradient is dead code.** `app/globals.css`
+   defines `.landing-scrim` inside `@media (max-width: 720px)` (~line 1412) and
+   then again as a plain rule (~line 1444). Equal specificity, and the plain
+   rule comes later in the file, so it wins at every viewport and the media
+   query never applies. The terrain-presence commit tuned that mobile gradient;
+   the tuning has never had any effect. Confirmed in a browser at 390px: the
+   computed `background-image` is the desktop two-axis gradient. The visible
+   consequence is that the right-hand ends of the link rows, and their arrows,
+   sit over bright wireframe on a phone. Fixing it means moving the plain rule
+   above the media query, or raising the media query's specificity.
 
-**Merge main into `content-pages` before doing anything else there.** Expect
-friction in `app/globals.css` and around the `/mixer` to `/stems` rename, since
-main has edited the mixer page since that branch was cut.
+   Note `.terrain--landing { height: 78vh }` from the same commit **does**
+   apply (measured 658px at 844px tall) — only the scrim rule is dead.
 
 ### What the project is waiting on (all from the artist)
 
 1. A mastered full-length mp3 at `public/audio/9cupsCatchingAFeelingWeb_mix.mp3`
    — the current file is a 28-second loop summed from the stems
-2. Embed URLs for `MIXES` and `ORIGINALS` in `lib/releases.ts` (on
-   `content-pages`); both lists are empty and ship an empty state
+2. Embed URLs for `MIXES` and `ORIGINALS` in `lib/releases.ts`; both lists are
+   empty and ship an empty state
 3. A press-pack share link for `PRESS_PACK_URL` in `lib/site-config.ts`
 4. A press/hero image and real biography copy for `/about`
 5. A decision on what `mov/9cupsVid.MOV` is for — untracked, unused
@@ -50,8 +67,8 @@ main has edited the mixer page since that branch was cut.
 
 | Branch | State |
 |---|---|
-| `main` | Current. Everything below is merged into it except `content-pages`. |
-| `content-pages` | **Active work.** Ahead 3, behind 5. One unpushed commit. |
+| `content-pages` | **Active work, and the furthest ahead.** Contains all of `main`. Pushed. |
+| `main` | Behind `content-pages`. Has not had this branch merged back yet. |
 | `backup/2026-09-30-pre-cleanup` | Snapshot before the 2026-09-30 cleanup. Keep. |
 | `design-tweeks-sept`, `new-design-video-bg` | Merged, pushed. Safe to delete. |
 | `cleanup-and-loader`, `hero-cta-responsive`, `terrain-presence`, `terrain-line-geometry` | Merged into main, never pushed. Safe to delete. |
@@ -62,7 +79,7 @@ A brand site for DJ 9cups. Two surfaces:
 
 | Route | What it is |
 |---|---|
-| `/` | Knockout video hero (the loop plays through giant "IX CUPS" type) above the landing: wordmark, play button, grouped links, mixer doorway, bookings. Both sections share ONE audio transport. Side by side instead of stacked above 1600x800. |
+| `/` | Knockout video hero (the loop plays through giant "IX CUPS" type) above the landing: wordmark, play button, grouped links, stems doorway, bookings. Both sections share ONE audio transport. Side by side instead of stacked above 1600x800. |
 | `/stems` | The four-stem player (was `/mixer`; renamed because "Mixer" read too close to "Mixes". `/mixer` permanently redirects). Editorial split: duotone'd portrait with the album cover blended over it on the left, wordmark + stem toggles + terrain + listen row on the right. |
 | `/mixes` | DJ mixes. List of facade players driven by `MIXES` in `lib/releases.ts`. Empty until entries are added. |
 | `/originals` | Original tracks, same component and shape, driven by `ORIGINALS`. |
@@ -79,7 +96,9 @@ Register is **brand**, declared in `PRODUCT.md`. Design canon lives in
 ```
 app/
   page.tsx              → <PlayerProvider>: <KnockoutHero cta={<HeroEnter/>}/> + <Landing variant="section"/>
-  mixer/page.tsx        → <EditorialHero videoName="haze" /> + back link
+  stems/page.tsx        → <EditorialHero videoName="haze" /> (was /mixer)
+  mixes/ originals/ about/  content pages; /mixer 308-redirects to /stems
+  todo/page.tsx         → local-only checklist, gated on NINECUPS_PRIVATE
   review/page.tsx       → route index + <DevDock />
   layout.tsx            → next/font: Bungee (display) + DM Sans (body)
   globals.css           → all CSS, token-led (~1400 lines)
@@ -95,19 +114,26 @@ components/
   ImageDemo/EditorialHero.tsx   the mixer composition
   StemToggles, TrackTitle, ListenOn, PlayControl, GrainOverlay, Duotone,
   HoverOverlay, InlineCover
+  Nav/Nav.tsx              site nav, mounted once in the root layout
+  ReleaseList/             /mixes and /originals, facade embeds
+  Player/EmbedPlayer.tsx   the facade itself: our markup, iframe on click
   DevDock/                 dev nav, mounted only on /review
   Explore/                 ASCII experiments
   Hero/HeroPage.tsx        NOT rendered anywhere; kept only because
                            Terrain imports the VisualiserProps type from it
 
 hooks/
-  useAudioEngine.ts     4-stem buffer mixer (mixer page)
+  useAudioEngine.ts     4-stem buffer mixer (/stems)
   useTrackPlayer.ts     single streaming track (landing page)
 
 lib/
   track-config.ts       RELEASE, stems, all outbound links, contact email
   audio-reactive.ts     bandEnergy, lerpToward, useReducedMotion
   transient-detect.ts   TransientDetector
+  releases.ts           MIXES and ORIGINALS (both empty, awaiting URLs)
+  site-config.ts        NAV_LINKS, PRESS_PACK_URL
+  private-gate.ts       the NINECUPS_PRIVATE check
+  todo-file.ts          TODO.md read/write
 ```
 
 ## The two audio hooks, and why there are two
@@ -123,7 +149,7 @@ Not an oversight. They have opposing requirements:
 
 Merging them would compromise both. Leave them separate.
 
-Consequence: audio does **not** continue across `/` → `/mixer` navigation. Each
+Consequence: audio does **not** continue across `/` → `/stems` navigation. Each
 page owns its own context. Making it continuous needs a shared provider and was
 scoped out of the MVP.
 
