@@ -63,7 +63,11 @@ const STATUS_COPY: Record<Status, string> = {
 const TOTAL_ROUTES = SECTIONS.reduce((n, s) => n + s.routes.length, 0)
 const COUNT_CLEAN = SECTIONS.flatMap(s => s.routes).filter(r => r.status === 'clean').length
 
-export const metadata = { title: 'Review · 9cups routes' }
+// Dev route index. Never a search result.
+export const metadata = {
+  title: 'Review · 9cups routes',
+  robots: { index: false, follow: false },
+}
 
 export default function ReviewPage() {
   return (

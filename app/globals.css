@@ -1365,6 +1365,22 @@ a {
               border-color var(--dur-fast) var(--ease-out);
 }
 
+/* The Google preferred-source opt-in. Deliberately the quietest thing in the
+   foot: Bookings is the real call to action here, and an SEO affordance must
+   not outrank it. Smaller, lower contrast, no underline until hovered. */
+.landing-contact--quiet {
+  font-size: var(--text-sm);
+  font-weight: 400;
+  color: rgb(240 235 224 / 0.58);
+  border-bottom-color: transparent;
+}
+
+.landing-contact--quiet:hover,
+.landing-contact--quiet:focus-visible {
+  color: rgb(240 235 224 / 0.9);
+  border-bottom-color: rgb(196 126 232 / 0.45);
+}
+
 .landing-contact:hover {
   color: var(--color-ground-light);
   border-color: rgb(204 46 144 / 0.55);

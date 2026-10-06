@@ -12,6 +12,8 @@ const recursive = Recursive({
 })
 
 export const metadata: Metadata = {
+  // Unfinished experiments, kept deliberately but never a search result.
+  robots: { index: false, follow: false },
   title: 'Explore · 9cups visualiser directions',
   description:
     'Prototype directions for the 9cups audio visualiser inspired by brik.space — text effects, generative grids, glyph plots, and dynamic brand toolkits.',

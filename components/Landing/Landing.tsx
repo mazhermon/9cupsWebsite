@@ -16,6 +16,7 @@ import { RELEASE, LINK_GROUPS, CONTACT_EMAIL } from '@/lib/track-config'
 import Wordmark from '@/components/Wordmark/Wordmark'
 import PlayControl from '@/components/PlayControl/PlayControl'
 import LinkGroups from '@/components/Landing/LinkGroups'
+import PreferredSource from '@/components/PreferredSource/PreferredSource'
 
 const Terrain = dynamic(() => import('@/components/Terrain/Terrain'), { ssr: false })
 
@@ -112,6 +113,8 @@ export default function Landing({
           <a className="landing-contact" href={`mailto:${CONTACT_EMAIL}`}>
             Bookings
           </a>
+
+          <PreferredSource className="landing-contact landing-contact--quiet" />
         </div>
       </div>
     </Root>
