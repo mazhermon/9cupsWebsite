@@ -21,6 +21,17 @@ const body = DM_Sans({
 export const metadata: Metadata = {
   title: '9cups · Catching A Feeling',
   description: 'Play with the stems of a 9cups release. House and UK Garage from Wellington.',
+  // The .ico is not listed here: app/favicon.ico is a Next file convention and
+  // is emitted automatically at /favicon.ico. Listing it again would duplicate
+  // the tag. These are the extras that convention does not cover.
+  icons: {
+    icon: [
+      { url: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
+      { url: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180' }],
+  },
+  manifest: '/site.webmanifest',
 }
 
 export const viewport: Viewport = {
