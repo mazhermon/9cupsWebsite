@@ -1,21 +1,50 @@
 # 9cups · project state
 
 **Authoritative context-restoration doc.** Read this first in a fresh session.
-Last updated: 2026-10-02.
+Last updated: 2026-10-07.
 
 Supersedes `docs/progress/2026-05-07-state.md` (deleted; recoverable from git
 history and the `backup/2026-09-30-pre-cleanup` branch).
 
-## Status, 2026-10-02
+## Status, 2026-10-07
 
-**`main` is clean, pushed, and green.** 69 unit tests and 56 e2e tests pass;
-`npx next build` is clean. (Check `git log --oneline -1` for where it actually
-is — a SHA written here goes stale the moment anything lands.) It is the design-complete single-surface
-site: home, mixer, and the dev-only `/review` and `/explore`.
+**`main` is launch-ready and pushed.** 69 unit tests and 56 e2e tests pass,
+typecheck is clean and `npx next build` is clean. It is the design-complete
+single-surface site: home, mixer, and the dev-only `/review` and `/explore`,
+now with the favicon set and the SEO foundations on top.
 
-**Nothing is deployed.** The GitHub repo exists and is current, but whether a
-Vercel project has been connected to it is unconfirmed — treat "is it live?" as
-an open question, not a yes.
+**`npm run lint` fails with 3 errors**, all in `hooks/useTrackPlayer.ts`
+(two `react-hooks/set-state-in-effect`, one `prefer-const`). CI runs lint, so
+**CI is red**. This pre-dates all recent work; the file is unchanged since
+well before. It does **not** block deploying: Vercel builds from the repo and
+`next build` passes. Fixing it means changing a hook's effect logic, so it
+wants its own pass with the audio tested, not a drive-by.
+
+### Launch
+
+Target URL is **`9cups.mazhermon.com`**, a subdomain of an already-owned apex,
+chosen over a dedicated domain to avoid a second registration fee. The
+trade-off is written up in `docs/SEO.md`. `PRODUCTION_ORIGIN` in
+`lib/site-url.ts` is the single source of truth; no environment variable is
+needed for production.
+
+Still outstanding, none of it code:
+
+1. Point the subdomain at Vercel (CNAME `9cups` to `cname.vercel-dns.com`).
+   Check first that the `mazhermon.com` apex project does not claim a
+   wildcard that would collide.
+2. Confirm whether a Vercel project is connected at all — still unverified.
+3. Google Search Console: verify, submit `/sitemap.xml`, request indexing.
+4. Put the URL in every profile bio. This is the highest-impact item
+   available and the one the whole entity graph depends on.
+
+### SEO
+
+`docs/SEO.md` is the reference: what is implemented, the conventions, and a
+per-route checklist of what `content-pages` needs before it merges. The short
+version of that checklist is sitemap entries, per-page `title` /
+`description`, and `alternates.canonical` on every route (without it, every
+inner page canonicalises to the homepage).
 
 ### Work in flight: the `content-pages` branch
 
@@ -27,14 +56,14 @@ an open question, not a yes.
 - `/mixer` renamed to `/stems`, with a permanent redirect
 - `/todo` — a local-only checklist backed by `TODO.md`
 
-At the time of writing it is **3 commits ahead of main and 5 behind**, and the
-5 it is missing are not cosmetic: the Marigold accent, the new hero heading,
-the hero-CTA responsive rule, and all of the terrain work. There is also one
-local commit on it that has not been pushed.
+`main` was merged into it on 2026-10-02 and it is pushed, so it carries all of
+main's terrain work. It does **not** yet carry the favicon or SEO commits
+below; merge `main` into it again before the next session there.
 
-**Merge main into `content-pages` before doing anything else there.** Expect
-friction in `app/globals.css` and around the `/mixer` to `/stems` rename, since
-main has edited the mixer page since that branch was cut.
+**Merging it back into `main` is the next significant move.** For search it is
+not a close call: `/about` is the only page on either branch with room for
+prose, and four indexable routes beat one. See `docs/SEO.md` for what that
+branch owes before it lands.
 
 ### What the project is waiting on (all from the artist)
 
@@ -79,6 +108,7 @@ app/
   review/page.tsx       → route index + <DevDock />
   layout.tsx            → next/font: Bungee (display) + DM Sans (body)
   globals.css           → all CSS, token-led (~1400 lines)
+  robots.ts / sitemap.ts → generated from SITE_URL
 
 components/
   hero-video/              KnockoutHero, HazeHero, BackgroundVideo, fonts (Anton + Space Grotesk)
@@ -91,6 +121,8 @@ components/
   ImageDemo/EditorialHero.tsx   the mixer composition
   StemToggles, TrackTitle, ListenOn, PlayControl, GrainOverlay, Duotone,
   HoverOverlay, InlineCover
+  StructuredData/          JSON-LD entity graph (see docs/SEO.md)
+  PreferredSource/         Google preferred-source opt-in link
   DevDock/                 dev nav, mounted only on /review
   Explore/                 ASCII experiments
   Hero/HeroPage.tsx        NOT rendered anywhere; kept only because
@@ -102,6 +134,7 @@ hooks/
 
 lib/
   track-config.ts       RELEASE, stems, all outbound links, contact email
+  site-url.ts           SITE_URL / SITE_DOMAIN — the one source of the origin
   audio-reactive.ts     bandEnergy, lerpToward, useReducedMotion
   transient-detect.ts   TransientDetector
 ```
